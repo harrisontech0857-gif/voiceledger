@@ -1,0 +1,177 @@
+name: iOS CD Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    name: Build, Archive & Release iOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.x'
+          cache: true
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Update pubspec.yaml version
+        run: |
+          sed -i '' "s/version: .*/version: ${{ steps.version.outputs.VERSION }}/" pubspec.yaml
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Setup provisioning profiles
+        env:
+          PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+          PP_PATH: ${{ runner.temp }}/voiceledger.mobileprovision
+        run: |
+          echo "$PROVISIONING_PROFILE_BASE64" | base64 -d > "$PP_PATH"
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp "$PP_PATH" ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      - name: Import signing certificate
+        env:
+          CERT_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+        run: |
+          CERT_PATH=${{ runner.temp }}/Certificates.p12
+          KEYCHAIN_PATH=${{ runner.temp }}/app-signing.keychain-db
+
+          echo "$CERT_BASE64" | base64 -d > "$CERT_PATH"
+
+          security create-keychain -p "$CERT_PASSWORD" "$KEYCHAIN_PATH"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$CERT_PASSWORD" "$KEYCHAIN_PATH"
+
+          security import "$CERT_PATH" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$CERT_PASSWORD" \
+            -T /usr/bin/codesign
+
+      - name: Update iOS build settings
+        run: |
+          cd ios
+
+          # Update build settings
+          sed -i '' \
+            -e "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = com.voiceledger.app;/" \
+            -e "s/PROVISIONING_PROFILE_SPECIFIER = .*/PROVISIONING_PROFILE_SPECIFIER = VoiceLedger;/" \
+            Runner.xcodeproj/project.pbxproj
+
+      - name: Build iOS (Archive)
+        run: |
+          flutter build ios --release \
+            --build-number=${{ github.run_number }}
+
+      - name: Export iOS Archive
+        run: |
+          cd ios
+
+          # Create export options plist
+          cat > ExportOptions.plist << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>destination</key>
+            <string>export</string>
+            <key>method</key>
+            <string>app-store</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>teamID</key>
+            <string>${{ secrets.APPLE_TEAM_ID }}</string>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -archivePath build/Runner.xcarchive \
+            archive
+
+          xcodebuild -exportArchive \
+            -archivePath build/Runner.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath build/ipa
+
+      - name: Upload to TestFlight
+        env:
+          APPSTORE_CONNECT_ISSUER_ID: ${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}
+          APPSTORE_CONNECT_KEY_ID: ${{ secrets.APPSTORE_CONNECT_KEY_ID }}
+          APPSTORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APPSTORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          # Create temporary directory for API key
+          mkdir -p ~/.appstoreconnect/private_keys
+
+          echo "$APPSTORE_CONNECT_PRIVATE_KEY_BASE64" | base64 -d > \
+            ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_CONNECT_KEY_ID}.p8
+
+          # Use xcrun altool or Transporter for upload
+          /Applications/Transporter.app/Contents/MacOS/itms-transporter \
+            -m upload \
+            -u "${{ secrets.APPSTORE_CONNECT_ISSUER_ID }}" \
+            -p @"$HOME/.appstoreconnect/private_keys/AuthKey_${APPSTORE_CONNECT_KEY_ID}.p8" \
+            -f "ios/build/ipa/Runner.ipa" \
+            -itc_provider "${{ secrets.APPLE_TEAM_ID }}"
+
+      - name: Clean up sensitive files
+        if: always()
+        run: |
+          rm -rf ~/.appstoreconnect
+          rm -rf ${{ runner.temp }}/Certificates.p12
+          security delete-keychain ${{ runner.temp }}/app-signing.keychain-db || true
+
+      - name: Upload IPA artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-ipa-release-${{ steps.version.outputs.VERSION }}
+          path: ios/build/ipa/Runner.ipa
+          retention-days: 90
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ios/build/ipa/Runner.ipa
+          body: |
+            Release v${{ steps.version.outputs.VERSION }}
+
+            Built on Flutter 3.19.x
+
+            Changes: ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    name: Notify Release
+    runs-on: macos-latest
+    needs: build-and-release
+    if: always()
+    steps:
+      - name: Send Telegram notification
+        run: |
+          STATUS="${{ needs.build-and-release.result }}"
+          VERSION="${GITHUB_REF#refs/tags/v}"
+
+          if [ "$STATUS" = "success" ]; then
+            MESSAGE="✅ iOS Release v$VERSION 已上傳 TestFlight！"
+          else
+            MESSAGE="❌ iOS Release v$VERSION 發佈失敗"
+          fi
+
+          curl -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" \
+            -d "text=$MESSAGE"

@@ -1,0 +1,255 @@
+{
+  "name": "VoiceLedger CI/CD Pipeline Notifications",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "51f0f5ab-2f91-49cb-9f80-a5c8b8e9f2d1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "github-ci-cd-webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "cicd-webhook",
+        "authentication": "header",
+        "headerParameterName": "X-GitHub-Event",
+        "headerParameterValue": "workflow_run"
+      },
+      "id": "webhook-1",
+      "name": "GitHub Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "github-cicd-notifications"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "{{ $json.body.action }}",
+              "operation": "equals",
+              "value2": "completed"
+            }
+          ]
+        }
+      },
+      "id": "if-workflow-completed",
+      "name": "If Workflow Completed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "{{ $json.body.workflow_run.conclusion }}",
+              "operation": "equals",
+              "value2": "success"
+            }
+          ]
+        }
+      },
+      "id": "if-success",
+      "name": "If Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "{{ $json.body.workflow_run.conclusion }}",
+              "operation": "equals",
+              "value2": "failure"
+            }
+          ]
+        }
+      },
+      "id": "if-failure",
+      "name": "If Failure",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "custom",
+        "customHeaders": {},
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_CHAT_ID }}\",\n  \"text\": \"✅ *VoiceLedger CI/CD 成功*\\n\\n📦 Workflow: {{ $json.body.workflow_run.name }}\\n🔀 Branch: {{ $json.body.workflow_run.head_branch }}\\n📝 Commit: {{ $json.body.workflow_run.head_commit.message }}\\n⏱️ Duration: {{ Math.round((new Date($json.body.workflow_run.updated_at) - new Date($json.body.workflow_run.created_at)) / 1000) }}s\\n🔗 [查看詳情]({{ $json.body.workflow_run.html_url }})\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "send-success-notification",
+      "name": "Send Success Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "custom",
+        "customHeaders": {},
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_CHAT_ID }}\",\n  \"text\": \"❌ *VoiceLedger CI/CD 失敗*\\n\\n📦 Workflow: {{ $json.body.workflow_run.name }}\\n🔀 Branch: {{ $json.body.workflow_run.head_branch }}\\n📝 Commit: {{ $json.body.workflow_run.head_commit.message }}\\n⏱️ Duration: {{ Math.round((new Date($json.body.workflow_run.updated_at) - new Date($json.body.workflow_run.created_at)) / 1000) }}s\\n🔗 [查看詳情]({{ $json.body.workflow_run.html_url }})\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "send-failure-notification",
+      "name": "Send Failure Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "custom",
+        "customHeaders": {},
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_CHAT_ID }}\",\n  \"text\": \"⚠️ *VoiceLedger CI/CD 被取消*\\n\\n📦 Workflow: {{ $json.body.workflow_run.name }}\\n🔀 Branch: {{ $json.body.workflow_run.head_branch }}\\n⏱️ Duration: {{ Math.round((new Date($json.body.workflow_run.updated_at) - new Date($json.body.workflow_run.created_at)) / 1000) }}s\\n🔗 [查看詳情]({{ $json.body.workflow_run.html_url }})\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "send-cancelled-notification",
+      "name": "Send Cancelled Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "{{ $json.body.workflow_run.conclusion }}",
+              "operation": "equals",
+              "value2": "cancelled"
+            }
+          ]
+        }
+      },
+      "id": "if-cancelled",
+      "name": "If Cancelled",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "webhook-1": {
+      "main": [
+        [
+          {
+            "node": "If Workflow Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if-workflow-completed": {
+      "main": [
+        [
+          {
+            "node": "If Success",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If Failure",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If Cancelled",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if-success": {
+      "main": [
+        [
+          {
+            "node": "Send Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if-failure": {
+      "main": [
+        [
+          {
+            "node": "Send Failure Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "if-cancelled": {
+      "main": [
+        [
+          {
+            "node": "Send Cancelled Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "errorHandler": "continueRegardlessOfError"
+  },
+  "staticData": null,
+  "pinData": null,
+  "versionId": "24bda4e4-8cf0-47be-9ebe-6b8bd0e0a1c2",
+  "meta": {
+    "instanceId": "6d4afe2e-11c1-4e78-a291-6cebf17f1a90"
+  },
+  "id": "8",
+  "tags": []
+}

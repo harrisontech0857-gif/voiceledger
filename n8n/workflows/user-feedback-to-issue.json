@@ -1,0 +1,211 @@
+{
+  "name": "User Feedback to GitHub Issue",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "app-feedback",
+        "authentication": "header",
+        "headerParameterName": "X-API-Key",
+        "headerParameterValue": "{{ $env.APP_FEEDBACK_API_KEY }}"
+      },
+      "id": "webhook-receive-feedback",
+      "name": "Webhook - Receive Feedback",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "voiceledger-app-feedback"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openai.com/v1/chat/completions",
+        "authentication": "header",
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=Bearer {{ $env.OPENAI_API_KEY }}",
+        "sendQuery": false,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"model\": \"gpt-4-turbo-preview\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an assistant that classifies user feedback into three categories: Bug, Feature Request, or Question. Respond with ONLY a JSON object with 'category' and 'confidence' (0-1) fields. Example: {\\\"category\\\": \\\"Bug\\\", \\\"confidence\\\": 0.95}\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.body.feedback_text }}\"\n    }\n  ],\n  \"temperature\": 0.3\n}",
+        "requestMethod": "POST"
+      },
+      "id": "classify-feedback-ai",
+      "name": "Classify Feedback (AI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse AI response\nconst content = $json.body.choices[0].message.content;\nconst classification = JSON.parse(content);\n\n// Map category to GitHub label\nconst categoryMap = {\n  'Bug': 'bug',\n  'Feature Request': 'enhancement',\n  'Question': 'question'\n};\n\nreturn {\n  category: classification.category,\n  label: categoryMap[classification.category],\n  confidence: classification.confidence,\n  feedback_text: $json.body.feedback_text,\n  user_id: $json.body.user_id,\n  user_email: $json.body.user_email,\n  app_version: $json.body.app_version,\n  device_info: $json.body.device_info,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "parse-classification",
+      "name": "Parse Classification",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $env.GITHUB_REPO_OWNER }}/{{ $env.GITHUB_REPO_NAME }}/issues",
+        "authentication": "header",
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=token {{ $env.GITHUB_TOKEN }}",
+        "sendQuery": false,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"title\": \"[{{ $json.category }}] User Feedback from {{ $json.user_email }}\",\n  \"body\": \"## User Feedback\\n\\n{{ $json.feedback_text }}\\n\\n---\\n\\n### Metadata\\n\\n- **User Email**: {{ $json.user_email }}\\n- **User ID**: {{ $json.user_id }}\\n- **App Version**: {{ $json.app_version }}\\n- **Device Info**: {{ $json.device_info }}\\n- **Submitted At**: {{ $json.timestamp }}\\n- **AI Confidence**: {{ ($json.confidence * 100).toFixed(2) }}%\\n\\n### Links\\n\\n- [Supabase Feedback Record](https://app.supabase.com/project/${{ env.SUPABASE_PROJECT_ID }}/editor/31013)\\n\",\n  \"labels\": [\n    \"{{ $json.label }}\",\n    \"user-feedback\",\n    \"{{ $json.app_version }}\"\n  ],\n  \"assignees\": []\n}",
+        "requestMethod": "POST"
+      },
+      "id": "create-github-issue",
+      "name": "Create GitHub Issue",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://${{ $env.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/user_feedback",
+        "authentication": "header",
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}",
+        "sendQuery": false,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"user_id\": \"{{ $json.body.user_id }}\",\n  \"feedback_text\": \"{{ $json.body.feedback_text }}\",\n  \"category\": \"{{ $json.category }}\",\n  \"ai_confidence\": {{ $json.confidence }},\n  \"github_issue_number\": \"{{ $json.body.number }}\",\n  \"github_issue_url\": \"{{ $json.body.html_url }}\",\n  \"app_version\": \"{{ $json.body.app_version }}\",\n  \"device_info\": \"{{ $json.body.device_info }}\",\n  \"processed_at\": \"now()\",\n  \"status\": \"open\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "log-feedback-supabase",
+      "name": "Log Feedback in Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_ADMIN_CHAT_ID }}\",\n  \"text\": \"🎯 *新用戶反饋已建 Issue*\\n\\n📌 分類: `{{ $json.category }}`\\n📊 AI 信心度: {{ ($json.confidence * 100).toFixed(1) }}%\\n👤 用戶: {{ $json.user_email }}\\n📱 App 版本: {{ $json.app_version }}\\n\\n💬 反饋內容:\\n{{ $json.feedback_text.substring(0, 150) }}{{ $json.feedback_text.length > 150 ? '...' : '' }}\\n\\n🔗 [GitHub Issue #{{ $json.body.number }}]({{ $json.body.html_url }})\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "notify-admin-telegram",
+      "name": "Notify Admin (Telegram)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_ADMIN_CHAT_ID }}\",\n  \"text\": \"❌ *用戶反饋處理失敗*\\n\\n👤 用戶: {{ $json.body.user_email }}\\n❌ 錯誤: {{ error.message }}\\n⏰ {{ now() }}\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "error-notification",
+      "name": "Error Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "webhook-receive-feedback": {
+      "main": [
+        [
+          {
+            "node": "Classify Feedback (AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "classify-feedback-ai": {
+      "main": [
+        [
+          {
+            "node": "Parse Classification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parse-classification": {
+      "main": [
+        [
+          {
+            "node": "Create GitHub Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create-github-issue": {
+      "main": [
+        [
+          {
+            "node": "Log Feedback in Supabase",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Admin (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "errorHandler": "continueRegardlessOfError"
+  },
+  "staticData": null,
+  "pinData": null,
+  "versionId": "b8d3e5f9-0g2c-5d7f-9i3e-8j0k1l2m3n4o",
+  "meta": {
+    "instanceId": "9f6chi4i-33e3-6g9a-c513-8edh39h3c3e2"
+  },
+  "id": "10",
+  "tags": ["feedback", "github", "ai-classification"]
+}

@@ -1,0 +1,244 @@
+{
+  "name": "Weekly Review Reminder",
+  "nodes": [
+    {
+      "parameters": {
+        "trigger": "every",
+        "unit": "weeks",
+        "value": 1,
+        "triggerAtDay": "Sunday",
+        "triggerAtHour": 20,
+        "triggerAtMinute": 0
+      },
+      "id": "schedule-weekly-sunday",
+      "name": "Schedule - Weekly Sunday 8PM",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://${{ $env.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/rpc/get_weekly_voice_ledger_summary",
+        "authentication": "header",
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}",
+        "sendQuery": true,
+        "queryParametersJson": "{\n  \"p_start_date\": \"{{ new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }}\",\n  \"p_end_date\": \"{{ new Date().toISOString().split('T')[0] }}\"\n}",
+        "requestMethod": "GET"
+      },
+      "id": "query-ledger-data",
+      "name": "Query Weekly Ledger Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const data = $json.body[0] || {};\nconst weekStart = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);\nconst weekEnd = new Date();\n\nconst summary = {\n  total_entries: data.total_entries || 0,\n  total_amount: data.total_amount || 0,\n  days_logged: data.days_logged || 0,\n  categories: data.categories || [],\n  missed_days: 7 - (data.days_logged || 0),\n  week_start: weekStart.toLocaleDateString('zh-TW'),\n  week_end: weekEnd.toLocaleDateString('zh-TW'),\n  top_category: data.top_category,\n  average_daily: (data.total_amount / (data.days_logged || 1)).toFixed(2),\n  insights: []\n};\n\n// Generate insights\nif (summary.missed_days > 0) {\n  summary.insights.push(`本週缺少 ${summary.missed_days} 天記帳`);\n}\n\nif (summary.total_entries > 0) {\n  summary.insights.push(`本週共記 ${summary.total_entries} 筆，總金額 $${summary.total_amount}`);\n}\n\nif (summary.top_category) {\n  summary.insights.push(`主要支出類別: ${summary.top_category}`);\n}\n\nreturn summary;"
+      },
+      "id": "process-ledger-summary",
+      "name": "Process Ledger Summary",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_USER_CHAT_ID }}\",\n  \"text\": \"📊 *本週記帳回顧 ({{ $json.week_start }} - {{ $json.week_end }})*\\n\\n✍️ 記帳情況\\n━━━━━━━━━━━━━━━\\n📝 總筆數: {{ $json.total_entries }}\\n💰 總金額: ${{ $json.total_amount }}\\n📅 記帳天數: {{ $json.days_logged }}/7 天\\n❌ 缺漏: {{ $json.missed_days }} 天\\n📈 日均支出: ${{ $json.average_daily }}\\n\\n🎯 本週重點類別\\n━━━━━━━━━━━━━━━\\n{{ $json.top_category ? $json.top_category : '無記錄' }}\\n\\n💡 智能建議\\n━━━━━━━━━━━━━━━\\n{{ $json.insights.map(i => '• ' + i).join('\\\\n') }}\\n\\n🔄 下週加油！記帳幫助你掌握開支習慣 💪\\n\\n🔗 [查看詳細報表](voiceledger://reports/weekly/{{ new Date().getISOString().split('T')[0] }})\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "send-reminder-telegram",
+      "name": "Send Reminder (Telegram)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://fcm.googleapis.com/v1/projects/{{ $env.FIREBASE_PROJECT_ID }}/messages:send",
+        "authentication": "header",
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=Bearer {{ $env.FIREBASE_SERVICE_ACCOUNT_TOKEN }}",
+        "sendQuery": false,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"message\": {\n    \"topic\": \"weekly-review\",\n    \"notification\": {\n      \"title\": \"📊 本週記帳回顧\",\n      \"body\": \"您本週記了 {{ $json.total_entries }} 筆，共 ${{ $json.total_amount }}。點擊查看詳細報表\"\n    },\n    \"data\": {\n      \"type\": \"weekly_review\",\n      \"total_entries\": \"{{ $json.total_entries }}\",\n      \"total_amount\": \"{{ $json.total_amount }}\",\n      \"days_logged\": \"{{ $json.days_logged }}\",\n      \"missed_days\": \"{{ $json.missed_days }}\",\n      \"deeplink\": \"voiceledger://reports/weekly/{{ new Date().getISOString().split('T')[0] }}\"\n    },\n    \"android\": {\n      \"priority\": \"high\",\n      \"notification\": {\n        \"sound\": \"default\",\n        \"channelId\": \"weekly_review\",\n        \"clickAction\": \"voiceledger://reports/weekly\"\n      }\n    },\n    \"apns\": {\n      \"headers\": {\n        \"apns-priority\": \"10\"\n      },\n      \"payload\": {\n        \"aps\": {\n          \"alert\": {\n            \"title\": \"📊 本週記帳回顧\",\n            \"body\": \"您本週記了 {{ $json.total_entries }} 筆，共 ${{ $json.total_amount }}。點擊查看詳細報表\"\n          },\n          \"sound\": \"default\",\n          \"badge\": 1,\n          \"category\": \"WEEKLY_REVIEW\"\n        }\n      }\n    }\n  }\n}",
+        "requestMethod": "POST"
+      },
+      "id": "send-fcm-reminder",
+      "name": "Send FCM Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://${{ $env.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/weekly_review_logs",
+        "authentication": "header",
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}",
+        "sendQuery": false,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"week_start\": \"{{ new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }}\",\n  \"week_end\": \"{{ new Date().toISOString().split('T')[0] }}\",\n  \"total_entries\": {{ $json.total_entries }},\n  \"total_amount\": {{ $json.total_amount }},\n  \"days_logged\": {{ $json.days_logged }},\n  \"missed_days\": {{ $json.missed_days }},\n  \"average_daily\": {{ $json.average_daily }},\n  \"top_category\": \"{{ $json.top_category }}\",\n  \"reminder_sent_at\": \"now()\",\n  \"insights\": {{ JSON.stringify($json.insights) }}\n}",
+        "requestMethod": "POST"
+      },
+      "id": "log-reminder-sent",
+      "name": "Log Reminder Sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_ADMIN_CHAT_ID }}\",\n  \"text\": \"✅ *週末記帳回顧提醒已發送*\\n\\n📊 統計:\\n• 本週記帳筆數: {{ $json.total_entries }}\\n• 總金額: ${{ $json.total_amount }}\\n• 記帳天數: {{ $json.days_logged }}/7\\n• 缺漏: {{ $json.missed_days }} 天\\n\\n🎯 主要類別: {{ $json.top_category || '無' }}\\n\\n⏰ 發送時間: {{ now() }}\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "notify-admin-sent",
+      "name": "Notify Admin - Reminder Sent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_ADMIN_CHAT_ID }}\",\n  \"text\": \"❌ *週末記帳提醒失敗*\\n\\n❌ 錯誤: {{ error.message }}\\n⏰ {{ now() }}\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "error-notification-reminder",
+      "name": "Error Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "schedule-weekly-sunday": {
+      "main": [
+        [
+          {
+            "node": "Query Weekly Ledger Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "query-ledger-data": {
+      "main": [
+        [
+          {
+            "node": "Process Ledger Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "process-ledger-summary": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder (Telegram)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send FCM Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send-reminder-telegram": {
+      "main": [
+        [
+          {
+            "node": "Log Reminder Sent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Admin - Reminder Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send-fcm-reminder": {
+      "main": [
+        [
+          {
+            "node": "Log Reminder Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "errorHandler": "continueRegardlessOfError",
+    "timezone": "Asia/Taipei"
+  },
+  "staticData": null,
+  "pinData": null,
+  "versionId": "c9e4f6g0-1h3d-6e8g-0j4f-9k1l2m3n4o5p",
+  "meta": {
+    "instanceId": "0g7dji5j-44f4-7h0b-d624-9fee40i4d4f3"
+  },
+  "id": "11",
+  "tags": ["schedule", "ledger", "reminder", "weekly"]
+}

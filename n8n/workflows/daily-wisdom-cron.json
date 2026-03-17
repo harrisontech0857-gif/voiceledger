@@ -1,0 +1,204 @@
+{
+  "name": "Daily Wisdom Push Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "trigger": "every",
+        "unit": "minutes",
+        "value": 1440,
+        "triggerAtHour": 8,
+        "triggerAtMinute": 0
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://${{ $env.SUPABASE_PROJECT_ID }}.supabase.co/functions/v1/generate-daily-wisdom",
+        "authentication": "header",
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=Bearer {{ $env.SUPABASE_ANON_KEY }}",
+        "sendQuery": false,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"date\": \"{{ $json.now }}\",\n  \"language\": \"zh-TW\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "call-supabase-edge-function",
+      "name": "Call Supabase Edge Function",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "custom",
+        "url": "=https://www.googleapis.com/identitytoolkit/v3/relyingparty/getProjectConfig?key={{ $env.FIREBASE_API_KEY }}",
+        "sendQuery": false,
+        "sendBody": true,
+        "requestMethod": "GET"
+      },
+      "id": "get-fcm-token",
+      "name": "Get FCM Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "custom",
+        "url": "=https://fcm.googleapis.com/v1/projects/{{ $env.FIREBASE_PROJECT_ID }}/messages:send",
+        "sendQuery": false,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"message\": {\n    \"token\": \"{{ $json.fcm_token }}\",\n    \"notification\": {\n      \"title\": \"每日金句\",\n      \"body\": \"{{ $json.body.wisdom }}\"\n    },\n    \"data\": {\n      \"wisdom_id\": \"{{ $json.body.wisdom_id }}\",\n      \"author\": \"{{ $json.body.author }}\",\n      \"category\": \"{{ $json.body.category }}\",\n      \"deeplink\": \"voiceledger://wisdom/{{ $json.body.wisdom_id }}\"\n    },\n    \"android\": {\n      \"priority\": \"high\",\n      \"notification\": {\n        \"sound\": \"default\",\n        \"channelId\": \"daily_wisdom\"\n      }\n    },\n    \"apns\": {\n      \"headers\": {\n        \"apns-priority\": \"10\"\n      },\n      \"payload\": {\n        \"aps\": {\n          \"alert\": {\n            \"title\": \"每日金句\",\n            \"body\": \"{{ $json.body.wisdom }}\"\n          },\n          \"sound\": \"default\",\n          \"badge\": 1\n        }\n      }\n    }\n  }\n}",
+        "sendHeaders": true,
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=Bearer {{ $env.FIREBASE_SERVICE_ACCOUNT_TOKEN }}",
+        "requestMethod": "POST"
+      },
+      "id": "send-fcm-notification",
+      "name": "Send FCM Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        850,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://${{ $env.SUPABASE_PROJECT_ID }}.supabase.co/rest/v1/wisdom_delivery_logs",
+        "authentication": "header",
+        "headerParameterName": "Authorization",
+        "headerParameterValue": "=Bearer {{ $env.SUPABASE_SERVICE_ROLE_KEY }}",
+        "sendQuery": false,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"wisdom_id\": \"{{ $json.body.wisdom_id }}\",\n  \"delivered_at\": \"now()\",\n  \"status\": \"{{ $json.statusCode === 200 ? 'delivered' : 'failed' }}\",\n  \"user_count\": 1,\n  \"metadata\": {\n    \"fcm_response\": \"{{ $json.body }}\"\n  }\n}",
+        "requestMethod": "POST"
+      },
+      "id": "log-delivery",
+      "name": "Log Delivery",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendQuery": true,
+        "sendBody": true,
+        "bodyParametersJson": "{\n  \"chat_id\": \"{{ $env.TELEGRAM_ADMIN_CHAT_ID }}\",\n  \"text\": \"📚 *每日金句推送完成*\\n\\n💬 \\\"{{ $json.body.wisdom }}\\\"\\n\\n✍️ 作者: {{ $json.body.author }}\\n🏷️ 分類: {{ $json.body.category }}\\n✅ 已送達 FCM\\n⏰ {{ now() }}\",\n  \"parse_mode\": \"Markdown\"\n}",
+        "requestMethod": "POST"
+      },
+      "id": "send-telegram-confirmation",
+      "name": "Send Telegram Confirmation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1050,
+        450
+      ]
+    },
+    {
+      "parameters": {
+        "errorMessage": "Failed to generate wisdom",
+        "message": "{{ error }}"
+      },
+      "id": "error-handler",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.errorMessage",
+      "typeVersion": 1,
+      "position": [
+        450,
+        500
+      ]
+    }
+  ],
+  "connections": {
+    "schedule-trigger": {
+      "main": [
+        [
+          {
+            "node": "Call Supabase Edge Function",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "call-supabase-edge-function": {
+      "main": [
+        [
+          {
+            "node": "Get FCM Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get-fcm-token": {
+      "main": [
+        [
+          {
+            "node": "Send FCM Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "send-fcm-notification": {
+      "main": [
+        [
+          {
+            "node": "Log Delivery",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Telegram Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "errorHandler": "continueRegardlessOfError",
+    "timezone": "Asia/Taipei"
+  },
+  "staticData": null,
+  "pinData": null,
+  "versionId": "a7c2d4e8-9f1b-4c6e-8h2d-7i9j0k1l2m3n",
+  "meta": {
+    "instanceId": "8e5bgf3h-22d2-5f89-b402-7dcg28g2b2d1"
+  },
+  "id": "9",
+  "tags": ["schedule", "fcm", "wisdom"]
+}
