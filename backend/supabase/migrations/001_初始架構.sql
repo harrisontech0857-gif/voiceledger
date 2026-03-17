@@ -830,7 +830,120 @@ CREATE TABLE notifications (
 );
 
 -- ============================================================================
--- 13. 家庭共享帳本表
+-- 13. 隱私與合規表
+-- ============================================================================
+
+-- 用戶隱私同意
+CREATE TABLE privacy_consents (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+  -- 同意項目
+  terms_of_service_agreed BOOLEAN DEFAULT FALSE,
+  privacy_policy_agreed BOOLEAN DEFAULT FALSE,
+  data_processing_agreed BOOLEAN DEFAULT FALSE,
+  marketing_agreed BOOLEAN DEFAULT FALSE,
+
+  -- 位置數據
+  location_tracking_agreed BOOLEAN DEFAULT FALSE,
+  location_history_retention_days INTEGER DEFAULT 30,
+
+  -- 照片分析
+  photo_analysis_agreed BOOLEAN DEFAULT FALSE,
+
+  -- 推播通知
+  push_notifications_agreed BOOLEAN DEFAULT FALSE,
+
+  -- 版本與時間
+  consent_version TEXT DEFAULT '1.0',
+  agreed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_modified_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP WITH TIME ZONE,
+
+  INDEX idx_user (user_id),
+  UNIQUE(user_id)
+);
+
+-- 數據匯出請求（GDPR 資料可攜權）
+CREATE TABLE data_export_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+  -- 請求信息
+  request_type TEXT NOT NULL DEFAULT 'full_export', -- 'full_export', 'partial_export', 'transactions_only'
+  format TEXT NOT NULL DEFAULT 'json', -- 'json', 'csv', 'pdf'
+  status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'processing', 'ready', 'completed', 'failed', 'expired'
+
+  -- 內容包含
+  include_transactions BOOLEAN DEFAULT TRUE,
+  include_personal_data BOOLEAN DEFAULT TRUE,
+  include_ai_interactions BOOLEAN DEFAULT TRUE,
+  include_behavioral_data BOOLEAN DEFAULT TRUE,
+
+  -- 下載信息
+  export_file_url TEXT, -- S3/Supabase Storage 下載連結
+  expires_at TIMESTAMP WITH TIME ZONE, -- 下載鏈接過期時間
+
+  -- 進度
+  processing_started_at TIMESTAMP WITH TIME ZONE,
+  completed_at TIMESTAMP WITH TIME ZONE,
+
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_user_status (user_id, status),
+  INDEX idx_created (created_at)
+);
+
+-- 用戶帳戶刪除請求（GDPR 被遺忘權）
+CREATE TABLE account_deletion_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+  -- 刪除狀態
+  status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'confirmed', 'processing', 'completed', 'cancelled'
+  reason TEXT, -- 用戶提供的刪除原因
+
+  -- 確認
+  confirmation_token TEXT UNIQUE,
+  confirmed_at TIMESTAMP WITH TIME ZONE,
+  email_sent_at TIMESTAMP WITH TIME ZONE,
+
+  -- 執行
+  scheduled_deletion_at TIMESTAMP WITH TIME ZONE, -- 30 天後刪除
+  completed_deletion_at TIMESTAMP WITH TIME ZONE,
+
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_user_status (user_id, status),
+  INDEX idx_scheduled (scheduled_deletion_at)
+);
+
+-- 數據處理活動日誌（合規審計追蹤）
+CREATE TABLE data_processing_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+  -- 操作
+  operation_type TEXT NOT NULL, -- 'read', 'create', 'update', 'delete', 'export', 'share'
+  resource_type TEXT NOT NULL, -- 'transaction', 'profile', 'location', 'photo', etc
+  resource_id UUID,
+
+  -- 詳細信息
+  description TEXT,
+  ip_address INET,
+  user_agent TEXT,
+
+  -- 時間
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_user_time (user_id, created_at),
+  INDEX idx_operation (operation_type),
+  INDEX idx_resource (resource_type)
+);
+
+-- ============================================================================
+-- 14. 家庭共享帳本表
 -- ============================================================================
 
 -- 家庭
@@ -1161,6 +1274,10 @@ ALTER TABLE family_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE family_ledgers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE family_ledger_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE family_settlements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE privacy_consents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE data_export_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE account_deletion_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE data_processing_logs ENABLE ROW LEVEL SECURITY;
 
 -- 用戶表 RLS 政策
 -- 用戶只能看到自己的信息，除非是家庭成員
@@ -1239,6 +1356,34 @@ CREATE POLICY "家庭成員可以看到家庭帳本" ON family_ledgers
       SELECT family_id FROM family_members WHERE user_id = auth.uid()
     )
   );
+
+-- 隱私同意表 RLS 政策
+CREATE POLICY "用戶只能看到自己的隱私同意記錄" ON privacy_consents
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "用戶只能管理自己的隱私同意" ON privacy_consents
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "用戶只能更新自己的隱私同意" ON privacy_consents
+  FOR UPDATE USING (user_id = auth.uid());
+
+-- 數據匯出請求 RLS 政策
+CREATE POLICY "用戶只能看到自己的匯出請求" ON data_export_requests
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "用戶只能創建自己的匯出請求" ON data_export_requests
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
+-- 帳戶刪除請求 RLS 政策
+CREATE POLICY "用戶只能看到自己的刪除請求" ON account_deletion_requests
+  FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "用戶只能創建自己的刪除請求" ON account_deletion_requests
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+
+-- 數據處理日誌 RLS 政策
+CREATE POLICY "用戶只能看到自己的數據處理日誌" ON data_processing_logs
+  FOR SELECT USING (user_id = auth.uid());
 
 -- ============================================================================
 -- 17. 視圖 (Views)
@@ -1319,13 +1464,28 @@ ALTER TABLE daily_quotes ADD CONSTRAINT valid_category
 -- 20. 註釋與文檔
 -- ============================================================================
 
-COMMENT ON TABLE users IS '用戶基本信息表，儲存所有應用用戶的核心資料';
-COMMENT ON TABLE transactions IS '交易記錄主表，支持多種來源（語音、GPS、照片等）的交易輸入';
-COMMENT ON TABLE daily_diaries IS '每日日記摘要，由 AI 自動生成，記錄日常消費和生活情況';
+-- 表級別註釋與文檔
+COMMENT ON TABLE users IS '用戶基本信息表，儲存所有應用用戶的核心資料。敏感欄位：email、phone_number 應使用 PgCrypto 加密存儲';
+COMMENT ON TABLE transactions IS '交易記錄主表，支持多種來源（語音、GPS、照片等）的交易輸入。敏感欄位：location_latitude、location_longitude（GPS 位置數據）建議加密';
+COMMENT ON TABLE daily_diaries IS '每日日記摘要，由 AI 自動生成，記錄日常消費和生活情況。敏感欄位：insights、ai_observations 可能包含個人隱私信息';
 COMMENT ON TABLE budgets IS '預算管理表，支持總預算和分類預算';
-COMMENT ON TABLE user_subscriptions IS '用戶訂閱狀態，與 RevenueCat 整合';
+COMMENT ON TABLE user_subscriptions IS '用戶訂閱狀態，與 RevenueCat 整合。敏感欄位：payment_method 應加密存儲';
 COMMENT ON TABLE family_ledgers IS '家庭共享帳本，支持多用戶的共同記帳';
 COMMENT ON TABLE daily_quotes IS '每日金句，可由 AI 生成或手動添加';
+COMMENT ON TABLE geofence_logs IS '地理圍欄記錄，包含用戶 GPS 位置數據。敏感欄位：location_latitude、location_longitude 應加密存儲';
+COMMENT ON TABLE photo_logs IS '照片分析結果，包含用戶上傳的照片。敏感欄位：photo_url 可能包含個人敏感信息，建議加密';
+COMMENT ON TABLE privacy_consents IS '用戶隱私同意記錄，用於 GDPR 合規。記錄用戶對各項數據收集的同意狀態';
+COMMENT ON TABLE data_export_requests IS 'GDPR 資料可攜權請求。用戶可以要求導出個人數據';
+COMMENT ON TABLE account_deletion_requests IS 'GDPR 被遺忘權請求。用戶可以要求完全刪除帳戶和數據';
+COMMENT ON TABLE data_processing_logs IS '數據處理活動日誌。用於審計追蹤所有數據訪問和操作。敏感欄位：ip_address 應按當地法律規定保留期限';
+
+-- 敏感欄位加密建議
+COMMENT ON COLUMN users.email IS '用戶電郵，應使用 pgcrypto 加密。SELECT 時使用 pgp_sym_decrypt()';
+COMMENT ON COLUMN users.phone_number IS '用戶電話號碼，應使用 pgcrypto 加密。敏感個人信息（PII）';
+COMMENT ON COLUMN geofence_logs.location_latitude IS 'GPS 緯度，精確位置數據，應加密。GDPR 下屬於敏感個人數據';
+COMMENT ON COLUMN geofence_logs.location_longitude IS 'GPS 經度，精確位置數據，應加密。GDPR 下屬於敏感個人數據';
+COMMENT ON COLUMN photo_logs.photo_url IS '照片 URL，可能包含用戶臉部或敏感位置信息，應加密存儲';
+COMMENT ON COLUMN user_subscriptions.payment_method IS '支付方式，應加密存儲。包含敏感金融信息';
 
 -- ============================================================================
 -- 完成

@@ -79,9 +79,11 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_ANON_KEY") || ""
 );
 
-const anthropic = new Anthropic({
+const enableAiApi = (Deno.env.get("ENABLE_AI_API") || "false").toLowerCase() === "true";
+
+const anthropic = enableAiApi ? new Anthropic({
   apiKey: Deno.env.get("ANTHROPIC_API_KEY"),
-});
+}) : null;
 
 function generate_uuid(): string {
   return crypto.randomUUID();
@@ -200,6 +202,21 @@ async function match_nearby_locations(
   return matches;
 }
 
+// 本地圖像分析備選方案 - 使用規則匹配而不需要 AI API
+function analyze_transaction_image_local(): Promise<{
+  merchant: string | null;
+  category: string | null;
+  confidence: number;
+  description: string;
+}> {
+  return Promise.resolve({
+    merchant: null,
+    category: null,
+    confidence: 0.3,
+    description: "圖像分析需要啟用 ENABLE_AI_API",
+  });
+}
+
 async function analyze_transaction_image(
   image_base64: string
 ): Promise<{
@@ -208,10 +225,15 @@ async function analyze_transaction_image(
   confidence: number;
   description: string;
 }> {
-  // In production, would use Claude's vision API
-  // For now, return mock analysis
+  // 如果 AI API 未啟用，使用本地備選方案
+  if (!enableAiApi || !anthropic) {
+    console.log("ENABLE_AI_API is false, using local fallback");
+    return analyze_transaction_image_local();
+  }
+
+  // 使用 Claude 的視覺 API
   try {
-    const message = await anthropic.messages.create({
+    const message = await anthropic!.messages.create({
       model: "claude-3-5-sonnet-20241022",
       max_tokens: 256,
       messages: [

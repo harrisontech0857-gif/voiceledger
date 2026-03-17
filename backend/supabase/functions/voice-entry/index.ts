@@ -44,9 +44,85 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_ANON_KEY") || ""
 );
 
-const anthropic = new Anthropic({
+const enableAiApi = (Deno.env.get("ENABLE_AI_API") || "false").toLowerCase() === "true";
+
+const anthropic = enableAiApi ? new Anthropic({
   apiKey: Deno.env.get("ANTHROPIC_API_KEY"),
-});
+}) : null;
+
+// 簡單的規則引擎模式匹配 - 無需付費 API 的本地處理
+function parse_voice_transcript_local(
+  transcript: string
+): {
+  entries: any[];
+  sentence_count: number;
+  split_ratio: number;
+} {
+  const entries: any[] = [];
+  const sentences = transcript.split(/[。！？]/g).filter((s) => s.trim());
+
+  // 提取金額的正則表達式
+  const amountRegex = /(?:NT\$|￥|\$)?(\d+(?:[.,]\d+)?)/g;
+  // 常見類別關鍵字
+  const categoryKeywords: Record<string, string[]> = {
+    dining_out: ["餐廳", "咖啡", "飯", "菜", "飯店", "餐", "吃", "喝"],
+    groceries: ["超市", "便利商店", "7-eleven", "全家", "ok便", "超商"],
+    transport: ["uber", "計程車", "公車", "捷運", "台鐵", "高鐵", "機票"],
+    shopping: ["購物", "買", "衣服", "褲子", "鞋", "包", "手機"],
+    entertainment: ["電影", "kktv", "netflix", "演唱會", "票", "遊戲"],
+    utilities: ["電費", "水費", "網路", "電話", "瓦斯"],
+    health: ["醫院", "診所", "藥房", "健身", "醫生"],
+  };
+
+  for (const sentence of sentences) {
+    const sentence_lower = sentence.toLowerCase();
+    let amount_match = amountRegex.exec(sentence);
+
+    if (amount_match) {
+      const amount = parseFloat(amount_match[1].replace(/,/g, ""));
+
+      // 推測分類
+      let category = "other";
+      for (const [cat, keywords] of Object.entries(categoryKeywords)) {
+        if (keywords.some((kw) => sentence_lower.includes(kw.toLowerCase()))) {
+          category = cat;
+          break;
+        }
+      }
+
+      entries.push({
+        amount: Math.round(amount),
+        currency: "TWD",
+        category,
+        merchant: sentence.substring(0, 20) || "Unknown",
+        description: sentence,
+        confidence: 0.75, // 本地處理的信心度較低
+        tags: [],
+      });
+    }
+  }
+
+  // 如果本地處理沒有提取到任何內容，返回默認條目
+  if (entries.length === 0) {
+    entries.push({
+      amount: 0,
+      currency: "TWD",
+      category: "other",
+      merchant: "Unknown",
+      description: transcript,
+      confidence: 0.3,
+      tags: ["需要人工審核"],
+    });
+  }
+
+  const split_ratio = entries.length > 1 ? entries.length / sentences.length : 1.0;
+
+  return {
+    entries,
+    sentence_count: sentences.length,
+    split_ratio: Math.min(split_ratio, 1.0),
+  };
+}
 
 async function parse_voice_transcript(
   transcript: string,
@@ -56,6 +132,13 @@ async function parse_voice_transcript(
   sentence_count: number;
   split_ratio: number;
 }> {
+  // 如果 AI API 未啟用，使用本地規則引擎
+  if (!enableAiApi || !anthropic) {
+    console.log("ENABLE_AI_API is false, using local rule engine");
+    return parse_voice_transcript_local(transcript);
+  }
+
+  // 否則使用 Claude API
   const prompt = `You are a financial transaction parser. Parse the following voice transcript and extract all spending entries.
 
 IMPORTANT INSTRUCTIONS:
@@ -81,7 +164,7 @@ Return JSON array with this structure:
   "tags": ["string"]
 }]`;
 
-  const message = await anthropic.messages.create({
+  const message = await anthropic!.messages.create({
     model: "claude-3-5-sonnet-20241022",
     max_tokens: 1024,
     messages: [

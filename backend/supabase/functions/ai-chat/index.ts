@@ -48,9 +48,11 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_ANON_KEY") || ""
 );
 
-const anthropic = new Anthropic({
+const enableAiApi = (Deno.env.get("ENABLE_AI_API") || "false").toLowerCase() === "true";
+
+const anthropic = enableAiApi ? new Anthropic({
   apiKey: Deno.env.get("ANTHROPIC_API_KEY"),
-});
+}) : null;
 
 interface QueryIntent {
   type: string;
@@ -63,11 +65,60 @@ function generate_uuid(): string {
   return crypto.randomUUID();
 }
 
+// 本地意圖解析 - 簡單的規則引擎
+function parse_user_intent_local(
+  message: string
+): QueryIntent {
+  const msg_lower = message.toLowerCase();
+
+  // 簡單的意圖偵測
+  let type = "balance_query";
+  if (msg_lower.includes("分類") || msg_lower.includes("category")) {
+    type = "category_summary";
+  } else if (msg_lower.includes("趨勢") || msg_lower.includes("trend")) {
+    type = "trend_analysis";
+  } else if (msg_lower.includes("預算") || msg_lower.includes("budget")) {
+    type = "budget_check";
+  } else if (msg_lower.includes("比較") || msg_lower.includes("compare")) {
+    type = "comparison";
+  }
+
+  // 簡單的實體提取
+  const categories = ["食物", "餐飲", "飲食", "購物", "交通", "娛樂", "健康", "教育"];
+  let category = null;
+  for (const cat of categories) {
+    if (msg_lower.includes(cat.toLowerCase())) {
+      category = cat;
+      break;
+    }
+  }
+
+  return {
+    type,
+    entities: {
+      category,
+      period: "month",
+      start_date: null,
+      end_date: null,
+      merchant: null,
+      amount_threshold: null,
+    },
+    sql_template: "",
+    requires_data_fetch: true,
+  };
+}
+
 // Parse user message to extract intent and entities
 async function parse_user_intent(
   message: string,
   timezone: string
 ): Promise<QueryIntent> {
+  // 如果 AI API 未啟用，使用本地規則引擎
+  if (!enableAiApi || !anthropic) {
+    console.log("ENABLE_AI_API is false, using local intent parser");
+    return parse_user_intent_local(message);
+  }
+
   const prompt = `You are a financial query parser. Analyze the user message and extract:
 1. Query type: balance_query, category_summary, trend_analysis, budget_check, comparison, anomaly_detection, recommendation
 2. Entities: category, time_period, merchant, amount_threshold
@@ -90,7 +141,7 @@ Return JSON:
   "confidence": "number (0-1)"
 }`;
 
-  const message_resp = await anthropic.messages.create({
+  const message_resp = await anthropic!.messages.create({
     model: "claude-3-5-sonnet-20241022",
     max_tokens: 512,
     messages: [
@@ -238,6 +289,27 @@ async function execute_query(
   return { data: data || [], count: count || 0 };
 }
 
+// 本地回覆模式 - 無需 AI API 的模板回覆
+function generate_response_local(
+  user_message: string,
+  query_results: unknown[],
+  intent: QueryIntent
+): string {
+  const templates: Record<string, string> = {
+    balance_query: "根據您的數據，您在選定期間內共進行了 {count} 筆交易，總支出為 NT${total}。",
+    category_summary: "您在 {category} 方面的消費情況已整理完畢。詳細數據已檢索，請核實。",
+    trend_analysis: "您的消費趨勢已分析。最近期間的支出呈現 {trend} 趨勢。",
+    budget_check: "您本月的預算使用情況如下。建議您留意支出類別。",
+    comparison: "與上月相比，您的消費有所變化。詳細數據已準備好供您查看。",
+  };
+
+  const template = templates[intent.type] || "您的財務數據已檢索。請查看詳細結果。";
+  return template
+    .replace("{count}", String(query_results?.length || 0))
+    .replace("{category}", String(intent.entities.category || "該分類"))
+    .replace("{trend}", intent.entities.category ? "變化" : "波動");
+}
+
 // Generate natural language response
 async function generate_response(
   user_message: string,
@@ -245,6 +317,12 @@ async function generate_response(
   intent: QueryIntent,
   timezone: string
 ): Promise<string> {
+  // 如果 AI API 未啟用，使用本地模板回覆
+  if (!enableAiApi || !anthropic) {
+    console.log("ENABLE_AI_API is false, using template response");
+    return generate_response_local(user_message, query_results, intent);
+  }
+
   const prompt = `You are a friendly financial assistant. Based on the user query and data results, generate a natural language response in Traditional Chinese (繁體中文).
 
 User Message: "${user_message}"
@@ -261,7 +339,7 @@ Guidelines:
 
 Generate response:`;
 
-  const response = await anthropic.messages.create({
+  const response = await anthropic!.messages.create({
     model: "claude-3-5-sonnet-20241022",
     max_tokens: 512,
     messages: [

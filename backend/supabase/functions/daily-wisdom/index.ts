@@ -44,9 +44,71 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_ANON_KEY") || ""
 );
 
-const anthropic = new Anthropic({
+const enableAiApi = (Deno.env.get("ENABLE_AI_API") || "false").toLowerCase() === "true";
+
+const anthropic = enableAiApi ? new Anthropic({
   apiKey: Deno.env.get("ANTHROPIC_API_KEY"),
-});
+}) : null;
+
+// 50 條內建的繁體中文理財金句
+const builtInQuotes = [
+  "財富不是來自收入，而是來自如何花費。",
+  "最好的投資就是投資於你自己的知識。",
+  "儲蓄不是為了錢，而是為了自由。",
+  "消費要節制，快樂要適度。",
+  "今天的節儉，就是明天的富有。",
+  "人生最大的資本，是時間和健康。",
+  "金錢會說謊，數字不會。",
+  "小錢不浪費，大錢才能存。",
+  "預算是通往財務自由的路標。",
+  "理性消費，享受生活，兩者可以兼得。",
+  "被動收入讓你睡覺也在賺錢。",
+  "投資自己，永遠不虧。",
+  "計畫好的消費，不會傷害存款。",
+  "每筆消費都是一個選擇，好好珍惜每一個。",
+  "複利是世界上第八大奇蹟。",
+  "貧困源於無計畫，富有源於有策略。",
+  "今天不存錢，未來就得省錢。",
+  "人生最大的遺憾，是沒能及早存錢。",
+  "理財不難，難在持之以恆。",
+  "金錢只是工具，目標才是方向。",
+  "小步持續，大步達成。",
+  "消費清單能救你的錢包。",
+  "每一分錢都在為你的未來投票。",
+  "習慣改變，人生就改變。",
+  "理財的第一步，是停止浪費。",
+  "存錢不是為了有錢，而是為了有選擇權。",
+  "花錢要聰慧，存錢要堅持。",
+  "預算自由，人生自由。",
+  "不花無謂的錢，才能花值得的錢。",
+  "理財是一場馬拉松，不是短跑。",
+  "每一筆消費，都在塑造你的未來。",
+  "高收入不一定等於高存款。",
+  "健康的財務，來自健康的習慣。",
+  "只有你能拯救你的錢包。",
+  "持續學習理財，終身受益。",
+  "消費決定了你的品質，存錢決定了你的未來。",
+  "財務自由不是終點，而是旅程。",
+  "每天進步一點點，一年大不同。",
+  "你的消費反映了你的優先順序。",
+  "理財高手的秘訣，就是重複做簡單的事。",
+  "改變觀念，改變生活。",
+  "金錢會跟著你的習慣走。",
+  "存錢是最好的投資，投資自己是最好的回報。",
+  "想要有富人的生活，先要有富人的習慣。",
+  "理財成功的關鍵，是早起步。",
+  "消費是生活的一部分，不是全部。",
+  "每個富人都是從節儉開始的。",
+  "目標明確，行動就明確。",
+  "你的錢在哪，你的人生就在哪。",
+  "理財不是限制，而是自由。",
+];
+
+function getQuoteOfDay(): string {
+  const today = new Date();
+  const dayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
+  return builtInQuotes[dayOfYear % builtInQuotes.length];
+}
 
 function generate_uuid(): string {
   return crypto.randomUUID();
@@ -193,6 +255,41 @@ function analyze_spending_data(
   };
 }
 
+// 本地金句生成 - 根據消費情況選擇合適的金句
+function generate_wisdom_quote_local(
+  stats: {
+    stats: {
+      total_spending: number;
+      daily_average: number;
+      transactions_count: number;
+      biggest_category: string;
+      biggest_category_amount: number;
+    };
+    trend: "increasing" | "decreasing" | "stable";
+    pattern: string;
+  }
+): {
+  quote: string;
+  actionable_tip: string;
+} {
+  const todayQuote = getQuoteOfDay();
+  let actionableTip = "今天記下您的每一筆消費，明天就會看到改變。";
+
+  // 根據消費趨勢提供建議
+  if (stats.trend === "increasing") {
+    actionableTip = `您的消費呈上升趨勢。建議檢視 ${stats.stats.biggest_category} 的支出，嘗試調整預算。`;
+  } else if (stats.trend === "decreasing") {
+    actionableTip = "您的消費呈下降趨勢，這很棒！保持這個勢頭，持續努力。";
+  } else {
+    actionableTip = `您的消費相對穩定。在 ${stats.stats.biggest_category} 方面的支出最多，可以考慮進一步優化。`;
+  }
+
+  return {
+    quote: todayQuote,
+    actionable_tip: actionableTip,
+  };
+}
+
 async function generate_wisdom_quote(
   user_id: string,
   stats: {
@@ -211,6 +308,12 @@ async function generate_wisdom_quote(
   quote: string;
   actionable_tip: string;
 }> {
+  // 如果 AI API 未啟用，使用本地金句庫
+  if (!enableAiApi || !anthropic) {
+    console.log("ENABLE_AI_API is false, using built-in quotes");
+    return generate_wisdom_quote_local(stats);
+  }
+
   const tone_instruction = {
     encouraging:
       "Use positive and motivating language to encourage good financial habits",
@@ -244,7 +347,7 @@ Requirements:
 - Include metaphors or relatable examples when relevant
 - Tip should be concrete and implementable`;
 
-  const message = await anthropic.messages.create({
+  const message = await anthropic!.messages.create({
     model: "claude-3-5-sonnet-20241022",
     max_tokens: 512,
     messages: [
