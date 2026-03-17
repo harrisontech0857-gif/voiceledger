@@ -76,7 +76,7 @@ interface PassiveInferenceResponse {
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") || "",
-  Deno.env.get("SUPABASE_ANON_KEY") || ""
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
 );
 
 const enableAiApi = (Deno.env.get("ENABLE_AI_API") || "false").toLowerCase() === "true";
@@ -402,17 +402,19 @@ async function store_inferred_entry(
       user_id,
       amount: entry.amount,
       currency: entry.currency,
+      transaction_type: "expense",
       category: entry.category,
-      merchant: entry.merchant,
-      description: entry.description,
-      timestamp: entry.timestamp,
-      source: entry.source,
-      confidence: entry.confidence,
-      status: entry.requires_confirmation ? "pending" : "confirmed",
-      metadata: {
+      merchant_name: entry.merchant,
+      notes: entry.description,
+      transaction_date: entry.timestamp.split("T")[0],
+      transaction_time: entry.timestamp.split("T")[1]?.split("+")[0] || null,
+      source_type: "notification",
+      source_detail: {
         confidence_breakdown: entry.confidence_breakdown,
         evidence: entry.evidence,
       },
+      confidence_score: entry.confidence,
+      is_verified: !entry.requires_confirmation,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },

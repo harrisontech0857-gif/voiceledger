@@ -39,9 +39,11 @@ interface VoiceEntryResponse {
   code?: string;
 }
 
+// 使用 service_role key 進行資料庫操作（繞過 RLS）
+// 用戶身份驗證透過 auth.getUser() 處理
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") || "",
-  Deno.env.get("SUPABASE_ANON_KEY") || ""
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
 );
 
 const enableAiApi = (Deno.env.get("ENABLE_AI_API") || "false").toLowerCase() === "true";
@@ -286,14 +288,17 @@ async function store_entries(
       user_id,
       amount: entry.amount,
       currency: entry.currency,
+      transaction_type: "expense",
       category: entry.category,
-      merchant: entry.merchant,
-      description: entry.description,
-      timestamp: entry.timestamp,
-      source: entry.source,
-      confidence: entry.confidence,
+      merchant_name: entry.merchant,
+      notes: entry.description,
+      transaction_date: entry.timestamp.split("T")[0],
+      transaction_time: entry.timestamp.split("T")[1]?.split("+")[0] || null,
+      source_type: "voice",
+      source_detail: { raw_transcript: entry.description },
+      confidence_score: entry.confidence,
       tags: entry.tags,
-      status: "confirmed",
+      is_verified: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }))

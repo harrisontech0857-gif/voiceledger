@@ -41,7 +41,7 @@ interface DailyWisdomResponse {
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") || "",
-  Deno.env.get("SUPABASE_ANON_KEY") || ""
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
 );
 
 const enableAiApi = (Deno.env.get("ENABLE_AI_API") || "false").toLowerCase() === "true";
@@ -133,7 +133,7 @@ function get_date_range(
 interface TransactionData {
   amount: number;
   category: string;
-  timestamp: string;
+  transaction_date: string;
 }
 
 async function fetch_spending_data(
@@ -148,12 +148,12 @@ async function fetch_spending_data(
 
   const { data: transactions, error } = await supabase
     .from("transactions")
-    .select("amount, category, timestamp")
+    .select("amount, category, transaction_date")
     .eq("user_id", user_id)
-    .eq("status", "confirmed")
-    .gte("timestamp", start.toISOString())
-    .lte("timestamp", end.toISOString())
-    .order("timestamp", { ascending: false });
+    .eq("is_verified", true)
+    .gte("transaction_date", start.toISOString().split("T")[0])
+    .lte("transaction_date", end.toISOString().split("T")[0])
+    .order("transaction_date", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch transactions: ${error.message}`);
@@ -164,7 +164,7 @@ async function fetch_spending_data(
   const category_breakdown: Record<string, number> = {};
 
   for (const tx of transactions || []) {
-    const date = new Date(tx.timestamp).toISOString().split("T")[0];
+    const date = tx.transaction_date;
     daily_stats[date] = (daily_stats[date] || 0) + tx.amount;
     category_breakdown[tx.category] =
       (category_breakdown[tx.category] || 0) + tx.amount;
@@ -222,7 +222,7 @@ function analyze_spending_data(
   // Detect pattern
   const weekday_totals: Record<number, number> = {};
   for (const tx of transactions) {
-    const day_of_week = new Date(tx.timestamp).getDay();
+    const day_of_week = new Date(tx.transaction_date).getDay();
     weekday_totals[day_of_week] =
       (weekday_totals[day_of_week] || 0) + tx.amount;
   }

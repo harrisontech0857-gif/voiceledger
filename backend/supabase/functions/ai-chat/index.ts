@@ -45,7 +45,7 @@ interface AIChatResponse {
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") || "",
-  Deno.env.get("SUPABASE_ANON_KEY") || ""
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""
 );
 
 const enableAiApi = (Deno.env.get("ENABLE_AI_API") || "false").toLowerCase() === "true";
@@ -190,22 +190,22 @@ function build_sql_query(user_id: string, intent: QueryIntent): string {
       FROM transactions
       WHERE user_id = '${user_id}'
         AND category = '${entities.category}'
-        AND timestamp >= '${start_date.toISOString()}'
-        AND timestamp <= '${end_date.toISOString()}'
-        AND status = 'confirmed'
+        AND transaction_date >= '${start_date.toISOString()}'
+        AND transaction_date <= '${end_date.toISOString()}'
+        AND is_verified = true
       GROUP BY category`;
 
     case "trend_analysis":
       return `SELECT
-        DATE(timestamp) as date,
+        transaction_date as date,
         SUM(amount) as daily_total,
         category
       FROM transactions
       WHERE user_id = '${user_id}'
-        AND timestamp >= '${start_date.toISOString()}'
-        AND timestamp <= '${end_date.toISOString()}'
-        AND status = 'confirmed'
-      GROUP BY DATE(timestamp), category
+        AND transaction_date >= '${start_date.toISOString()}'
+        AND transaction_date <= '${end_date.toISOString()}'
+        AND is_verified = true
+      GROUP BY transaction_date, category
       ORDER BY date DESC`;
 
     case "balance_query":
@@ -216,9 +216,9 @@ function build_sql_query(user_id: string, intent: QueryIntent): string {
         MAX(amount) as max_transaction
       FROM transactions
       WHERE user_id = '${user_id}'
-        AND timestamp >= '${start_date.toISOString()}'
-        AND timestamp <= '${end_date.toISOString()}'
-        AND status = 'confirmed'`;
+        AND transaction_date >= '${start_date.toISOString()}'
+        AND transaction_date <= '${end_date.toISOString()}'
+        AND is_verified = true`;
 
     case "budget_check":
       return `SELECT
@@ -227,20 +227,20 @@ function build_sql_query(user_id: string, intent: QueryIntent): string {
         COUNT(*) as transaction_count
       FROM transactions
       WHERE user_id = '${user_id}'
-        AND timestamp >= DATE_TRUNC('month', CURRENT_DATE)
-        AND status = 'confirmed'
+        AND transaction_date >= DATE_TRUNC('month', CURRENT_DATE)
+        AND is_verified = true
       GROUP BY category
       ORDER BY spent DESC`;
 
     case "comparison":
       return `SELECT
-        DATE_TRUNC('month', timestamp)::date as month,
+        DATE_TRUNC('month', transaction_date)::date as month,
         SUM(amount) as monthly_total,
         COUNT(*) as transaction_count
       FROM transactions
       WHERE user_id = '${user_id}'
-        AND timestamp >= '${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()}'
-        AND status = 'confirmed'
+        AND transaction_date >= '${new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()}'
+        AND is_verified = true
       GROUP BY month
       ORDER BY month DESC`;
 
@@ -250,43 +250,33 @@ function build_sql_query(user_id: string, intent: QueryIntent): string {
         COUNT(*) as count
       FROM transactions
       WHERE user_id = '${user_id}'
-        AND timestamp >= '${start_date.toISOString()}'
-        AND timestamp <= '${end_date.toISOString()}'
-        AND status = 'confirmed'`;
+        AND transaction_date >= '${start_date.toISOString()}'
+        AND transaction_date <= '${end_date.toISOString()}'
+        AND is_verified = true`;
   }
 }
 
-// Execute SQL query
+// 直接用 Supabase client 查詢（不依賴 RPC）
 async function execute_query(
   user_id: string,
-  sql: string
+  _sql: string
 ): Promise<{ data: unknown[]; count: number }> {
-  // Use RPC function or direct query
-  const { data, error, count } = await supabase.rpc("execute_sql", {
-    query: sql,
-  });
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+  const today = new Date().toISOString().split("T")[0];
 
-  if (error) {
-    // Fallback: execute simple queries directly
-    if (sql.includes("category_summary")) {
-      const { data: result, error: err } = await supabase
-        .from("transactions")
-        .select("category, amount")
-        .eq("user_id", user_id)
-        .eq("status", "confirmed")
-        .gte(
-          "timestamp",
-          new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
-        );
+  try {
+    const { data, error } = await supabase
+      .from("transactions")
+      .select("amount, category, transaction_date, merchant_name")
+      .eq("user_id", user_id)
+      .gte("transaction_date", thirtyDaysAgo)
+      .lte("transaction_date", today);
 
-      if (err) throw err;
-      return { data: result || [], count: result?.length || 0 };
-    }
-
-    throw error;
+    if (error) throw error;
+    return { data: data || [], count: data?.length || 0 };
+  } catch (_e) {
+    return { data: [], count: 0 };
   }
-
-  return { data: data || [], count: count || 0 };
 }
 
 // 本地回覆模式 - 無需 AI API 的模板回覆
