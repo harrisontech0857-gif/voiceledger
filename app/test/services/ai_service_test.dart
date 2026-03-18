@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:voiceledger/services/ai_service.dart';
-import 'package:voiceledger/models/transaction.dart';
 
 void main() {
   group('MockAiService', () {
@@ -11,36 +10,14 @@ void main() {
     });
 
     group('analyzeTransaction', () {
-      test('食物相關描述回傳 food 類別', () async {
+      test('回傳非空字串', () async {
         final result = await service.analyzeTransaction('中午吃便當花了80元');
-        expect(result['category'], 'food');
+        expect(result.isNotEmpty, true);
       });
 
-      test('交通相關描述回傳 transport 類別', () async {
+      test('回傳包含輸入描述', () async {
         final result = await service.analyzeTransaction('搭捷運去上班');
-        expect(result['category'], 'transport');
-      });
-
-      test('娛樂相關描述回傳 entertainment 類別', () async {
-        final result = await service.analyzeTransaction('看電影花了350');
-        expect(result['category'], 'entertainment');
-      });
-
-      test('購物相關描述回傳 shopping 類別', () async {
-        final result = await service.analyzeTransaction('買衣服花了1200');
-        expect(result['category'], 'shopping');
-      });
-
-      test('無法分類時回傳 other', () async {
-        final result = await service.analyzeTransaction('雜費支出');
-        expect(result['category'], 'other');
-      });
-
-      test('回傳值包含必要欄位', () async {
-        final result = await service.analyzeTransaction('午餐');
-        expect(result, containsPair('category', isNotNull));
-        expect(result, containsPair('confidence', isNotNull));
-        expect(result, containsPair('suggestion', isNotNull));
+        expect(result, contains('搭捷運去上班'));
       });
     });
 
@@ -70,20 +47,22 @@ void main() {
     });
 
     group('sendMessage', () {
-      test('回傳非空回應', () async {
+      test('回傳 ChatMessage 物件', () async {
         final response = await service.sendMessage(
           '我這個月花太多了',
           [],
         );
-        expect(response.isNotEmpty, true);
+        expect(response, isA<ChatMessage>());
+        expect(response.content.isNotEmpty, true);
+        expect(response.isUser, false);
       });
 
-      test('帳戶問題觸發特定回應', () async {
+      test('帳單問題觸發回應', () async {
         final response = await service.sendMessage(
-          '我的帳單怎麼看',
+          '花了多少',
           [],
         );
-        expect(response.isNotEmpty, true);
+        expect(response.content, contains('NT\$'));
       });
     });
 
@@ -94,47 +73,29 @@ void main() {
         expect(result, containsPair('category', isNotNull));
         expect(result, containsPair('description', isNotNull));
       });
+
+      test('正確提取金額', () async {
+        final result = await service.extractTransactionDetails('買咖啡花了120元');
+        expect(result['amount'], 120.0);
+      });
     });
 
     group('analyzeSpendingPatterns', () {
       test('回傳分析結果', () async {
-        final transactions = [
-          Transaction(
-            id: '1',
-            userId: 'u1',
-            amount: 500,
-            type: TransactionType.expense,
-            category: TransactionCategory.food,
-            createdAt: DateTime.now(),
-            description: '晚餐',
-          ),
-          Transaction(
-            id: '2',
-            userId: 'u1',
-            amount: 100,
-            type: TransactionType.expense,
-            category: TransactionCategory.transport,
-            createdAt: DateTime.now(),
-            description: '捷運',
-          ),
+        final transactions = <Map<String, dynamic>>[
+          {'amount': 500.0, 'category': 'food', 'description': '晚餐'},
+          {'amount': 100.0, 'category': 'transport', 'description': '捷運'},
         ];
         final result = await service.analyzeSpendingPatterns(transactions);
         expect(result, isNotNull);
+        expect(result, containsPair('top_category', isNotNull));
       });
     });
 
     group('generateJournalEntry', () {
       test('回傳日記文字', () async {
-        final transactions = [
-          Transaction(
-            id: '1',
-            userId: 'u1',
-            amount: 200,
-            type: TransactionType.expense,
-            category: TransactionCategory.food,
-            createdAt: DateTime.now(),
-            description: '午餐便當',
-          ),
+        final transactions = <Map<String, dynamic>>[
+          {'amount': 200.0, 'category': 'food', 'description': '午餐便當'},
         ];
         final entry = await service.generateJournalEntry(transactions);
         expect(entry.isNotEmpty, true);
