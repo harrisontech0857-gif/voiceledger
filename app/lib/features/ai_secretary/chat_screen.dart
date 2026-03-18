@@ -248,7 +248,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               borderRadius: BorderRadius.circular(
                                 AppRadius.xl,
                               ),
-                              borderSide: const BorderSide(
+                              borderSide: BorderSide(
                                 color: Theme.of(context).colorScheme.primary,
                                 width: 2,
                               ),

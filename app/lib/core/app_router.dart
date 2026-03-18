@@ -15,6 +15,8 @@ import '../features/settings/privacy_settings_screen.dart';
 import '../features/subscription/paywall_screen.dart';
 import '../features/transactions/add_transaction_screen.dart';
 import '../features/transactions/transaction_list_screen.dart';
+import '../features/legal/privacy_policy_screen.dart';
+import '../features/legal/terms_of_service_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -97,6 +99,14 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/paywall',
         builder: (context, state) => const PaywallScreen(),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (context, state) => const TermsOfServiceScreen(),
       ),
     ],
   );
