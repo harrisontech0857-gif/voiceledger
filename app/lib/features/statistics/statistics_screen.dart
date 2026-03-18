@@ -3,11 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/theme.dart';
 
-class StatisticsScreen extends ConsumerWidget {
+class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
+  int _selectedPeriodIndex = 1; // 0=周, 1=月, 2=年
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('財務統計'), centerTitle: true),
       body: SingleChildScrollView(
@@ -15,156 +22,157 @@ class StatisticsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _PeriodSelector(),
+            // 期間選擇器
+            _buildSegmentedControl(),
             const SizedBox(height: AppSpacing.lg),
-            const _SummaryCards(),
+
+            // 摘要卡片
+            const _SummaryRow(),
             const SizedBox(height: AppSpacing.lg),
-            Text('分類支出', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppSpacing.md),
-            const _CategoryBreakdown(),
-            const SizedBox(height: AppSpacing.lg),
-            Text('支出趨勢', style: Theme.of(context).textTheme.titleLarge),
+
+            // 支出趨勢圖
+            _SectionHeader(title: '支出趨勢'),
             const SizedBox(height: AppSpacing.md),
             const _TrendChart(),
             const SizedBox(height: AppSpacing.lg),
-            Text('最大支出', style: Theme.of(context).textTheme.titleLarge),
+
+            // 分類支出
+            _SectionHeader(title: '分類支出'),
+            const SizedBox(height: AppSpacing.md),
+            const _CategoryPieChart(),
+            const SizedBox(height: AppSpacing.md),
+            const _CategoryBreakdownList(),
+            const SizedBox(height: AppSpacing.lg),
+
+            // 最大支出
+            _SectionHeader(title: '最大支出'),
             const SizedBox(height: AppSpacing.md),
             const _TopTransactions(),
+            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
     );
   }
-}
 
-class _PeriodSelector extends StatefulWidget {
-  const _PeriodSelector();
-
-  @override
-  State<_PeriodSelector> createState() => _PeriodSelectorState();
-}
-
-class _PeriodSelectorState extends State<_PeriodSelector> {
-  String _selectedPeriod = '月';
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildSegmentedControl() {
+    final labels = ['周', '月', '年'];
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(4),
       child: Row(
-        children: [
-          _PeriodButton(
-            label: '周',
-            isSelected: _selectedPeriod == '周',
-            onTap: () => setState(() => _selectedPeriod = '周'),
-          ),
-          _PeriodButton(
-            label: '月',
-            isSelected: _selectedPeriod == '月',
-            onTap: () => setState(() => _selectedPeriod = '月'),
-          ),
-          _PeriodButton(
-            label: '年',
-            isSelected: _selectedPeriod == '年',
-            onTap: () => setState(() => _selectedPeriod = '年'),
-          ),
-        ],
+        children: List.generate(labels.length, (i) {
+          final selected = _selectedPeriodIndex == i;
+          return Expanded(
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedPeriodIndex = i),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  boxShadow: selected
+                      ? [
+                          BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withAlpha(40),
+                            blurRadius: 8,
+                          ),
+                        ]
+                      : null,
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Text(
+                  labels[i],
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: selected
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          );
+        }),
       ),
     );
   }
 }
 
-class _PeriodButton extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _PeriodButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          decoration: BoxDecoration(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
+    return Text(
+      title,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
           ),
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: isSelected ? Colors.white : null,
-                  fontWeight: FontWeight.w600,
-                ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
     );
   }
 }
 
-class _SummaryCards extends StatelessWidget {
-  const _SummaryCards();
+/// 摘要列（兩行各兩張卡片）
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow();
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: const [
+      children: [
         Row(
-          children: [
+          children: const [
             Expanded(
-              child: _StatSummaryCard(
+              child: _StatCard(
                 title: '總支出',
                 amount: 'NT\$ 8,450',
-                change: '-12% vs 上月',
-                isPositive: true,
+                subtitle: '-12% vs 上月',
+                subtitleColor: Colors.green,
                 icon: Icons.trending_down_rounded,
               ),
             ),
             SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: _StatSummaryCard(
+              child: _StatCard(
                 title: '總收入',
                 amount: 'NT\$ 25,000',
-                change: '+5% vs 上月',
-                isPositive: true,
+                subtitle: '+5% vs 上月',
+                subtitleColor: Colors.green,
                 icon: Icons.trending_up_rounded,
               ),
             ),
           ],
         ),
-        SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.sm),
         Row(
-          children: [
+          children: const [
             Expanded(
-              child: _StatSummaryCard(
+              child: _StatCard(
                 title: '淨結餘',
                 amount: 'NT\$ 16,550',
-                change: '66% 儲蓄率',
-                isPositive: true,
+                subtitle: '66% 儲蓄率',
+                subtitleColor: Colors.green,
                 icon: Icons.savings_rounded,
               ),
             ),
             SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: _StatSummaryCard(
-                title: '平均日支出',
+              child: _StatCard(
+                title: '日均支出',
                 amount: 'NT\$ 281',
-                change: 'vs 預算 NT\$300',
-                isPositive: true,
+                subtitle: 'vs 預算 NT\$300',
+                subtitleColor: Colors.green,
                 icon: Icons.calendar_today_rounded,
               ),
             ),
@@ -175,368 +183,370 @@ class _SummaryCards extends StatelessWidget {
   }
 }
 
-class _StatSummaryCard extends StatelessWidget {
+class _StatCard extends StatelessWidget {
   final String title;
   final String amount;
-  final String change;
-  final bool isPositive;
+  final String subtitle;
+  final Color subtitleColor;
   final IconData icon;
 
-  const _StatSummaryCard({
+  const _StatCard({
     required this.title,
     required this.amount,
-    required this.change,
-    required this.isPositive,
+    required this.subtitle,
+    required this.subtitleColor,
     required this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title, style: Theme.of(context).textTheme.labelSmall),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withAlpha((255 * 0.1).round()),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  child: Icon(
-                    icon,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 16,
-                  ),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withAlpha(20),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              amount,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              change,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isPositive ? Colors.green : Colors.red,
-                  ),
-            ),
-          ],
-        ),
+                child: Icon(
+                  icon,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 16,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            amount,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: subtitleColor,
+                ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _CategoryBreakdown extends StatelessWidget {
-  const _CategoryBreakdown();
+/// 圓餅圖
+class _CategoryPieChart extends StatelessWidget {
+  const _CategoryPieChart();
 
   @override
   Widget build(BuildContext context) {
     final categories = [
-      {'name': '餐飲', 'amount': 'NT\$ 2,100', 'percentage': 25.0, 'icon': '🍜'},
-      {'name': '交通', 'amount': 'NT\$ 1,800', 'percentage': 21.0, 'icon': '🚗'},
-      {'name': '購物', 'amount': 'NT\$ 1,550', 'percentage': 18.0, 'icon': '🛍️'},
-      {'name': '娛樂', 'amount': 'NT\$ 1,200', 'percentage': 14.0, 'icon': '🎮'},
-      {'name': '其他', 'amount': 'NT\$ 1,800', 'percentage': 22.0, 'icon': '📝'},
+      ('餐飲', 25.0, const Color(0xFFFF9500)),
+      ('交通', 21.0, const Color(0xFF2196F3)),
+      ('購物', 18.0, const Color(0xFF4CAF50)),
+      ('娛樂', 14.0, const Color(0xFFFFC107)),
+      ('其他', 22.0, const Color(0xFFFF6B6B)),
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // PieChart visualization
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: SizedBox(
-              height: 250,
-              child: PieChart(
-                PieChartData(
-                  sections: List.generate(categories.length, (index) {
-                    final percentage =
-                        categories[index]['percentage'] as double;
-                    return PieChartSectionData(
-                      value: percentage,
-                      color: _getCategoryColor(index),
-                      title: '${percentage.toStringAsFixed(0)}%',
-                      radius: 80,
-                      titleStyle: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    );
-                  }),
-                  sectionsSpace: 2,
-                  centerSpaceRadius: 40,
-                ),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 200,
+            child: PieChart(
+              PieChartData(
+                sections: categories.map((c) {
+                  return PieChartSectionData(
+                    value: c.$2,
+                    color: c.$3,
+                    title: '${c.$2.toStringAsFixed(0)}%',
+                    radius: 70,
+                    titleStyle: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  );
+                }).toList(),
+                sectionsSpace: 2,
+                centerSpaceRadius: 35,
               ),
             ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        // Legend
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: List.generate(categories.length, (index) {
-            final cat = categories[index];
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: _getCategoryColor(index),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  '${cat['name']} (${cat['percentage']}%)',
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ],
-            );
-          }),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        // Category breakdown list
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: categories.length,
-          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-          itemBuilder: (context, index) {
-            final cat = categories[index];
-            final percentage = cat['percentage'] as double;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          cat['icon'] as String,
-                          style: const TextStyle(fontSize: 20),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              cat['name'] as String,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            Text(
-                              cat['amount'] as String,
-                              style: Theme.of(context).textTheme.labelSmall,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '${percentage.toStringAsFixed(1)}%',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: percentage / 100,
-                    minHeight: 8,
-                    backgroundColor: Colors.grey.withAlpha((255 * 0.2).round()),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      _getCategoryColor(index),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.sm,
+            children: categories.map((c) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: c.$3,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
-      ],
+                  const SizedBox(width: 4),
+                  Text(
+                    '${c.$1} ${c.$2.toStringAsFixed(0)}%',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
-  }
-
-  Color _getCategoryColor(int index) {
-    final colors = const [
-      Color(0xFFFF9500),
-      Color(0xFF2196F3),
-      Color(0xFF4CAF50),
-      Color(0xFFFFC107),
-      Color(0xFFFF6B6B),
-    ];
-    return colors[index % colors.length];
   }
 }
 
+/// 分類明細列表
+class _CategoryBreakdownList extends StatelessWidget {
+  const _CategoryBreakdownList();
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = [
+      ('餐飲', 'NT\$ 2,100', 0.25, '🍜', const Color(0xFFFF9500)),
+      ('交通', 'NT\$ 1,800', 0.21, '🚗', const Color(0xFF2196F3)),
+      ('購物', 'NT\$ 1,550', 0.18, '🛍️', const Color(0xFF4CAF50)),
+      ('娛樂', 'NT\$ 1,200', 0.14, '🎮', const Color(0xFFFFC107)),
+      ('其他', 'NT\$ 1,800', 0.22, '📝', const Color(0xFFFF6B6B)),
+    ];
+
+    return Column(
+      children: categories.map((c) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+          child: Row(
+            children: [
+              Text(c.$4, style: const TextStyle(fontSize: 22)),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          c.$1,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        Text(
+                          c.$2,
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: c.$3,
+                        minHeight: 6,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .outlineVariant
+                            .withAlpha(100),
+                        valueColor: AlwaysStoppedAnimation<Color>(c.$5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+/// 支出趨勢圖（長條圖）
 class _TrendChart extends StatelessWidget {
   const _TrendChart();
 
   @override
   Widget build(BuildContext context) {
-    final days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-    final amounts = [250, 420, 180, 350, 200, 500, 350];
-    final maxAmount = amounts.reduce((a, b) => a > b ? a : b);
+    final days = ['一', '二', '三', '四', '五', '六', '日'];
+    final amounts = [250.0, 420.0, 180.0, 350.0, 200.0, 500.0, 350.0];
+    final cs = Theme.of(context).colorScheme;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 200,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: List.generate(days.length, (index) {
-                  final amount = amounts[index];
-                  final height = (amount / maxAmount) * 150;
-
-                  return Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Text(
-                          'NT\$${amount}',
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Container(
-                          width: double.infinity,
-                          height: height,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(AppRadius.sm),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          days[index],
-                          style: Theme.of(context).textTheme.labelSmall,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: SizedBox(
+        height: 200,
+        child: BarChart(
+          BarChartData(
+            alignment: BarChartAlignment.spaceAround,
+            maxY: 600,
+            barTouchData: BarTouchData(enabled: true),
+            titlesData: FlTitlesData(
+              show: true,
+              bottomTitles: AxisTitles(
+                sideTitles: SideTitles(
+                  showTitles: true,
+                  getTitlesWidget: (value, meta) {
+                    final idx = value.toInt();
+                    if (idx < 0 || idx >= days.length) {
+                      return const SizedBox.shrink();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        days[idx],
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    );
+                  },
+                  reservedSize: 24,
+                ),
+              ),
+              leftTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              topTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
+              ),
+              rightTitles: const AxisTitles(
+                sideTitles: SideTitles(showTitles: false),
               ),
             ),
-          ],
+            gridData: const FlGridData(show: false),
+            borderData: FlBorderData(show: false),
+            barGroups: List.generate(days.length, (i) {
+              return BarChartGroupData(
+                x: i,
+                barRods: [
+                  BarChartRodData(
+                    toY: amounts[i],
+                    color: cs.primary,
+                    width: 20,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(6),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ),
         ),
       ),
     );
   }
 }
 
+/// 最大支出列表
 class _TopTransactions extends StatelessWidget {
   const _TopTransactions();
 
   @override
   Widget build(BuildContext context) {
     final transactions = [
-      {
-        'name': '超市購物',
-        'amount': 'NT\$ 850',
-        'date': '2024-03-15',
-        'icon': '🛍️',
-      },
-      {
-        'name': '餐廳聚餐',
-        'amount': 'NT\$ 620',
-        'date': '2024-03-14',
-        'icon': '🍽️',
-      },
-      {
-        'name': '計程車費用',
-        'amount': 'NT\$ 450',
-        'date': '2024-03-13',
-        'icon': '🚕',
-      },
+      ('超市購物', 'NT\$ 850', '03/15', '🛍️'),
+      ('餐廳聚餐', 'NT\$ 620', '03/14', '🍽️'),
+      ('計程車費用', 'NT\$ 450', '03/13', '🚕'),
     ];
 
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: transactions.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-      itemBuilder: (context, index) {
-        final tx = transactions[index];
-
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-          ),
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withAlpha((255 * 0.1).round()),
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-                child: Center(
-                  child: Text(
-                    tx['icon'] as String,
-                    style: const TextStyle(fontSize: 24),
+    return Column(
+      children: transactions.map((tx) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withAlpha(20),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: Center(
+                    child: Text(
+                      tx.$4,
+                      style: const TextStyle(fontSize: 22),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tx['name'] as String,
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    Text(
-                      tx['date'] as String,
-                      style: Theme.of(context).textTheme.labelSmall,
-                    ),
-                  ],
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tx.$1,
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      Text(
+                        tx.$3,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Text(
-                tx['amount'] as String,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ],
+                Text(
+                  tx.$2,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
           ),
         );
-      },
+      }).toList(),
     );
   }
 }

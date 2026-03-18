@@ -16,7 +16,8 @@ class VoiceEntryScreen extends ConsumerStatefulWidget {
 
 class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
   bool _isListening = false;
   String _recognizedText = '';
   String _aiResponse = '';
@@ -25,17 +26,19 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
       vsync: this,
-    )..repeat();
-
+    );
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.25).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
     _initializeVoice();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _pulseController.dispose();
     ref.read(voiceServiceProvider).dispose();
     super.dispose();
   }
@@ -60,7 +63,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       _isProcessing = false;
     });
 
-    _animationController.forward();
+    _pulseController.repeat(reverse: true);
 
     try {
       final voiceService = ref.read(voiceServiceProvider);
@@ -71,6 +74,8 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
           _recognizedText = text;
           _isListening = false;
         });
+        _pulseController.stop();
+        _pulseController.reset();
 
         if (text.isNotEmpty) {
           await _processVoiceInput(text);
@@ -79,13 +84,13 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     } catch (e) {
       if (mounted) {
         setState(() => _isListening = false);
+        _pulseController.stop();
+        _pulseController.reset();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('錯誤: $e')));
       }
     }
-
-    _animationController.stop();
   }
 
   Future<void> _processVoiceInput(String transcript) async {
@@ -93,7 +98,6 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
 
     try {
       final aiService = ref.read(aiServiceProvider);
-
       final details = await aiService.extractTransactionDetails(transcript);
       final response = await aiService.analyzeTransaction(transcript);
 
@@ -102,7 +106,6 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
           _aiResponse = response;
           _isProcessing = false;
         });
-
         _showConfirmationDialog(details);
       }
     } catch (e) {
@@ -118,12 +121,12 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
   void _showConfirmationDialog(Map<String, dynamic> details) {
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (ctx) => Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -133,58 +136,81 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '確認交易詳情',
-                      style: Theme.of(context).textTheme.headlineSmall,
+                      '確認交易',
+                      style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Navigator.pop(ctx),
                       child: const Icon(Icons.close_rounded),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.md),
-                _buildDetailField(
-                  context,
-                  '金額',
-                  details['amount']?.toString() ?? 'N/A',
-                ),
-                _buildDetailField(
-                  context,
-                  '類別',
-                  details['category']?.toString() ?? 'N/A',
-                ),
-                _buildDetailField(
-                  context,
-                  '描述',
-                  details['description']?.toString() ?? _recognizedText,
+                const SizedBox(height: AppSpacing.lg),
+                _DetailChip(
+                  label: '金額',
+                  value: details['amount']?.toString() ?? 'N/A',
+                  icon: Icons.attach_money_rounded,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  child: Text(
-                    'AI 回饋: $_aiResponse',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
+                _DetailChip(
+                  label: '類別',
+                  value: details['category']?.toString() ?? 'N/A',
+                  icon: Icons.category_rounded,
                 ),
+                const SizedBox(height: AppSpacing.md),
+                _DetailChip(
+                  label: '描述',
+                  value: details['description']?.toString() ?? _recognizedText,
+                  icon: Icons.description_rounded,
+                ),
+                if (_aiResponse.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: Theme.of(ctx).colorScheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.smart_toy_rounded,
+                          size: 18,
+                          color: Theme.of(ctx).colorScheme.onTertiaryContainer,
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            _aiResponse,
+                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(ctx)
+                                      .colorScheme
+                                      .onTertiaryContainer,
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.lg),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.pop(ctx),
                         child: const Text('取消'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: ElevatedButton(
+                      child: FilledButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.pop(ctx);
                           _saveTransaction(details);
                         },
                         child: const Text('確認保存'),
@@ -196,36 +222,6 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDetailField(BuildContext context, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.sm,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
-          ),
-        ],
       ),
     );
   }
@@ -253,9 +249,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
         ),
       );
       Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          context.go('/dashboard');
-        }
+        if (mounted) context.go('/dashboard');
       });
     }
   }
@@ -296,181 +290,254 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('語音記帳'), centerTitle: true),
+      backgroundColor: const Color(0xFF1A1A2E),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        title: const Text('語音記帳'),
+        centerTitle: true,
+        elevation: 0,
+      ),
       body: Center(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // 動畫麥克風按鈕
-                GestureDetector(
-                  onTap: _isListening || _isProcessing ? null : _startListening,
-                  child: AnimatedBuilder(
-                    animation: _animationController,
-                    builder: (context, child) {
-                      return Container(
-                        width: 160,
-                        height: 160,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 波紋環
+              SizedBox(
+                width: 220,
+                height: 220,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // 外圈脈衝
+                    if (_isListening)
+                      AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          return Container(
+                            width: 200 * _pulseAnimation.value,
+                            height: 200 * _pulseAnimation.value,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: cs.primary.withAlpha(80),
+                                width: 2,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    if (_isListening)
+                      AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          final scale = 1.0 +
+                              (_pulseAnimation.value - 1.0) * 0.6;
+                          return Container(
+                            width: 180 * scale,
+                            height: 180 * scale,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: cs.primary.withAlpha(40),
+                                width: 1.5,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    // 主按鈕
+                    GestureDetector(
+                      onTap:
+                          _isListening || _isProcessing ? null : _startListening,
+                      child: Container(
+                        width: 140,
+                        height: 140,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              cs.primary,
+                              cs.tertiary,
+                            ],
+                          ),
                           boxShadow: [
-                            if (_isListening)
-                              BoxShadow(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withAlpha((255 * 0.5).round()),
-                                blurRadius:
-                                    20 + (_animationController.value * 10),
-                                spreadRadius:
-                                    10 + (_animationController.value * 10),
-                              ),
+                            BoxShadow(
+                              color: cs.primary.withAlpha(100),
+                              blurRadius: _isListening ? 30 : 15,
+                              spreadRadius: _isListening ? 5 : 0,
+                            ),
                           ],
                         ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [
-                                Theme.of(context).colorScheme.primary,
-                                Theme.of(context).colorScheme.primary.withAlpha(
-                                      (255 * 0.7).round(),
-                                    ),
-                              ],
-                            ),
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: _isListening || _isProcessing
-                                  ? null
-                                  : _startListening,
-                              customBorder: const CircleBorder(),
-                              child: Center(
-                                child: Icon(
-                                  _isListening
-                                      ? Icons.stop_rounded
-                                      : Icons.mic_rounded,
-                                  color: Colors.white,
-                                  size: 64,
-                                ),
-                              ),
-                            ),
-                          ),
+                        child: Icon(
+                          _isListening
+                              ? Icons.stop_rounded
+                              : Icons.mic_rounded,
+                          color: Colors.white,
+                          size: 56,
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.lg),
+              ),
+              const SizedBox(height: AppSpacing.xl),
 
-                // 狀態文字
+              // 狀態文字
+              Text(
+                _isListening
+                    ? '正在聆聽...'
+                    : _isProcessing
+                        ? '正在處理...'
+                        : '輕按麥克風開始記帳',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              if (!_isListening && !_isProcessing) ...[
+                const SizedBox(height: AppSpacing.sm),
                 Text(
-                  _isListening
-                      ? '正在聆聽...'
-                      : _isProcessing
-                          ? '正在處理...'
-                          : '輕按麥克風開始記帳',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
+                  '說出金額與用途，AI 自動分類',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withAlpha(120),
                       ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppSpacing.md),
-
-                // 辨識結果顯示
-                if (_recognizedText.isNotEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withAlpha((255 * 0.3).round()),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '辨識結果',
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          _recognizedText,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                if (_recognizedText.isNotEmpty)
-                  const SizedBox(height: AppSpacing.md),
-
-                // AI 回應顯示
-                if (_aiResponse.isNotEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.tertiaryContainer,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.tertiary.withAlpha((255 * 0.3).round()),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.smart_toy_rounded,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onTertiaryContainer,
-                            ),
-                            const SizedBox(width: AppSpacing.sm),
-                            Text(
-                              'AI 秘書',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onTertiaryContainer,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(
-                          _aiResponse,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-
-                if (_isProcessing) const SizedBox(height: AppSpacing.md),
-                if (_isProcessing) const CircularProgressIndicator(),
               ],
-            ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // 辨識結果
+              if (_recognizedText.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(15),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(
+                      color: cs.primary.withAlpha(60),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '辨識結果',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: Colors.white.withAlpha(150),
+                            ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        _recognizedText,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: Colors.white,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              if (_aiResponse.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: cs.tertiary.withAlpha(30),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(
+                      color: cs.tertiary.withAlpha(60),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.smart_toy_rounded,
+                        color: cs.tertiary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          _aiResponse,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.white.withAlpha(200),
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
+              if (_isProcessing) ...[
+                const SizedBox(height: AppSpacing.lg),
+                const CircularProgressIndicator(color: Colors.white),
+              ],
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 確認對話框中的資訊行
+class _DetailChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _DetailChip({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: Theme.of(context).colorScheme.onPrimaryContainer,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              Text(value, style: Theme.of(context).textTheme.bodyLarge),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

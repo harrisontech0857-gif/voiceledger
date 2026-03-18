@@ -32,12 +32,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   void _loadInitialGreeting() {
-    // Add initial greeting from AI
     setState(() {
       _messages = [
         ChatMessage(
           id: '0',
-          content: '你好！我是妳的 AI 財務秘書。有什麼我可以幫助的嗎？',
+          content: '你好！我是你的 AI 財務秘書 🤖\n有什麼我可以幫助的嗎？',
           isUser: false,
           timestamp: DateTime.now(),
           suggestion: '幫我分析這個月的支出',
@@ -49,7 +48,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _sendMessage(String content) async {
     if (content.isEmpty || _isSending) return;
 
-    // Add user message
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: content,
@@ -100,42 +98,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI 財務秘書'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: cs.primaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.smart_toy_rounded,
+                size: 18,
+                color: cs.onPrimaryContainer,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            const Text('AI 財務秘書'),
+          ],
+        ),
         centerTitle: true,
         elevation: 0,
       ),
       body: Column(
         children: [
-          // Messages List
+          // 訊息列表
           Expanded(
             child: _messages.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          size: 64,
-                          color: Colors.grey.withAlpha((255 * 0.3).round()),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          '開始對話',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
-                              ?.copyWith(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  )
+                ? _EmptyState()
                 : ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    itemCount: _messages.length,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    itemCount: _messages.length + (_isSending ? 1 : 0),
                     itemBuilder: (context, index) {
+                      // 打字指示器
+                      if (_isSending && index == _messages.length) {
+                        return const _TypingIndicator();
+                      }
                       final message = _messages[index];
                       return _ChatBubble(
                         message: message,
@@ -145,182 +151,26 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
           ),
 
-          // Message Input Area
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              border: Border(
-                top: BorderSide(
-                  color: Colors.grey.withAlpha((255 * 0.1).round()),
-                ),
-              ),
+          // 快速回覆
+          if (_messages.isNotEmpty &&
+              !_messages.last.isUser &&
+              _messages.last.suggestion != null &&
+              !_isSending)
+            _QuickReplies(
+              suggestions: [
+                _messages.last.suggestion ?? '',
+                '顯示支出報告',
+                '設定預算',
+              ],
+              onTap: _sendMessage,
             ),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            child: SafeArea(
-              top: false,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Suggestions
-                  if (_messages.isNotEmpty &&
-                      _messages.last.suggestion != null &&
-                      !_messages.last.isUser)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                      child: SizedBox(
-                        height: 40,
-                        child: ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 3,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(width: AppSpacing.sm),
-                          itemBuilder: (context, index) {
-                            final suggestions = [
-                              _messages.last.suggestion ?? '',
-                              '顯示我的支出報告',
-                              '設定月度預算',
-                            ];
-                            return ActionChip(
-                              onPressed: () {
-                                _sendMessage(suggestions[index]);
-                              },
-                              label: Text(
-                                suggestions[index],
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.labelSmall?.copyWith(fontSize: 11),
-                              ),
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primary
-                                  .withAlpha((255 * 0.1).round()),
-                              side: BorderSide(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withAlpha((255 * 0.3).round()),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
 
-                  // Input Field
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _messageController,
-                          enabled: !_isSending,
-                          maxLines: null,
-                          minLines: 1,
-                          decoration: InputDecoration(
-                            hintText: '輸入訊息...',
-                            hintStyle: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: Colors.grey),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.xl),
-                              borderSide: BorderSide(
-                                color: Colors.grey.withAlpha(
-                                  (255 * 0.2).round(),
-                                ),
-                              ),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.xl),
-                              borderSide: BorderSide(
-                                color: Colors.grey.withAlpha(
-                                  (255 * 0.2).round(),
-                                ),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.xl),
-                              borderSide: BorderSide(
-                                color: Theme.of(context).colorScheme.primary,
-                                width: 2,
-                              ),
-                            ),
-                            disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.xl),
-                              borderSide: BorderSide(
-                                color: Colors.grey.withAlpha(
-                                  (255 * 0.3).round(),
-                                ),
-                              ),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.sm,
-                            ),
-                            filled: true,
-                            fillColor: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerLow,
-                          ),
-                          onSubmitted: (value) {
-                            _sendMessage(value);
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Theme.of(context).colorScheme.primary,
-                              Theme.of(context).colorScheme.primaryContainer,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(AppRadius.xl),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: _isSending
-                                ? null
-                                : () {
-                                    _sendMessage(
-                                      _messageController.text.trim(),
-                                    );
-                                  },
-                            customBorder: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.xl),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(AppSpacing.sm),
-                              child: _isSending
-                                  ? const SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.send_rounded,
-                                      color: Colors.white,
-                                    ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          // 輸入區
+          _InputBar(
+            controller: _messageController,
+            isSending: _isSending,
+            onSend: () => _sendMessage(_messageController.text.trim()),
+            onSubmitted: _sendMessage,
           ),
         ],
       ),
@@ -328,6 +178,176 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
+/// 空狀態
+class _EmptyState extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.chat_bubble_outline_rounded,
+            size: 56,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            '開始對話',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 打字中指示器
+class _TypingIndicator extends StatelessWidget {
+  const _TypingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(AppRadius.lg),
+              topRight: Radius.circular(AppRadius.lg),
+              bottomRight: Radius.circular(AppRadius.lg),
+              bottomLeft: Radius.circular(4),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _Dot(delay: 0),
+              const SizedBox(width: 4),
+              _Dot(delay: 150),
+              const SizedBox(width: 4),
+              _Dot(delay: 300),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Dot extends StatefulWidget {
+  final int delay;
+  const _Dot({required this.delay});
+
+  @override
+  State<_Dot> createState() => _DotState();
+}
+
+class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    Future.delayed(Duration(milliseconds: widget.delay), () {
+      if (mounted) _controller.repeat(reverse: true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Opacity(
+          opacity: _animation.value,
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// 快速回覆列
+class _QuickReplies extends StatelessWidget {
+  final List<String> suggestions;
+  final ValueChanged<String> onTap;
+
+  const _QuickReplies({required this.suggestions, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      child: SizedBox(
+        height: 36,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: suggestions.length,
+          separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+          itemBuilder: (context, index) {
+            return ActionChip(
+              onPressed: () => onTap(suggestions[index]),
+              label: Text(
+                suggestions[index],
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+              backgroundColor: Theme.of(context)
+                  .colorScheme
+                  .primaryContainer
+                  .withAlpha(100),
+              side: BorderSide(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withAlpha(60),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.full),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// 聊天氣泡
 class _ChatBubble extends StatelessWidget {
   final ChatMessage message;
   final bool isUser;
@@ -337,42 +357,178 @@ class _ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final timeFormat = DateFormat('HH:mm');
+    final cs = Theme.of(context).colorScheme;
+
+    // 不同的圓角：自己的訊息右下較小，AI 的訊息左下較小
+    final borderRadius = isUser
+        ? const BorderRadius.only(
+            topLeft: Radius.circular(AppRadius.lg),
+            topRight: Radius.circular(AppRadius.lg),
+            bottomLeft: Radius.circular(AppRadius.lg),
+            bottomRight: Radius.circular(4),
+          )
+        : const BorderRadius.only(
+            topLeft: Radius.circular(AppRadius.lg),
+            topRight: Radius.circular(AppRadius.lg),
+            bottomRight: Radius.circular(AppRadius.lg),
+            bottomLeft: Radius.circular(4),
+          );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Align(
-        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-        child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.75,
-              ),
-              decoration: BoxDecoration(
-                color: isUser
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              child: Text(
-                message.content,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isUser ? Colors.white : null,
-                    ),
+      child: Row(
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!isUser) ...[
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: cs.primaryContainer,
+              child: Icon(
+                Icons.smart_toy_rounded,
+                size: 14,
+                color: cs.onPrimaryContainer,
               ),
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              timeFormat.format(message.timestamp),
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(fontSize: 11),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Flexible(
+            child: Column(
+              crossAxisAlignment:
+                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              children: [
+                Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.72,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isUser ? cs.primary : cs.surfaceContainerLow,
+                    borderRadius: borderRadius,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: 10,
+                  ),
+                  child: Text(
+                    message.content,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: isUser ? Colors.white : null,
+                          height: 1.4,
+                        ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  timeFormat.format(message.timestamp),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontSize: 10,
+                        color: cs.onSurfaceVariant,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 輸入欄
+class _InputBar extends StatelessWidget {
+  final TextEditingController controller;
+  final bool isSending;
+  final VoidCallback onSend;
+  final ValueChanged<String> onSubmitted;
+
+  const _InputBar({
+    required this.controller,
+    required this.isSending,
+    required this.onSend,
+    required this.onSubmitted,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(
+          top: BorderSide(color: cs.outlineVariant.withAlpha(80)),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.sm,
+        AppSpacing.sm,
+        AppSpacing.sm,
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                enabled: !isSending,
+                maxLines: null,
+                minLines: 1,
+                decoration: InputDecoration(
+                  hintText: '輸入訊息...',
+                  hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.full),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: cs.surfaceContainerLow,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: 10,
+                  ),
+                ),
+                onSubmitted: onSubmitted,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [cs.primary, cs.tertiary],
+                ),
+                shape: BoxShape.circle,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: isSending ? null : onSend,
+                  customBorder: const CircleBorder(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: isSending
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.send_rounded,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
