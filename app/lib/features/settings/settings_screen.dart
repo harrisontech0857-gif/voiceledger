@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../main.dart' show kMockMode;
+import '../../main.dart' show kMockMode, kGeminiApiKey;
 import '../../core/theme.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -150,6 +150,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
 
+            // AI 設定
+            _SettingsGroup(
+              title: 'AI 模型',
+              children: [
+                _SettingsTile(
+                  icon: Icons.auto_awesome_rounded,
+                  iconColor: Colors.amber,
+                  title: 'Gemini API Key',
+                  subtitle: kGeminiApiKey.isEmpty
+                      ? '未設定（使用 Mock 模式）'
+                      : '已連接 Gemini 2.0 Flash',
+                  showArrow: true,
+                  onTap: () => _showGeminiKeyDialog(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+
             // 訂閱
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
@@ -227,6 +245,60 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             const SizedBox(height: AppSpacing.xl),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showGeminiKeyDialog(BuildContext context) {
+    final controller = TextEditingController(text: kGeminiApiKey);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('設定 Gemini API Key'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '免費取得：aistudio.google.com/apikey',
+              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(ctx).colorScheme.primary,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                labelText: 'API Key',
+                hintText: 'AIzaSy...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () {
+              setState(() {
+                kGeminiApiKey = controller.text.trim();
+              });
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    kGeminiApiKey.isEmpty
+                        ? 'Gemini 已關閉，使用 Mock 模式'
+                        : 'Gemini AI 已啟用！重啟 App 生效。',
+                  ),
+                ),
+              );
+            },
+            child: const Text('儲存'),
+          ),
+        ],
       ),
     );
   }

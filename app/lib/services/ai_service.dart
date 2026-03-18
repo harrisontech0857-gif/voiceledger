@@ -3,12 +3,34 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logger/logger.dart';
-import '../main.dart' show kMockMode;
+import '../main.dart' show kMockMode, kGeminiApiKey;
+import 'gemini_ai_service.dart';
+import 'supabase_gemini_service.dart';
 
+/// AI 服務優先順序：
+/// 1. Supabase Edge Function + Gemini（正式版，API key 在後端）
+/// 2. Client 端直接呼叫 Gemini（開發測試用，需手動輸入 API key）
+/// 3. Mock 模式（無網路，假資料）
 final aiServiceProvider = Provider<AiServiceBase>((ref) {
-  if (kMockMode) return MockAiService();
-  final client = Supabase.instance.client;
-  return AiService(client);
+  // 正式模式：已登入 Supabase → 透過 Edge Function 呼叫 Gemini
+  if (!kMockMode) {
+    try {
+      final client = Supabase.instance.client;
+      if (client.auth.currentSession != null) {
+        return SupabaseGeminiService(client);
+      }
+    } catch (_) {
+      // Supabase 未初始化，繼續嘗試下一個
+    }
+  }
+
+  // 開發測試：有 Gemini API key → client 端直呼
+  if (kGeminiApiKey.isNotEmpty) {
+    return GeminiAiService(apiKey: kGeminiApiKey);
+  }
+
+  // 最後：Mock 模式
+  return MockAiService();
 });
 
 final aiResponseProvider = FutureProvider.family<String, String>((

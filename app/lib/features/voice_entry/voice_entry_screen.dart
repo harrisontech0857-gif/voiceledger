@@ -18,10 +18,15 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
   bool _isListening = false;
-  String _recognizedText = '';
-  String _aiResponse = '';
   bool _isProcessing = false;
+  bool _voiceAvailable = true;
+  String _partialText = ''; // 即時辨識結果
+  String _finalText = ''; // 最終辨識結果
+  String _aiResponse = '';
+
+  final _textController = TextEditingController();
 
   @override
   void initState() {
@@ -33,80 +38,168 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.25).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
-    _initializeVoice();
+    _checkVoiceAvailability();
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
-    ref.read(voiceServiceProvider).dispose();
+    _textController.dispose();
     super.dispose();
   }
 
-  Future<void> _initializeVoice() async {
+  Future<void> _checkVoiceAvailability() async {
     final voiceService = ref.read(voiceServiceProvider);
-    final isInitialized = await voiceService.initialize();
-    if (!isInitialized && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('語音服務初始化失敗')));
+    final ok = await voiceService.initialize();
+    if (mounted) {
+      setState(() => _voiceAvailable = ok);
     }
   }
 
+  /// 開始錄音
   Future<void> _startListening() async {
-    if (_isListening) return;
+    if (_isListening) {
+      // 已在錄音 → 停止
+      await _stopListening();
+      return;
+    }
 
     setState(() {
       _isListening = true;
-      _recognizedText = '';
+      _partialText = '';
+      _finalText = '';
       _aiResponse = '';
       _isProcessing = false;
     });
 
     _pulseController.repeat(reverse: true);
 
-    try {
-      final voiceService = ref.read(voiceServiceProvider);
-      final text = await voiceService.listenOnce(localeId: 'zh_TW');
+    final voiceService = ref.read(voiceServiceProvider);
 
-      if (mounted) {
+    // 設定即時回呼
+    voiceService.onResult = (text, isFinal) {
+      if (!mounted) return;
+      setState(() {
+        _partialText = text;
+        if (isFinal) {
+          _finalText = text;
+        }
+      });
+
+      // 如果收到最終結果，自動停止
+      if (isFinal && text.isNotEmpty) {
+        _onRecognitionDone(text);
+      }
+    };
+
+    voiceService.onStatus = (status) {
+      if (!mounted) return;
+      // 'done' 或 'notListening' 表示語音引擎結束
+      if (status == 'done' || status == 'notListening') {
+        if (_isListening && _partialText.isNotEmpty) {
+          _onRecognitionDone(_partialText);
+        } else if (_isListening) {
+          setState(() => _isListening = false);
+          _pulseController.stop();
+          _pulseController.reset();
+        }
+      } else if (status == 'not_supported' || status == 'error') {
         setState(() {
-          _recognizedText = text;
           _isListening = false;
+          _voiceAvailable = false;
         });
         _pulseController.stop();
         _pulseController.reset();
-
-        if (text.isNotEmpty) {
-          await _processVoiceInput(text);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('語音功能不可用，請使用文字輸入')),
+          );
         }
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isListening = false);
-        _pulseController.stop();
-        _pulseController.reset();
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('錯誤: $e')));
+    };
+
+    await voiceService.startListening(localeId: 'zh_TW');
+  }
+
+  /// 手動停止錄音
+  Future<void> _stopListening() async {
+    final voiceService = ref.read(voiceServiceProvider);
+    final text = await voiceService.stopListening();
+
+    _pulseController.stop();
+    _pulseController.reset();
+
+    if (mounted) {
+      setState(() => _isListening = false);
+
+      final result = text.isNotEmpty ? text : _partialText;
+      if (result.isNotEmpty) {
+        _onRecognitionDone(result);
       }
     }
   }
 
-  Future<void> _processVoiceInput(String transcript) async {
+  /// 辨識完成後處理
+  void _onRecognitionDone(String text) {
+    _pulseController.stop();
+    _pulseController.reset();
+
+    setState(() {
+      _isListening = false;
+      _finalText = text;
+      _partialText = text;
+    });
+
+    _processInput(text);
+  }
+
+  /// 用文字輸入提交
+  void _submitText() {
+    final text = _textController.text.trim();
+    if (text.isEmpty) return;
+
+    setState(() {
+      _finalText = text;
+      _partialText = text;
+    });
+
+    _textController.clear();
+    _processInput(text);
+  }
+
+  /// AI 處理輸入 — 支援一句話多筆交易
+  Future<void> _processInput(String transcript) async {
     setState(() => _isProcessing = true);
 
     try {
       final aiService = ref.read(aiServiceProvider);
       final details = await aiService.extractTransactionDetails(transcript);
-      final response = await aiService.analyzeTransaction(transcript);
+
+      // 取得 AI 回饋（如果有 feedback 欄位就用，否則另外呼叫）
+      String feedback = '';
+      if (details.containsKey('feedback') &&
+          (details['feedback'] as String).isNotEmpty) {
+        feedback = details['feedback'] as String;
+      } else {
+        feedback = await aiService.analyzeTransaction(transcript);
+      }
+
+      // 檢查是否有多筆交易
+      final allTx = details['all_transactions'] as List<dynamic>?;
 
       if (mounted) {
         setState(() {
-          _aiResponse = response;
+          _aiResponse = feedback;
           _isProcessing = false;
         });
-        _showConfirmationDialog(details);
+
+        if (allTx != null && allTx.length > 1) {
+          // 多筆交易 → 顯示列表確認
+          _showMultiTransactionDialog(allTx, feedback);
+        } else {
+          // 單筆交易
+          _showConfirmationDialog(details);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -116,6 +209,170 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
         ).showSnackBar(SnackBar(content: Text('處理失敗: $e')));
       }
     }
+  }
+
+  /// 多筆交易確認對話框
+  void _showMultiTransactionDialog(
+    List<dynamic> transactions,
+    String feedback,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '偵測到 ${transactions.length} 筆交易',
+                      style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(ctx),
+                      child: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
+                // 交易列表
+                ...transactions.map((tx) {
+                  final t = tx as Map<String, dynamic>;
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: Theme.of(ctx).colorScheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Theme.of(ctx)
+                                .colorScheme
+                                .primary
+                                .withAlpha(20),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            _categoryIcon(t['category']?.toString() ?? ''),
+                            color: Theme.of(ctx).colorScheme.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                t['description']?.toString() ?? '',
+                                style: Theme.of(ctx).textTheme.bodyMedium,
+                              ),
+                              Text(
+                                t['category']?.toString() ?? '其他',
+                                style: Theme.of(ctx).textTheme.labelSmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          'NT\$ ${t['amount'] ?? 0}',
+                          style:
+                              Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(ctx).colorScheme.error,
+                                  ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                if (feedback.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: Theme.of(ctx).colorScheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.smart_toy_rounded,
+                          size: 16,
+                          color:
+                              Theme.of(ctx).colorScheme.onTertiaryContainer,
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            feedback,
+                            style: Theme.of(ctx).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.lg),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: const Text('取消'),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          // 保存所有交易
+                          for (final tx in transactions) {
+                            _saveTransaction(tx as Map<String, dynamic>);
+                          }
+                        },
+                        child: Text('全部保存 (${transactions.length}筆)'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _categoryIcon(String category) {
+    const map = {
+      '餐飲': Icons.restaurant_rounded,
+      '交通': Icons.directions_car_rounded,
+      '購物': Icons.shopping_bag_rounded,
+      '娛樂': Icons.sports_esports_rounded,
+      '日用': Icons.home_rounded,
+      '健康': Icons.favorite_rounded,
+      '教育': Icons.school_rounded,
+      '投資': Icons.trending_up_rounded,
+      '薪資': Icons.account_balance_wallet_rounded,
+    };
+    return map[category] ?? Icons.receipt_rounded;
   }
 
   void _showConfirmationDialog(Map<String, dynamic> details) {
@@ -150,7 +407,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                 const SizedBox(height: AppSpacing.lg),
                 _DetailChip(
                   label: '金額',
-                  value: details['amount']?.toString() ?? 'N/A',
+                  value: 'NT\$ ${details['amount'] ?? 'N/A'}',
                   icon: Icons.attach_money_rounded,
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -162,7 +419,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                 const SizedBox(height: AppSpacing.md),
                 _DetailChip(
                   label: '描述',
-                  value: details['description']?.toString() ?? _recognizedText,
+                  value: details['description']?.toString() ?? _finalText,
                   icon: Icons.description_rounded,
                 ),
                 if (_aiResponse.isNotEmpty) ...[
@@ -236,19 +493,19 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       type: TransactionType.expense,
       category: _parseCategory(details['category']?.toString() ?? ''),
       createdAt: DateTime.now(),
-      description: details['description']?.toString() ?? _recognizedText,
-      voiceTranscript: _recognizedText,
+      description: details['description']?.toString() ?? _finalText,
+      voiceTranscript: _finalText,
       notes: _aiResponse,
     );
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('交易已保存'),
-          backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
+          content: const Text('交易已保存！'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
-      Future.delayed(const Duration(seconds: 2), () {
+      Future.delayed(const Duration(seconds: 1), () {
         if (mounted) context.go('/dashboard');
       });
     }
@@ -301,193 +558,282 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
         centerTitle: true,
         elevation: 0,
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // 波紋環
-              SizedBox(
-                width: 220,
-                height: 220,
-                child: Stack(
-                  alignment: Alignment.center,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // 主要內容區（可滾動）
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
                   children: [
-                    // 外圈脈衝
-                    if (_isListening)
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) {
-                          return Container(
-                            width: 200 * _pulseAnimation.value,
-                            height: 200 * _pulseAnimation.value,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: cs.primary.withAlpha(80),
-                                width: 2,
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // 麥克風按鈕（按下開始/停止）
+                    SizedBox(
+                      width: 220,
+                      height: 220,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // 外圈脈衝動畫
+                          if (_isListening)
+                            AnimatedBuilder(
+                              animation: _pulseAnimation,
+                              builder: (context, child) {
+                                return Container(
+                                  width: 200 * _pulseAnimation.value,
+                                  height: 200 * _pulseAnimation.value,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: cs.primary.withAlpha(80),
+                                      width: 2,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          // 主按鈕
+                          GestureDetector(
+                            onTap: _isProcessing ? null : _startListening,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              width: _isListening ? 150 : 140,
+                              height: _isListening ? 150 : 140,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: _isListening
+                                      ? [Colors.red, Colors.red.shade700]
+                                      : [cs.primary, cs.tertiary],
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: (_isListening
+                                            ? Colors.red
+                                            : cs.primary)
+                                        .withAlpha(100),
+                                    blurRadius: _isListening ? 30 : 15,
+                                    spreadRadius: _isListening ? 5 : 0,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                _isListening
+                                    ? Icons.stop_rounded
+                                    : Icons.mic_rounded,
+                                color: Colors.white,
+                                size: 56,
                               ),
                             ),
-                          );
-                        },
-                      ),
-                    if (_isListening)
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) {
-                          final scale = 1.0 +
-                              (_pulseAnimation.value - 1.0) * 0.6;
-                          return Container(
-                            width: 180 * scale,
-                            height: 180 * scale,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: cs.primary.withAlpha(40),
-                                width: 1.5,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    // 主按鈕
-                    GestureDetector(
-                      onTap:
-                          _isListening || _isProcessing ? null : _startListening,
-                      child: Container(
-                        width: 140,
-                        height: 140,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              cs.primary,
-                              cs.tertiary,
-                            ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: cs.primary.withAlpha(100),
-                              blurRadius: _isListening ? 30 : 15,
-                              spreadRadius: _isListening ? 5 : 0,
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // 狀態文字
+                    Text(
+                      _isListening
+                          ? '正在聆聽... 再按一次停止'
+                          : _isProcessing
+                              ? 'AI 正在分析中...'
+                              : _voiceAvailable
+                                  ? '按下麥克風開始說話'
+                                  : '語音不可用，請用下方文字輸入',
+                      style:
+                          Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 4),
+                    if (!_isListening && !_isProcessing)
+                      Text(
+                        '例如：「午餐便當 85 元」「搭計程車 250 塊」',
+                        style:
+                            Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.white.withAlpha(100),
+                                ),
+                        textAlign: TextAlign.center,
+                      ),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // 即時辨識結果
+                    if (_partialText.isNotEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withAlpha(15),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                          border: Border.all(
+                            color: _isListening
+                                ? Colors.amber.withAlpha(80)
+                                : cs.primary.withAlpha(60),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(
+                                  _isListening
+                                      ? Icons.hearing_rounded
+                                      : Icons.check_circle_rounded,
+                                  color: _isListening
+                                      ? Colors.amber
+                                      : Colors.green,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  _isListening ? '辨識中...' : '辨識完成',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelSmall
+                                      ?.copyWith(
+                                        color: _isListening
+                                            ? Colors.amber
+                                            : Colors.green,
+                                      ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              _partialText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                  ),
                             ),
                           ],
                         ),
-                        child: Icon(
-                          _isListening
-                              ? Icons.stop_rounded
-                              : Icons.mic_rounded,
-                          color: Colors.white,
-                          size: 56,
+                      ),
+
+                    // AI 回饋
+                    if (_aiResponse.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: cs.tertiary.withAlpha(30),
+                          borderRadius:
+                              BorderRadius.circular(AppRadius.lg),
+                          border:
+                              Border.all(color: cs.tertiary.withAlpha(60)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.smart_toy_rounded,
+                                color: cs.tertiary, size: 20),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Text(
+                                _aiResponse,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.white.withAlpha(200),
+                                    ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    if (_isProcessing) ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      const CircularProgressIndicator(color: Colors.white),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+
+            // 底部：文字輸入備案
+            Container(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.sm,
+                AppSpacing.sm,
+                AppSpacing.md,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withAlpha(10),
+                border: Border(
+                  top: BorderSide(color: Colors.white.withAlpha(20)),
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _textController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: '或直接輸入：午餐 85 元',
+                          hintStyle: TextStyle(
+                            color: Colors.white.withAlpha(80),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppRadius.full),
+                            borderSide: BorderSide.none,
+                          ),
+                          filled: true,
+                          fillColor: Colors.white.withAlpha(15),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: 10,
+                          ),
+                        ),
+                        onSubmitted: (_) => _submitText(),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [cs.primary, cs.tertiary],
+                        ),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _isProcessing ? null : _submitText,
+                          customBorder: const CircleBorder(),
+                          child: const Padding(
+                            padding: EdgeInsets.all(10),
+                            child: Icon(
+                              Icons.send_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-
-              // 狀態文字
-              Text(
-                _isListening
-                    ? '正在聆聽...'
-                    : _isProcessing
-                        ? '正在處理...'
-                        : '輕按麥克風開始記帳',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                textAlign: TextAlign.center,
-              ),
-              if (!_isListening && !_isProcessing) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  '說出金額與用途，AI 自動分類',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withAlpha(120),
-                      ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-
-              // 辨識結果
-              if (_recognizedText.isNotEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(15),
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(
-                      color: cs.primary.withAlpha(60),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '辨識結果',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.white.withAlpha(150),
-                            ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        _recognizedText,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: Colors.white,
-                            ),
-                      ),
-                    ],
-                  ),
-                ),
-
-              if (_aiResponse.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.md),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: cs.tertiary.withAlpha(30),
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(
-                      color: cs.tertiary.withAlpha(60),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.smart_toy_rounded,
-                        color: cs.tertiary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          _aiResponse,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white.withAlpha(200),
-                                  ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-
-              if (_isProcessing) ...[
-                const SizedBox(height: AppSpacing.lg),
-                const CircularProgressIndicator(color: Colors.white),
-              ],
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
