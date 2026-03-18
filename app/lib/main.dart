@@ -2,16 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/env.dart';
+import 'core/config.dart';
 import 'core/app_router.dart';
 import 'core/theme.dart';
+
+/// 全域 mock 模式旗標
+bool kMockMode = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
-    url: Env.supabaseUrl,
-    anonKey: Env.supabaseAnonKey,
-  );
+  // 判斷是否進入 mock 模式（缺少 Supabase 設定時自動啟用）
+  if (AppConfig.isMockMode || Env.supabaseAnonKey.isEmpty) {
+    kMockMode = true;
+    debugPrint('⚡ 語記 — Mock 模式啟動（無需後端）');
+  } else {
+    try {
+      await Supabase.initialize(
+        url: Env.supabaseUrl,
+        anonKey: Env.supabaseAnonKey,
+      );
+    } catch (e) {
+      kMockMode = true;
+      debugPrint('⚠️ Supabase 初始化失敗，切換至 Mock 模式: $e');
+    }
+  }
 
   runApp(const ProviderScope(child: VoiceLedgerApp()));
 }

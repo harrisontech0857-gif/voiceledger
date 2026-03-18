@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../main.dart' show kMockMode;
 import '../features/auth/auth_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/consent_screen.dart';
@@ -29,6 +30,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/dashboard',
     redirect: (context, state) {
+      // Mock 模式：跳過認證，直接進入 Dashboard
+      if (kMockMode) return null;
+
       final session = Supabase.instance.client.auth.currentSession;
       final isLoggedIn = session != null;
       final isAuthRoute = state.matchedLocation == '/auth';

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../main.dart' show kMockMode;
 import '../../core/theme.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -37,7 +38,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           TextButton(
             onPressed: () async {
-              await Supabase.instance.client.auth.signOut();
+              if (!kMockMode) {
+                await Supabase.instance.client.auth.signOut();
+              }
               if (!mounted) return;
               context.go('/auth');
             },
