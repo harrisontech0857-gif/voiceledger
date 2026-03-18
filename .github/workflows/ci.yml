@@ -162,32 +162,18 @@ jobs:
 
       - name: Fix Android SDK versions
         run: |
-          # 在 gradle.properties 中定義全域 SDK 版本
-          cat >> android/gradle.properties << 'PROPS'
-          android.compileSdkVersion=35
-          android.minSdkVersion=21
-          android.targetSdkVersion=35
-          PROPS
-          # 直接替換所有 build.gradle(.kts) 中的 flutter.xxx 引用
-          find android -name "build.gradle*" | while read f; do
-            sed -i 's/flutter\.compileSdkVersion/35/g' "$f"
-            sed -i 's/flutter\.minSdkVersion/21/g' "$f"
-            sed -i 's/flutter\.targetSdkVersion/35/g' "$f"
+          # 替換 app 層 build.gradle 中的 flutter.xxx
+          for f in android/app/build.gradle.kts android/app/build.gradle; do
+            if [ -f "$f" ]; then
+              sed -i 's/flutter\.compileSdkVersion/35/g' "$f"
+              sed -i 's/flutter\.minSdkVersion/21/g' "$f"
+              sed -i 's/flutter\.targetSdkVersion/35/g' "$f"
+            fi
           done
-          # 在 settings.gradle(.kts) 中加入 plugin management 設定
-          if [ -f "android/settings.gradle.kts" ]; then
-            # Kotlin DSL — 加入 subprojects compileSdk 覆寫
-            cat >> android/settings.gradle.kts << 'GRADLE'
-
-          gradle.beforeProject {
-              if (extensions.findByName("android") != null) {
-                  extensions.configure<com.android.build.gradle.BaseExtension> {
-                      compileSdkVersion(35)
-                  }
-              }
-          }
-          GRADLE
-          fi
+          # 替換 pub-cache 中 plugin 的 build.gradle
+          PUB_CACHE="${PUB_CACHE:-$HOME/.pub-cache}"
+          find "$PUB_CACHE" -path "*/android/build.gradle" -exec \
+            sed -i 's/flutter\.compileSdkVersion/35/g; s/flutter\.minSdkVersion/21/g; s/flutter\.targetSdkVersion/35/g' {} + 2>/dev/null || true
 
       - name: Get dependencies
         run: flutter pub get
