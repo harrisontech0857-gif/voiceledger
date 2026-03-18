@@ -88,23 +88,24 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 Text(
                   '語記',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 Text(
                   'AI 財務秘書',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.lg),
 
                 // 標籤切換器
                 Container(
                   decoration: BoxDecoration(
-                    color:
-                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   padding: const EdgeInsets.all(AppSpacing.sm),
@@ -143,8 +144,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     child: Text(
                       _errorMessage!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.error,
-                          ),
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
@@ -295,10 +296,9 @@ class _TabButton extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color:
-                      isActive ? Theme.of(context).colorScheme.onPrimary : null,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: isActive ? Theme.of(context).colorScheme.onPrimary : null,
+              fontWeight: FontWeight.w600,
+            ),
             textAlign: TextAlign.center,
           ),
         ),

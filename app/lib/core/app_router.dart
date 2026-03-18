@@ -46,10 +46,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: '/auth',
-        builder: (context, state) => const AuthScreen(),
-      ),
+      GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
@@ -131,12 +128,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  static const _routes = [
-    '/dashboard',
-    '/statistics',
-    '/journal',
-    '/settings',
-  ];
+  static const _routes = ['/dashboard', '/statistics', '/journal', '/settings'];
 
   @override
   Widget build(BuildContext context) {

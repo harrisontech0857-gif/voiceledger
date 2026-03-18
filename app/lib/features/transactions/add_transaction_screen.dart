@@ -56,9 +56,9 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
 
   Future<void> _saveTransaction() async {
     if (_amountController.text.isEmpty || _descriptionController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('請輸入所有必要資訊')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('請輸入所有必要資訊')));
       return;
     }
 
@@ -81,16 +81,16 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
       await service.addTransaction(transaction);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('交易已保存')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('交易已保存')));
         context.go('/dashboard');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存失敗: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('保存失敗: $e')));
       }
     } finally {
       if (mounted) {
@@ -104,20 +104,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
     final dateFormat = DateFormat('yyyy/MM/dd', 'zh_TW');
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('新增交易'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('新增交易'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 交易類型選擇
-            Text(
-              '交易類型',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('交易類型', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
@@ -146,15 +140,13 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             const SizedBox(height: AppSpacing.lg),
 
             // 金額輸入
-            Text(
-              '金額',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('金額', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _amountController,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               enabled: !_isLoading,
               decoration: const InputDecoration(
                 labelText: '金額 (NT\$)',
@@ -164,10 +156,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             const SizedBox(height: AppSpacing.lg),
 
             // 類別選擇
-            Text(
-              '類別',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('類別', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             DropdownMenu<TransactionCategory>(
               width: double.infinity,
@@ -178,19 +167,18 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                 }
               },
               dropdownMenuEntries: TransactionCategory.values
-                  .map((cat) => DropdownMenuEntry(
-                        value: cat,
-                        label: '${cat.icon} ${cat.displayName}',
-                      ))
+                  .map(
+                    (cat) => DropdownMenuEntry(
+                      value: cat,
+                      label: '${cat.icon} ${cat.displayName}',
+                    ),
+                  )
                   .toList(),
             ),
             const SizedBox(height: AppSpacing.lg),
 
             // 日期選擇
-            Text(
-              '日期',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('日期', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             GestureDetector(
               onTap: _isLoading ? null : _selectDate,
@@ -224,10 +212,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             const SizedBox(height: AppSpacing.lg),
 
             // 描述輸入
-            Text(
-              '描述',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('描述', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _descriptionController,
@@ -241,10 +226,7 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
             const SizedBox(height: AppSpacing.lg),
 
             // 備註輸入
-            Text(
-              '備註 (選擇)',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('備註 (選擇)', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             TextField(
               controller: _noteController,

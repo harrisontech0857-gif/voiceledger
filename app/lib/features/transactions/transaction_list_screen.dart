@@ -20,20 +20,15 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
   @override
   Widget build(BuildContext context) {
     final transactionsAsync = ref.watch(
-      userTransactionsProvider(
-        (
-          userId: 'current_user_id',
-          startDate: null,
-          endDate: null,
-        ),
-      ),
+      userTransactionsProvider((
+        userId: 'current_user_id',
+        startDate: null,
+        endDate: null,
+      )),
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('交易列表'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('交易列表'), centerTitle: true),
       body: Column(
         children: [
           // 篩選選項
@@ -42,10 +37,7 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  '篩選',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
+                Text('篩選', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
@@ -82,8 +74,9 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                 var filtered = transactions;
 
                 if (_selectedType != null) {
-                  filtered =
-                      filtered.where((tx) => tx.type == _selectedType).toList();
+                  filtered = filtered
+                      .where((tx) => tx.type == _selectedType)
+                      .toList();
                 }
 
                 if (_selectedCategory != null) {
@@ -135,19 +128,16 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                             style: Theme.of(context).textTheme.labelMedium,
                           ),
                         ),
-                        ...dayTransactions
-                            .map((tx) => _TransactionTile(transaction: tx)),
+                        ...dayTransactions.map(
+                          (tx) => _TransactionTile(transaction: tx),
+                        ),
                       ],
                     );
                   },
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              error: (error, stackTrace) => Center(
-                child: Text('載入失敗: $error'),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stackTrace) => Center(child: Text('載入失敗: $error')),
             ),
           ),
         ],
@@ -197,11 +187,11 @@ class _TransactionTile extends ConsumerWidget {
               Text(
                 '${isIncome ? '+' : '-'}NT\$ ${transaction.amount.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: isIncome
-                          ? Theme.of(context).colorScheme.tertiaryContainer
-                          : Theme.of(context).colorScheme.error,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: isIncome
+                      ? Theme.of(context).colorScheme.tertiaryContainer
+                      : Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 timeFormat.format(transaction.createdAt),
@@ -217,10 +207,7 @@ class _TransactionTile extends ConsumerWidget {
     );
   }
 
-  void _showTransactionDetails(
-    BuildContext context,
-    Transaction transaction,
-  ) {
+  void _showTransactionDetails(BuildContext context, Transaction transaction) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Padding(
@@ -233,10 +220,7 @@ class _TransactionTile extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '交易詳情',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
+                Text('交易詳情', style: Theme.of(context).textTheme.headlineSmall),
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
                   child: const Icon(Icons.close_rounded),
@@ -250,24 +234,12 @@ class _TransactionTile extends ConsumerWidget {
               label: '金額',
               value: 'NT\$ ${transaction.amount.toStringAsFixed(2)}',
             ),
-            _DetailRow(
-              label: '類別',
-              value: transaction.category.displayName,
-            ),
-            _DetailRow(
-              label: '描述',
-              value: transaction.description,
-            ),
+            _DetailRow(label: '類別', value: transaction.category.displayName),
+            _DetailRow(label: '描述', value: transaction.description),
             if (transaction.notes != null)
-              _DetailRow(
-                label: '備註',
-                value: transaction.notes!,
-              ),
+              _DetailRow(label: '備註', value: transaction.notes!),
             if (transaction.voiceTranscript != null)
-              _DetailRow(
-                label: '語音',
-                value: transaction.voiceTranscript!,
-              ),
+              _DetailRow(label: '語音', value: transaction.voiceTranscript!),
             const SizedBox(height: AppSpacing.lg),
 
             // 刪除按鈕
@@ -291,10 +263,7 @@ class _TransactionTile extends ConsumerWidget {
     );
   }
 
-  void _deleteTransaction(
-    BuildContext context,
-    Transaction transaction,
-  ) {
+  void _deleteTransaction(BuildContext context, Transaction transaction) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -323,10 +292,7 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -339,9 +305,9 @@ class _DetailRow extends StatelessWidget {
             width: 80,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
           Expanded(

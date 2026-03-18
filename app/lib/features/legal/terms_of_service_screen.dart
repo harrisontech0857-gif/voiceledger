@@ -18,16 +18,16 @@ class TermsOfServiceScreen extends StatelessWidget {
           children: [
             Text(
               '語記 使用條款',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               '最後更新日期：2026 年 3 月 18 日',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
             ),
             const SizedBox(height: AppSpacing.lg),
             _buildSection(context, '1. 服務說明', '''
@@ -67,15 +67,12 @@ class TermsOfServiceScreen extends StatelessWidget {
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(
-            content.trim(),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
+          Text(content.trim(), style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
     );

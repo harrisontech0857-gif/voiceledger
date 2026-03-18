@@ -85,21 +85,9 @@ class SubscriptionService {
   Map<String, dynamic> getTierPricing(String tier) {
     const pricing = {
       tierFree: {'monthlyPrice': 0, 'yearlyPrice': 0, 'currency': 'TWD'},
-      tierPremium: {
-        'monthlyPrice': 99,
-        'yearlyPrice': 999,
-        'currency': 'TWD',
-      },
-      tierPro: {
-        'monthlyPrice': 199,
-        'yearlyPrice': 1999,
-        'currency': 'TWD',
-      },
-      tierFamily: {
-        'monthlyPrice': 299,
-        'yearlyPrice': 2999,
-        'currency': 'TWD',
-      },
+      tierPremium: {'monthlyPrice': 99, 'yearlyPrice': 999, 'currency': 'TWD'},
+      tierPro: {'monthlyPrice': 199, 'yearlyPrice': 1999, 'currency': 'TWD'},
+      tierFamily: {'monthlyPrice': 299, 'yearlyPrice': 2999, 'currency': 'TWD'},
     };
 
     return pricing[tier] ?? pricing[tierFree] ?? {};

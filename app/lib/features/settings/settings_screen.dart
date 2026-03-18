@@ -112,8 +112,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: _isDarkMode,
                     onChanged: (value) {
                       setState(() => _isDarkMode = value);
-                      ref.read(themeModeProvider.notifier).state =
-                          value ? ThemeMode.dark : ThemeMode.light;
+                      ref.read(themeModeProvider.notifier).state = value
+                          ? ThemeMode.dark
+                          : ThemeMode.light;
                     },
                   ),
                 ),
@@ -206,10 +207,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.primaryContainer
-                    ]),
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary,
+                        Theme.of(context).colorScheme.primaryContainer,
+                      ],
+                    ),
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                   ),
                   child: Column(
@@ -217,26 +220,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(
                         'VoiceLedger Premium',
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       Text(
                         '解鎖所有高級功能，包括無限制的 AI 分析、高級報告和優先支援',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color:
-                                  Colors.white.withAlpha((255 * 0.9).round()),
-                            ),
+                          color: Colors.white.withAlpha((255 * 0.9).round()),
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor:
-                              Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                         ),
                         onPressed: () {},
                         child: const Text('升級到 Premium'),
@@ -341,9 +344,9 @@ class _SettingSection extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         ...children,
@@ -378,10 +381,9 @@ class _SettingTile extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: Theme.of(context)
-              .colorScheme
-              .surfaceContainerLow
-              .withAlpha((255 * 0.5).round()),
+          color: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerLow.withAlpha((255 * 0.5).round()),
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Row(
@@ -390,14 +392,16 @@ class _SettingTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withAlpha((255 * 0.1).round()),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withAlpha((255 * 0.1).round()),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: Icon(icon,
-                  color: Theme.of(context).colorScheme.primary, size: 20),
+              child: Icon(
+                icon,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(

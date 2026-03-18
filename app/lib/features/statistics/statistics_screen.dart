@@ -105,9 +105,9 @@ class _PeriodButton extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: isSelected ? Colors.white : null,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: isSelected ? Colors.white : null,
+              fontWeight: FontWeight.w600,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -204,10 +204,9 @@ class _StatSummaryCard extends StatelessWidget {
                 Text(title, style: Theme.of(context).textTheme.labelSmall),
                 Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withAlpha((255 * 0.1).round()),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withAlpha((255 * 0.1).round()),
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                   padding: const EdgeInsets.all(AppSpacing.sm),
@@ -230,8 +229,8 @@ class _StatSummaryCard extends StatelessWidget {
             Text(
               change,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isPositive ? Colors.green : Colors.red,
-                  ),
+                color: isPositive ? Colors.green : Colors.red,
+              ),
             ),
           ],
         ),
@@ -264,24 +263,21 @@ class _CategoryBreakdown extends StatelessWidget {
               height: 250,
               child: PieChart(
                 PieChartData(
-                  sections: List.generate(
-                    categories.length,
-                    (index) {
-                      final percentage =
-                          categories[index]['percentage'] as double;
-                      return PieChartSectionData(
-                        value: percentage,
-                        color: _getCategoryColor(index),
-                        title: '${percentage.toStringAsFixed(0)}%',
-                        radius: 80,
-                        titleStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      );
-                    },
-                  ),
+                  sections: List.generate(categories.length, (index) {
+                    final percentage =
+                        categories[index]['percentage'] as double;
+                    return PieChartSectionData(
+                      value: percentage,
+                      color: _getCategoryColor(index),
+                      title: '${percentage.toStringAsFixed(0)}%',
+                      radius: 80,
+                      titleStyle: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    );
+                  }),
                   sectionsSpace: 2,
                   centerSpaceRadius: 40,
                 ),
@@ -294,30 +290,27 @@ class _CategoryBreakdown extends StatelessWidget {
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
-          children: List.generate(
-            categories.length,
-            (index) {
-              final cat = categories[index];
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: _getCategoryColor(index),
-                      shape: BoxShape.circle,
-                    ),
+          children: List.generate(categories.length, (index) {
+            final cat = categories[index];
+            return Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: _getCategoryColor(index),
+                    shape: BoxShape.circle,
                   ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    '${cat['name']} (${cat['percentage']}%)',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ],
-              );
-            },
-          ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  '${cat['name']} (${cat['percentage']}%)',
+                  style: Theme.of(context).textTheme.labelSmall,
+                ),
+              ],
+            );
+          }),
         ),
         const SizedBox(height: AppSpacing.md),
         // Category breakdown list
@@ -360,12 +353,9 @@ class _CategoryBreakdown extends StatelessWidget {
                     ),
                     Text(
                       '${percentage.toStringAsFixed(1)}%',
-                      style: Theme.of(
-                        context,
-                      )
-                          .textTheme
-                          .titleSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -508,10 +498,9 @@ class _TopTransactions extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withAlpha((255 * 0.1).round()),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withAlpha((255 * 0.1).round()),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Center(
@@ -540,9 +529,9 @@ class _TopTransactions extends StatelessWidget {
               Text(
                 tx['amount'] as String,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),

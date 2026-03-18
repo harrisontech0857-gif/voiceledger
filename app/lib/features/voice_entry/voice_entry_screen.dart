@@ -44,9 +44,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     final voiceService = ref.read(voiceServiceProvider);
     final isInitialized = await voiceService.initialize();
     if (!isInitialized && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('語音服務初始化失敗')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('語音服務初始化失敗')));
     }
   }
 
@@ -79,9 +79,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     } catch (e) {
       if (mounted) {
         setState(() => _isListening = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('錯誤: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('錯誤: $e')));
       }
     }
 
@@ -108,9 +108,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('處理失敗: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('處理失敗: $e')));
       }
     }
   }
@@ -208,9 +208,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: AppSpacing.sm),
           Container(
@@ -223,10 +223,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ],
       ),
@@ -322,9 +319,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                           boxShadow: [
                             if (_isListening)
                               BoxShadow(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
+                                color: Theme.of(context).colorScheme.primary
                                     .withAlpha((255 * 0.5).round()),
                                 blurRadius:
                                     20 + (_animationController.value * 10),
@@ -339,10 +334,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                             gradient: LinearGradient(
                               colors: [
                                 Theme.of(context).colorScheme.primary,
-                                Theme.of(context)
-                                    .colorScheme
-                                    .primary
-                                    .withAlpha((255 * 0.7).round()),
+                                Theme.of(context).colorScheme.primary.withAlpha(
+                                  (255 * 0.7).round(),
+                                ),
                               ],
                             ),
                           ),
@@ -376,11 +370,11 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                   _isListening
                       ? '正在聆聽...'
                       : _isProcessing
-                          ? '正在處理...'
-                          : '輕按麥克風開始記帳',
+                      ? '正在處理...'
+                      : '輕按麥克風開始記帳',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -391,14 +385,14 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                     width: double.infinity,
                     padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(AppRadius.lg),
                       border: Border.all(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .primary
-                            .withAlpha((255 * 0.3).round()),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha((255 * 0.3).round()),
                       ),
                     ),
                     child: Column(
@@ -428,10 +422,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                       color: Theme.of(context).colorScheme.tertiaryContainer,
                       borderRadius: BorderRadius.circular(AppRadius.lg),
                       border: Border.all(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .tertiary
-                            .withAlpha((255 * 0.3).round()),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.tertiary.withAlpha((255 * 0.3).round()),
                       ),
                     ),
                     child: Column(
@@ -441,20 +434,18 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                           children: [
                             Icon(
                               Icons.smart_toy_rounded,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onTertiaryContainer,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onTertiaryContainer,
                             ),
                             const SizedBox(width: AppSpacing.sm),
                             Text(
                               'AI 秘書',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
+                              style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onTertiaryContainer,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onTertiaryContainer,
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),

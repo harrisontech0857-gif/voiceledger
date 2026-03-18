@@ -20,8 +20,10 @@ class NotificationService {
   /// 設定每日記帳提醒
   /// [enabled] 是否啟用提醒
   /// [hour] 提醒時間（24小時制，0-23），預設為 20 點
-  Future<void> setDailyReminder(bool enabled,
-      {int hour = _defaultReminderHour}) async {
+  Future<void> setDailyReminder(
+    bool enabled, {
+    int hour = _defaultReminderHour,
+  }) async {
     if (hour < 0 || hour > 23) {
       throw ArgumentError('hour must be between 0 and 23');
     }

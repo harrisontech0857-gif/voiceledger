@@ -123,9 +123,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         const SizedBox(height: AppSpacing.md),
                         Text(
                           '開始對話',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
+                          style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(color: Colors.grey),
                         ),
                       ],
@@ -151,7 +149,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               color: Theme.of(context).scaffoldBackgroundColor,
               border: Border(
                 top: BorderSide(
-                    color: Colors.grey.withAlpha((255 * 0.1).round())),
+                  color: Colors.grey.withAlpha((255 * 0.1).round()),
+                ),
               ),
             ),
             padding: const EdgeInsets.symmetric(
@@ -169,9 +168,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       _messages.last.suggestion != null &&
                       !_messages.last.isUser)
                     Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: AppSpacing.sm,
-                      ),
+                      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                       child: SizedBox(
                         height: 40,
                         child: ListView.separated(
@@ -200,9 +197,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   .primary
                                   .withAlpha((255 * 0.1).round()),
                               side: BorderSide(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .primary
+                                color: Theme.of(context).colorScheme.primary
                                     .withAlpha((255 * 0.3).round()),
                               ),
                             );
@@ -222,44 +217,37 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           minLines: 1,
                           decoration: InputDecoration(
                             hintText: '輸入訊息...',
-                            hintStyle: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            hintStyle: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(color: Colors.grey),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.xl,
-                              ),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                               borderSide: BorderSide(
-                                color:
-                                    Colors.grey.withAlpha((255 * 0.2).round()),
+                                color: Colors.grey.withAlpha(
+                                  (255 * 0.2).round(),
+                                ),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.xl,
-                              ),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                               borderSide: BorderSide(
-                                color:
-                                    Colors.grey.withAlpha((255 * 0.2).round()),
+                                color: Colors.grey.withAlpha(
+                                  (255 * 0.2).round(),
+                                ),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.xl,
-                              ),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                               borderSide: BorderSide(
                                 color: Theme.of(context).colorScheme.primary,
                                 width: 2,
                               ),
                             ),
                             disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.xl,
-                              ),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                               borderSide: BorderSide(
-                                color:
-                                    Colors.grey.withAlpha((255 * 0.3).round()),
+                                color: Colors.grey.withAlpha(
+                                  (255 * 0.3).round(),
+                                ),
                               ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
@@ -279,13 +267,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       const SizedBox(width: AppSpacing.sm),
                       Container(
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(colors: [
-                            Theme.of(context).colorScheme.primary,
-                            Theme.of(context).colorScheme.primaryContainer
-                          ]),
-                          borderRadius: BorderRadius.circular(
-                            AppRadius.xl,
+                          gradient: LinearGradient(
+                            colors: [
+                              Theme.of(context).colorScheme.primary,
+                              Theme.of(context).colorScheme.primaryContainer,
+                            ],
                           ),
+                          borderRadius: BorderRadius.circular(AppRadius.xl),
                         ),
                         child: Material(
                           color: Colors.transparent,
@@ -298,14 +286,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                     );
                                   },
                             customBorder: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.xl,
-                              ),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.all(
-                                AppSpacing.sm,
-                              ),
+                              padding: const EdgeInsets.all(AppSpacing.sm),
                               child: _isSending
                                   ? const SizedBox(
                                       width: 24,
@@ -313,8 +297,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                       child: CircularProgressIndicator(
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
+                                              Colors.white,
+                                            ),
                                         strokeWidth: 2,
                                       ),
                                     )
@@ -353,8 +337,9 @@ class _ChatBubble extends StatelessWidget {
       child: Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isUser
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Container(
               constraints: BoxConstraints(
@@ -373,8 +358,8 @@ class _ChatBubble extends StatelessWidget {
               child: Text(
                 message.content,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isUser ? Colors.white : null,
-                    ),
+                  color: isUser ? Colors.white : null,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),

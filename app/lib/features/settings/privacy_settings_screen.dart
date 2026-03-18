@@ -45,9 +45,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('載入隱私設定失敗：$e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('載入隱私設定失敗：$e')));
       }
     } finally {
       setState(() => _isLoading = false);
@@ -60,19 +60,21 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       await prefs.setBool('locationTrackingEnabled', _locationTrackingEnabled);
       await prefs.setBool('photoAnalysisEnabled', _photoAnalysisEnabled);
       await prefs.setBool(
-          'pushNotificationsEnabled', _pushNotificationsEnabled);
+        'pushNotificationsEnabled',
+        _pushNotificationsEnabled,
+      );
       await prefs.setInt('locationRetentionDays', _locationRetentionDays);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('隱私設定已保存')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('隱私設定已保存')));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('保存隱私設定失敗：$e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('保存隱私設定失敗：$e')));
       }
     }
   }
@@ -190,7 +192,8 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                     if (_locationTrackingEnabled)
                       Padding(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md),
+                          horizontal: AppSpacing.md,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -311,7 +314,8 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                         color: Colors.red.withAlpha((255 * 0.1).round()),
                         borderRadius: BorderRadius.circular(AppRadius.md),
                         border: Border.all(
-                            color: Colors.red.withAlpha((255 * 0.3).round())),
+                          color: Colors.red.withAlpha((255 * 0.3).round()),
+                        ),
                       ),
                       child: const Text(
                         '警告：刪除帳戶將永久刪除您的所有數據。此操作無法撤銷。根據 GDPR，您有 30 天的冷卻期可以取消此請求。',

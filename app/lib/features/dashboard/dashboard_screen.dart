@@ -26,8 +26,9 @@ class DashboardScreen extends ConsumerWidget {
               child: GestureDetector(
                 onTap: () => context.go('/settings'),
                 child: CircleAvatar(
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primaryContainer,
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer,
                   child: Icon(
                     Icons.person_rounded,
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -85,10 +86,9 @@ class _DailyQuoteCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).colorScheme.primary,
-            Theme.of(context)
-                .colorScheme
-                .primary
-                .withAlpha((255 * 0.7).round()),
+            Theme.of(
+              context,
+            ).colorScheme.primary.withAlpha((255 * 0.7).round()),
           ],
         ),
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -110,9 +110,9 @@ class _DailyQuoteCard extends StatelessWidget {
               Text(
                 '今日金句',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -121,29 +121,28 @@ class _DailyQuoteCard extends StatelessWidget {
             data: (quote) => Text(
               quote.isEmpty ? '每日一句，激勵人心。' : quote,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontStyle: FontStyle.italic,
-                  ),
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontStyle: FontStyle.italic,
+              ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
             loading: () => Container(
               height: 60,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onPrimary.withAlpha(
-                      (255 * 0.2).round(),
-                    ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onPrimary.withAlpha((255 * 0.2).round()),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
             ),
             error: (e, st) => Text(
               '無法加載金句',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onPrimary
-                        .withAlpha((255 * 0.8).round()),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onPrimary.withAlpha((255 * 0.8).round()),
+              ),
             ),
           ),
         ],
@@ -181,9 +180,9 @@ class _TodaysSummaryCard extends StatelessWidget {
                     Text(
                       'NT\$ 1,250',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -251,10 +250,7 @@ class _QuickActionsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '快速操作',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text('快速操作', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: AppSpacing.md),
         Row(
           children: [
@@ -346,9 +342,9 @@ class _QuickActionButton extends StatelessWidget {
               const SizedBox(height: AppSpacing.sm),
               Text(
                 label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: color,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: color),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -395,10 +391,7 @@ class _RecentTransactionsSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '最近交易',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('最近交易', style: Theme.of(context).textTheme.titleLarge),
             Semantics(
               label: '查看所有交易',
               button: true,
@@ -409,9 +402,9 @@ class _RecentTransactionsSection extends StatelessWidget {
                 child: Text(
                   '查看全部',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -472,9 +465,9 @@ class _RecentTransactionsSection extends StatelessWidget {
                       Text(
                         tx['amount'] as String,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.error,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          color: Theme.of(context).colorScheme.error,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         tx['time'] as String,

@@ -11,8 +11,10 @@ final aiServiceProvider = Provider<AiServiceBase>((ref) {
   return AiService(client);
 });
 
-final aiResponseProvider =
-    FutureProvider.family<String, String>((ref, prompt) async {
+final aiResponseProvider = FutureProvider.family<String, String>((
+  ref,
+  prompt,
+) async {
   final aiService = ref.watch(aiServiceProvider);
   return aiService.analyzeTransaction(prompt);
 });
@@ -69,11 +71,15 @@ abstract class AiServiceBase {
   Future<String> getFinancialAdvice(Map<String, dynamic> spendingData);
   Future<String> getDailyQuote();
   Future<ChatMessage> sendMessage(
-      String content, List<ChatMessage> conversationHistory);
+    String content,
+    List<ChatMessage> conversationHistory,
+  );
   Future<Map<String, dynamic>> analyzeSpendingPatterns(
-      List<Map<String, dynamic>> transactions);
+    List<Map<String, dynamic>> transactions,
+  );
   Future<String> generateJournalEntry(
-      List<Map<String, dynamic>> dailyTransactions);
+    List<Map<String, dynamic>> dailyTransactions,
+  );
   Future<Map<String, dynamic>> extractTransactionDetails(String transcript);
 }
 
@@ -124,8 +130,9 @@ class AiService implements AiServiceBase {
   @override
   Future<String> getDailyQuote() async {
     try {
-      final response =
-          await _supabaseClient.functions.invoke('get-daily-quote');
+      final response = await _supabaseClient.functions.invoke(
+        'get-daily-quote',
+      );
       if (response.status == 200) {
         final result = response.data as Map<String, dynamic>;
         return result['quote'] as String? ?? '';
@@ -144,10 +151,12 @@ class AiService implements AiServiceBase {
   ) async {
     try {
       final messages = conversationHistory
-          .map((msg) => {
-                'role': msg.isUser ? 'user' : 'assistant',
-                'content': msg.content,
-              })
+          .map(
+            (msg) => {
+              'role': msg.isUser ? 'user' : 'assistant',
+              'content': msg.content,
+            },
+          )
           .toList();
       messages.add({'role': 'user', 'content': content});
 
@@ -250,7 +259,8 @@ class MockAiService implements AiServiceBase {
   static const _mockResponses = {
     '花了多少': '本月餐飲支出共 NT\$5,348，佔總支出 35%。相比上月增加了 12%。建議控制在 30% 以內。',
     '預算': '已為你設定月度預算。目前已使用 NT\$10,280 (68.5%)，剩餘 NT\$4,720 可用。',
-    '建議': '根據你的消費習慣，建議：\n1. 減少外食 2-3 次/週\n2. 設定每日消費上限 NT\$500\n3. 每月固定儲蓄 20% 薪資',
+    '建議':
+        '根據你的消費習慣，建議：\n1. 減少外食 2-3 次/週\n2. 設定每日消費上限 NT\$500\n3. 每月固定儲蓄 20% 薪資',
   };
 
   @override

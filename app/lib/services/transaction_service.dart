@@ -80,8 +80,10 @@ class TransactionService implements TransactionServiceBase {
   Future<Map<String, double>> getMonthlySummary(DateTime month) async {
     final startDate = DateTime(month.year, month.month, 1);
     final endDate = DateTime(month.year, month.month + 1, 0);
-    final transactions =
-        await getTransactions(startDate: startDate, endDate: endDate);
+    final transactions = await getTransactions(
+      startDate: startDate,
+      endDate: endDate,
+    );
 
     double income = 0;
     double expense = 0;
@@ -99,8 +101,10 @@ class TransactionService implements TransactionServiceBase {
   Future<Map<String, double>> getCategorySummary(DateTime month) async {
     final startDate = DateTime(month.year, month.month, 1);
     final endDate = DateTime(month.year, month.month + 1, 0);
-    final transactions =
-        await getTransactions(startDate: startDate, endDate: endDate);
+    final transactions = await getTransactions(
+      startDate: startDate,
+      endDate: endDate,
+    );
 
     final summary = <String, double>{};
     for (final tx in transactions) {
@@ -153,8 +157,10 @@ class MockTransactionService implements TransactionServiceBase {
   Future<Map<String, double>> getMonthlySummary(DateTime month) async {
     final startDate = DateTime(month.year, month.month, 1);
     final endDate = DateTime(month.year, month.month + 1, 0);
-    final transactions =
-        await getTransactions(startDate: startDate, endDate: endDate);
+    final transactions = await getTransactions(
+      startDate: startDate,
+      endDate: endDate,
+    );
 
     double income = 0;
     double expense = 0;
@@ -172,8 +178,10 @@ class MockTransactionService implements TransactionServiceBase {
   Future<Map<String, double>> getCategorySummary(DateTime month) async {
     final startDate = DateTime(month.year, month.month, 1);
     final endDate = DateTime(month.year, month.month + 1, 0);
-    final transactions =
-        await getTransactions(startDate: startDate, endDate: endDate);
+    final transactions = await getTransactions(
+      startDate: startDate,
+      endDate: endDate,
+    );
 
     final summary = <String, double>{};
     for (final tx in transactions) {
@@ -187,66 +195,106 @@ class MockTransactionService implements TransactionServiceBase {
     final now = DateTime.now();
     return [
       Transaction(
-        id: 'mock-1', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 180, currency: 'TWD',
-        category: TransactionCategory.food, description: '牛肉麵',
+        id: 'mock-1',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 180,
+        currency: 'TWD',
+        category: TransactionCategory.food,
+        description: '牛肉麵',
         notes: '中午跟同事去吃的',
         createdAt: now.subtract(const Duration(hours: 2)),
       ),
       Transaction(
-        id: 'mock-2', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 35, currency: 'TWD',
-        category: TransactionCategory.transport, description: '捷運板南線',
+        id: 'mock-2',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 35,
+        currency: 'TWD',
+        category: TransactionCategory.transport,
+        description: '捷運板南線',
         createdAt: now.subtract(const Duration(hours: 5)),
       ),
       Transaction(
-        id: 'mock-3', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 250, currency: 'TWD',
-        category: TransactionCategory.shopping, description: 'Uniqlo T恤',
+        id: 'mock-3',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 250,
+        currency: 'TWD',
+        category: TransactionCategory.shopping,
+        description: 'Uniqlo T恤',
         createdAt: now.subtract(const Duration(hours: 8)),
       ),
       Transaction(
-        id: 'mock-4', userId: 'mock-user-001',
-        type: TransactionType.income, amount: 48000, currency: 'TWD',
-        category: TransactionCategory.salary, description: '三月份薪資',
+        id: 'mock-4',
+        userId: 'mock-user-001',
+        type: TransactionType.income,
+        amount: 48000,
+        currency: 'TWD',
+        category: TransactionCategory.salary,
+        description: '三月份薪資',
         createdAt: now.subtract(const Duration(days: 3)),
       ),
       Transaction(
-        id: 'mock-5', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 1290, currency: 'TWD',
-        category: TransactionCategory.entertainment, description: 'Nintendo eShop',
+        id: 'mock-5',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 1290,
+        currency: 'TWD',
+        category: TransactionCategory.entertainment,
+        description: 'Nintendo eShop',
         notes: '薩爾達傳說 DLC',
         createdAt: now.subtract(const Duration(days: 1)),
       ),
       Transaction(
-        id: 'mock-6', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 12000, currency: 'TWD',
-        category: TransactionCategory.utilities, description: '三月房租',
+        id: 'mock-6',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 12000,
+        currency: 'TWD',
+        category: TransactionCategory.utilities,
+        description: '三月房租',
         createdAt: now.subtract(const Duration(days: 5)),
       ),
       Transaction(
-        id: 'mock-7', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 390, currency: 'TWD',
-        category: TransactionCategory.entertainment, description: 'Netflix 月費',
+        id: 'mock-7',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 390,
+        currency: 'TWD',
+        category: TransactionCategory.entertainment,
+        description: 'Netflix 月費',
         createdAt: now.subtract(const Duration(days: 7)),
       ),
       Transaction(
-        id: 'mock-8', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 85, currency: 'TWD',
-        category: TransactionCategory.food, description: '全家便當',
+        id: 'mock-8',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 85,
+        currency: 'TWD',
+        category: TransactionCategory.food,
+        description: '全家便當',
         createdAt: now.subtract(const Duration(days: 1, hours: 4)),
       ),
       Transaction(
-        id: 'mock-9', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 680, currency: 'TWD',
-        category: TransactionCategory.education, description: 'Udemy 課程',
+        id: 'mock-9',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 680,
+        currency: 'TWD',
+        category: TransactionCategory.education,
+        description: 'Udemy 課程',
         notes: 'Flutter 進階開發',
         createdAt: now.subtract(const Duration(days: 10)),
       ),
       Transaction(
-        id: 'mock-10', userId: 'mock-user-001',
-        type: TransactionType.expense, amount: 150, currency: 'TWD',
-        category: TransactionCategory.food, description: '星巴克拿鐵',
+        id: 'mock-10',
+        userId: 'mock-user-001',
+        type: TransactionType.expense,
+        amount: 150,
+        currency: 'TWD',
+        category: TransactionCategory.food,
+        description: '星巴克拿鐵',
         createdAt: now.subtract(const Duration(hours: 26)),
       ),
     ];
@@ -254,27 +302,27 @@ class MockTransactionService implements TransactionServiceBase {
 }
 
 // Providers for transaction data
-final userTransactionsProvider = FutureProvider.family<List<Transaction>,
-    ({String userId, DateTime? startDate, DateTime? endDate})>((
-  ref,
-  params,
-) async {
-  final service = ref.watch(transactionServiceProvider);
-  return service.getTransactions(
-    userId: params.userId,
-    startDate: params.startDate,
-    endDate: params.endDate,
-  );
-});
+final userTransactionsProvider =
+    FutureProvider.family<
+      List<Transaction>,
+      ({String userId, DateTime? startDate, DateTime? endDate})
+    >((ref, params) async {
+      final service = ref.watch(transactionServiceProvider);
+      return service.getTransactions(
+        userId: params.userId,
+        startDate: params.startDate,
+        endDate: params.endDate,
+      );
+    });
 
 final monthlySummaryProvider =
     FutureProvider.family<Map<String, double>, DateTime>((ref, month) async {
-  final service = ref.watch(transactionServiceProvider);
-  return service.getMonthlySummary(month);
-});
+      final service = ref.watch(transactionServiceProvider);
+      return service.getMonthlySummary(month);
+    });
 
 final categorySummaryProvider =
     FutureProvider.family<Map<String, double>, DateTime>((ref, month) async {
-  final service = ref.watch(transactionServiceProvider);
-  return service.getCategorySummary(month);
-});
+      final service = ref.watch(transactionServiceProvider);
+      return service.getCategorySummary(month);
+    });
