@@ -53,7 +53,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: scheme,
       textTheme: textTheme,
-      cardTheme: CardThemeData(
+      cardTheme: const CardTheme().copyWith(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
@@ -117,7 +117,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
       ),
-      dialogTheme: DialogThemeData(
+      dialogTheme: const DialogTheme().copyWith(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.xl),
         ),
