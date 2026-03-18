@@ -32,7 +32,8 @@ dependencies:
 
   # Location & Geofencing
   geolocator: ^10.1.0
-  geofencing: ^1.0.0
+  # geofencing 套件不存在，改用 easy_geofencing 或 native_geofence
+  # TODO: 前端開發時選擇合適的 geofencing 套件
 
   # Image & Camera
   image_picker: ^1.0.0
