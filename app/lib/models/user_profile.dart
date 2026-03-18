@@ -55,8 +55,7 @@ class UserProfile with _$UserProfile {
       premiumProductId: map['premium_product_id'] as String?,
       locale: map['locale'] as String? ?? 'zh_TW',
       themeMode: map['theme_mode'] as String? ?? 'light',
-      notificationsEnabled:
-          map['notifications_enabled'] as bool? ?? true,
+      notificationsEnabled: map['notifications_enabled'] as bool? ?? true,
       locationTrackingEnabled:
           map['location_tracking_enabled'] as bool? ?? true,
       voiceInputEnabled: map['voice_input_enabled'] as bool? ?? true,

@@ -93,9 +93,9 @@ class _DailyQuoteCard extends StatelessWidget {
               Text(
                 '今日金句',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -104,9 +104,9 @@ class _DailyQuoteCard extends StatelessWidget {
             data: (quote) => Text(
               quote.isEmpty ? '每日一句，激勵人心。' : quote,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
-                    fontStyle: FontStyle.italic,
-                  ),
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+              ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -124,8 +124,8 @@ class _DailyQuoteCard extends StatelessWidget {
             error: (e, st) => Text(
               '無法加載金句',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
-                  ),
+                color: Colors.white.withOpacity(0.8),
+              ),
             ),
           ),
         ],
@@ -162,9 +162,9 @@ class _TodaysSummaryCard extends ConsumerWidget {
                     Text(
                       'NT\$ 1,250',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: AppTheme.primaryGradientStart,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        color: AppTheme.primaryGradientStart,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -228,10 +228,7 @@ class _QuickActionsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '快速操作',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
+        Text('快速操作', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: AppTheme.spacingMedium),
         Row(
           children: [
@@ -304,9 +301,7 @@ class _QuickActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          border: Border.all(
-            color: color.withOpacity(0.3),
-          ),
+          border: Border.all(color: color.withOpacity(0.3)),
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.spacingSmall,
@@ -318,9 +313,9 @@ class _QuickActionButton extends StatelessWidget {
             const SizedBox(height: AppTheme.spacingSmall),
             Text(
               label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: color),
               textAlign: TextAlign.center,
             ),
           ],
@@ -366,18 +361,15 @@ class _RecentTransactionsSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '最近交易',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('最近交易', style: Theme.of(context).textTheme.titleLarge),
             GestureDetector(
               onTap: () => GoRouter.of(context).go(Routes.statistics),
               child: Text(
                 '查看全部',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.primaryGradientStart,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: AppTheme.primaryGradientStart,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -387,7 +379,8 @@ class _RecentTransactionsSection extends StatelessWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: transactions.length,
-          separatorBuilder: (_, __) => const SizedBox(height: AppTheme.spacingSmall),
+          separatorBuilder: (_, __) =>
+              const SizedBox(height: AppTheme.spacingSmall),
           itemBuilder: (context, index) {
             final tx = transactions[index];
             return Container(
@@ -434,9 +427,9 @@ class _RecentTransactionsSection extends StatelessWidget {
                       Text(
                         tx['amount'] as String,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Text(
                         tx['time'] as String,
@@ -533,12 +526,7 @@ class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
                 0,
                 bounds.width,
                 bounds.height,
-              ).shift(
-                Offset(
-                  _shimmerController.value * bounds.width * 2,
-                  0,
-                ),
-              ),
+              ).shift(Offset(_shimmerController.value * bounds.width * 2, 0)),
             );
           },
           child: child,

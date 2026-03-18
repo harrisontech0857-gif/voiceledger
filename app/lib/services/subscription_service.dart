@@ -28,7 +28,8 @@ class SubscriptionService {
       final response = await _supabase
           .from('user_subscriptions')
           .select(
-              'id, plan_id, status, started_at, trial_ends_at, renews_at, cancelled_at, expires_at')
+            'id, plan_id, status, started_at, trial_ends_at, renews_at, cancelled_at, expires_at',
+          )
           .eq('user_id', userId)
           .order('started_at', ascending: false)
           .limit(1);
@@ -90,7 +91,11 @@ class SubscriptionService {
 
       if (tier == TIER_FREE) {
         // 免費版功能
-        return ['voice_input', 'manual_entry', 'basic_analytics'].contains(featureName);
+        return [
+          'voice_input',
+          'manual_entry',
+          'basic_analytics',
+        ].contains(featureName);
       }
 
       if (plan == null) return false;
@@ -112,8 +117,9 @@ class SubscriptionService {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('用戶未登錄');
 
-      final trialEndsAt =
-          DateTime.now().add(Duration(days: trialDays)).toIso8601String();
+      final trialEndsAt = DateTime.now()
+          .add(Duration(days: trialDays))
+          .toIso8601String();
 
       await _supabase.from('user_subscriptions').insert({
         'user_id': userId,
@@ -312,21 +318,13 @@ class SubscriptionService {
   /// 獲取訂閱定價
   Map<String, dynamic> getSubscriptionPricing(String tier) {
     const pricing = {
-      TIER_FREE: {
-        'monthly_price': 0,
-        'yearly_price': 0,
-        'currency': 'TWD',
-      },
+      TIER_FREE: {'monthly_price': 0, 'yearly_price': 0, 'currency': 'TWD'},
       TIER_PREMIUM: {
         'monthly_price': 99,
         'yearly_price': 999,
         'currency': 'TWD',
       },
-      TIER_PRO: {
-        'monthly_price': 199,
-        'yearly_price': 1999,
-        'currency': 'TWD',
-      },
+      TIER_PRO: {'monthly_price': 199, 'yearly_price': 1999, 'currency': 'TWD'},
       TIER_FAMILY: {
         'monthly_price': 299,
         'yearly_price': 2999,

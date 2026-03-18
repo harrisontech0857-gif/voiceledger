@@ -164,9 +164,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                   ? Icons.check_rounded
                                   : Icons.arrow_forward_rounded,
                             ),
-                            label: Text(
-                              _currentPage == 4 ? '開始使用' : '下一步',
-                            ),
+                            label: Text(_currentPage == 4 ? '開始使用' : '下一步'),
                             onPressed: _nextPage,
                           ),
                         ),
@@ -225,27 +223,23 @@ class _OnboardingPage extends StatelessWidget {
                 color: color.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 60,
-              ),
+              child: Icon(icon, color: color, size: 60),
             ),
             const SizedBox(height: AppTheme.spacingLarge),
             Text(
               title,
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppTheme.spacingMedium),
             Text(
               description,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).textTheme.bodyMedium?.color,
-                    height: 1.5,
-                  ),
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                height: 1.5,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

@@ -53,10 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('設定'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('設定'), centerTitle: true),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -215,7 +212,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(
                         'VoiceLedger Premium',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
@@ -224,8 +222,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       Text(
                         '解鎖所有高級功能，包括無限制的 AI 分析、高級報告和優先支援',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                            ),
+                          color: Colors.white.withOpacity(0.9),
+                        ),
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
                       ElevatedButton(
@@ -303,9 +301,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('預算已更新')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('預算已更新')));
             },
             child: const Text('保存'),
           ),
@@ -319,10 +317,7 @@ class _SettingSection extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _SettingSection({
-    required this.title,
-    required this.children,
-  });
+  const _SettingSection({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -339,9 +334,9 @@ class _SettingSection extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: AppTheme.primaryGradientStart,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: AppTheme.primaryGradientStart,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         ...children,
@@ -388,21 +383,14 @@ class _SettingTile extends StatelessWidget {
                 color: AppTheme.primaryGradientStart.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
               ),
-              child: Icon(
-                icon,
-                color: AppTheme.primaryGradientStart,
-                size: 20,
-              ),
+              child: Icon(icon, color: AppTheme.primaryGradientStart, size: 20),
             ),
             const SizedBox(width: AppTheme.spacingMedium),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
+                  Text(title, style: Theme.of(context).textTheme.titleSmall),
                   if (subtitle != null)
                     Text(
                       subtitle!,
@@ -412,10 +400,7 @@ class _SettingTile extends StatelessWidget {
               ),
             ),
             trailing ??
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Colors.grey,
-                ),
+                const Icon(Icons.chevron_right_rounded, color: Colors.grey),
           ],
         ),
       ),

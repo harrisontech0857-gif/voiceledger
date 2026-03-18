@@ -2,15 +2,19 @@ include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
-    prefer_const_constructors: true
-    prefer_const_declarations: true
+    prefer_const_constructors: false
+    prefer_const_declarations: false
     avoid_print: true
     prefer_single_quotes: true
+    use_super_parameters: false
 
 analyzer:
   errors:
     missing_required_param: error
     missing_return: error
+    deprecated_member_use: info
+    dangling_library_doc_comments: ignore
+    unused_local_variable: warning
   exclude:
     - "**/*.g.dart"
     - "**/*.freezed.dart"

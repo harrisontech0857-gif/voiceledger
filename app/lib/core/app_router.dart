@@ -53,70 +53,46 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: Routes.auth,
-        pageBuilder: (context, state) => _buildTransitionPage(
-          context,
-          const AuthScreen(),
-          state,
-        ),
+        pageBuilder: (context, state) =>
+            _buildTransitionPage(context, const AuthScreen(), state),
       ),
       GoRoute(
         path: Routes.onboarding,
-        pageBuilder: (context, state) => _buildTransitionPage(
-          context,
-          const OnboardingScreen(),
-          state,
-        ),
+        pageBuilder: (context, state) =>
+            _buildTransitionPage(context, const OnboardingScreen(), state),
       ),
       ShellRoute(
         builder: (context, state, child) => _BottomNavShell(child: child),
         routes: [
           GoRoute(
             path: Routes.dashboard,
-            pageBuilder: (context, state) => _buildTransitionPage(
-              context,
-              const DashboardScreen(),
-              state,
-            ),
+            pageBuilder: (context, state) =>
+                _buildTransitionPage(context, const DashboardScreen(), state),
           ),
           GoRoute(
             path: Routes.voiceEntry,
-            pageBuilder: (context, state) => _buildTransitionPage(
-              context,
-              const VoiceEntryScreen(),
-              state,
-            ),
+            pageBuilder: (context, state) =>
+                _buildTransitionPage(context, const VoiceEntryScreen(), state),
           ),
           GoRoute(
             path: Routes.aiSecretary,
-            pageBuilder: (context, state) => _buildTransitionPage(
-              context,
-              const ChatScreen(),
-              state,
-            ),
+            pageBuilder: (context, state) =>
+                _buildTransitionPage(context, const ChatScreen(), state),
           ),
           GoRoute(
             path: Routes.statistics,
-            pageBuilder: (context, state) => _buildTransitionPage(
-              context,
-              const StatisticsScreen(),
-              state,
-            ),
+            pageBuilder: (context, state) =>
+                _buildTransitionPage(context, const StatisticsScreen(), state),
           ),
           GoRoute(
             path: Routes.journal,
-            pageBuilder: (context, state) => _buildTransitionPage(
-              context,
-              const JournalScreen(),
-              state,
-            ),
+            pageBuilder: (context, state) =>
+                _buildTransitionPage(context, const JournalScreen(), state),
           ),
           GoRoute(
             path: Routes.settings,
-            pageBuilder: (context, state) => _buildTransitionPage(
-              context,
-              const SettingsScreen(),
-              state,
-            ),
+            pageBuilder: (context, state) =>
+                _buildTransitionPage(context, const SettingsScreen(), state),
           ),
         ],
       ),
@@ -163,26 +139,14 @@ class _BottomNavShell extends ConsumerWidget {
         currentIndex: _getSelectedIndex(location),
         elevation: 8,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_rounded),
-            label: '首頁',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.mic_rounded),
-            label: '記帳',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_rounded),
-            label: '秘書',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '首頁'),
+          BottomNavigationBarItem(icon: Icon(Icons.mic_rounded), label: '記帳'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_rounded), label: '秘書'),
           BottomNavigationBarItem(
             icon: Icon(Icons.trending_up_rounded),
             label: '統計',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book_rounded),
-            label: '日記',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.book_rounded), label: '日記'),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_rounded),
             label: '設定',

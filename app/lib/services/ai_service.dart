@@ -7,7 +7,10 @@ final aiServiceProvider = Provider<AiService>((ref) {
   return AiService(client);
 });
 
-final aiResponseProvider = FutureProvider.family<String, String>((ref, prompt) async {
+final aiResponseProvider = FutureProvider.family<String, String>((
+  ref,
+  prompt,
+) async {
   final aiService = ref.watch(aiServiceProvider);
   return aiService.analyzeTransaction(prompt);
 });
@@ -68,9 +71,7 @@ class AiService {
     try {
       final response = await _supabaseClient.functions.invoke(
         'analyze-transaction',
-        body: {
-          'description': description,
-        },
+        body: {'description': description},
       );
 
       if (response.status == 200) {
@@ -91,9 +92,7 @@ class AiService {
     try {
       final response = await _supabaseClient.functions.invoke(
         'get-financial-advice',
-        body: {
-          'spending_data': spendingData,
-        },
+        body: {'spending_data': spendingData},
       );
 
       if (response.status == 200) {
@@ -136,22 +135,19 @@ class AiService {
   ) async {
     try {
       final messages = conversationHistory
-          .map((msg) => {
-                'role': msg.isUser ? 'user' : 'assistant',
-                'content': msg.content,
-              })
+          .map(
+            (msg) => {
+              'role': msg.isUser ? 'user' : 'assistant',
+              'content': msg.content,
+            },
+          )
           .toList();
 
-      messages.add({
-        'role': 'user',
-        'content': content,
-      });
+      messages.add({'role': 'user', 'content': content});
 
       final response = await _supabaseClient.functions.invoke(
         'chat-with-secretary',
-        body: {
-          'messages': messages,
-        },
+        body: {'messages': messages},
       );
 
       if (response.status == 200) {
@@ -193,9 +189,7 @@ class AiService {
     try {
       final response = await _supabaseClient.functions.invoke(
         'analyze-spending',
-        body: {
-          'transactions': transactions,
-        },
+        body: {'transactions': transactions},
       );
 
       if (response.status == 200) {
@@ -217,9 +211,7 @@ class AiService {
     try {
       final response = await _supabaseClient.functions.invoke(
         'generate-journal',
-        body: {
-          'transactions': dailyTransactions,
-        },
+        body: {'transactions': dailyTransactions},
       );
 
       if (response.status == 200) {
@@ -242,9 +234,7 @@ class AiService {
     try {
       final response = await _supabaseClient.functions.invoke(
         'extract-transaction',
-        body: {
-          'transcript': transcript,
-        },
+        body: {'transcript': transcript},
       );
 
       if (response.status == 200) {

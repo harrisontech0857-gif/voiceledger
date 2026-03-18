@@ -8,10 +8,7 @@ class StatisticsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('財務統計'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('財務統計'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.spacingMedium),
         child: Column(
@@ -26,28 +23,19 @@ class StatisticsScreen extends ConsumerWidget {
             const SizedBox(height: AppTheme.spacingLarge),
 
             // Spending by Category
-            Text(
-              '分類支出',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('分類支出', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppTheme.spacingMedium),
             _CategoryBreakdown(),
             const SizedBox(height: AppTheme.spacingLarge),
 
             // Trend Chart
-            Text(
-              '支出趨勢',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('支出趨勢', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppTheme.spacingMedium),
             _TrendChart(),
             const SizedBox(height: AppTheme.spacingLarge),
 
             // Top Transactions
-            Text(
-              '最大支出',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('最大支出', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: AppTheme.spacingMedium),
             _TopTransactions(),
           ],
@@ -125,9 +113,9 @@ class _PeriodButton extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: isSelected ? Colors.white : null,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: isSelected ? Colors.white : null,
+              fontWeight: FontWeight.w600,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -221,10 +209,7 @@ class _StatSummaryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
+                Text(title, style: Theme.of(context).textTheme.labelSmall),
                 Container(
                   decoration: BoxDecoration(
                     color: AppTheme.primaryGradientStart.withOpacity(0.1),
@@ -242,16 +227,16 @@ class _StatSummaryCard extends StatelessWidget {
             const SizedBox(height: AppTheme.spacingSmall),
             Text(
               amount,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: AppTheme.spacingSmall),
             Text(
               change,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isPositive ? AppTheme.successGreen : Colors.red,
-                  ),
+                color: isPositive ? AppTheme.successGreen : Colors.red,
+              ),
             ),
           ],
         ),
@@ -277,7 +262,8 @@ class _CategoryBreakdown extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: categories.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppTheme.spacingSmall),
+      separatorBuilder: (_, __) =>
+          const SizedBox(height: AppTheme.spacingSmall),
       itemBuilder: (context, index) {
         final cat = categories[index];
         final percentage = cat['percentage'] as double;
@@ -290,7 +276,10 @@ class _CategoryBreakdown extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Text(cat['icon'] as String, style: const TextStyle(fontSize: 20)),
+                    Text(
+                      cat['icon'] as String,
+                      style: const TextStyle(fontSize: 20),
+                    ),
                     const SizedBox(width: AppTheme.spacingSmall),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,9 +298,9 @@ class _CategoryBreakdown extends StatelessWidget {
                 ),
                 Text(
                   '${percentage.toStringAsFixed(1)}%',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -364,42 +353,39 @@ class _TrendChart extends StatelessWidget {
               height: 200,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: List.generate(
-                  days.length,
-                  (index) {
-                    final amount = amounts[index];
-                    final height = (amount / maxAmount) * 150;
+                children: List.generate(days.length, (index) {
+                  final amount = amounts[index];
+                  final height = (amount / maxAmount) * 150;
 
-                    return Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            'NT\$${amount}',
-                            style: Theme.of(context).textTheme.labelSmall,
-                          ),
-                          const SizedBox(height: AppTheme.spacingSmall),
-                          Container(
-                            width: double.infinity,
-                            height: height,
-                            decoration: BoxDecoration(
-                              gradient: AppTheme.primaryGradient,
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(AppTheme.radiusSmall),
-                              ),
+                  return Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'NT\$${amount}',
+                          style: Theme.of(context).textTheme.labelSmall,
+                        ),
+                        const SizedBox(height: AppTheme.spacingSmall),
+                        Container(
+                          width: double.infinity,
+                          height: height,
+                          decoration: BoxDecoration(
+                            gradient: AppTheme.primaryGradient,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(AppTheme.radiusSmall),
                             ),
                           ),
-                          const SizedBox(height: AppTheme.spacingSmall),
-                          Text(
-                            days[index],
-                            style: Theme.of(context).textTheme.labelSmall,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                        const SizedBox(height: AppTheme.spacingSmall),
+                        Text(
+                          days[index],
+                          style: Theme.of(context).textTheme.labelSmall,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                }),
               ),
             ),
           ],
@@ -415,16 +401,32 @@ class _TopTransactions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final transactions = [
-      {'name': '超市購物', 'amount': 'NT\$ 850', 'date': '2024-03-15', 'icon': '🛍️'},
-      {'name': '餐廳聚餐', 'amount': 'NT\$ 620', 'date': '2024-03-14', 'icon': '🍽️'},
-      {'name': '計程車費用', 'amount': 'NT\$ 450', 'date': '2024-03-13', 'icon': '🚕'},
+      {
+        'name': '超市購物',
+        'amount': 'NT\$ 850',
+        'date': '2024-03-15',
+        'icon': '🛍️',
+      },
+      {
+        'name': '餐廳聚餐',
+        'amount': 'NT\$ 620',
+        'date': '2024-03-14',
+        'icon': '🍽️',
+      },
+      {
+        'name': '計程車費用',
+        'amount': 'NT\$ 450',
+        'date': '2024-03-13',
+        'icon': '🚕',
+      },
     ];
 
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: transactions.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppTheme.spacingSmall),
+      separatorBuilder: (_, __) =>
+          const SizedBox(height: AppTheme.spacingSmall),
       itemBuilder: (context, index) {
         final tx = transactions[index];
 
@@ -469,9 +471,9 @@ class _TopTransactions extends StatelessWidget {
               Text(
                 tx['amount'] as String,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),

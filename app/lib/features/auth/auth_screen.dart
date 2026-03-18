@@ -89,20 +89,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 Text(
                   '語記',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        background: Paint()
-                          ..shader = LinearGradient(
-                            colors: [
-                              AppTheme.primaryGradientStart,
-                              AppTheme.primaryGradientEnd,
-                            ],
-                          ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
-                      ),
+                    background: Paint()
+                      ..shader = LinearGradient(
+                        colors: [
+                          AppTheme.primaryGradientStart,
+                          AppTheme.primaryGradientEnd,
+                        ],
+                      ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
+                  ),
                 ),
                 Text(
                   'AI 財務秘書',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.primaryGradientStart,
-                      ),
+                    color: AppTheme.primaryGradientStart,
+                  ),
                 ),
                 const SizedBox(height: AppTheme.spacingLarge),
 
@@ -140,14 +140,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     padding: const EdgeInsets.all(AppTheme.spacingMedium),
                     decoration: BoxDecoration(
                       color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.radiusMedium,
+                      ),
                       border: Border.all(color: Colors.red.withOpacity(0.3)),
                     ),
                     child: Text(
                       _errorMessage!,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.red,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: Colors.red),
                     ),
                   ),
                 if (_errorMessage != null)
@@ -196,9 +198,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         ? const SizedBox(
                             height: 20,
                             width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : Text(_isLogin ? '登入' : '建立帳戶'),
                   ),
@@ -211,7 +211,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     Expanded(child: Divider()),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: AppTheme.spacingSmall),
+                        horizontal: AppTheme.spacingSmall,
+                      ),
                       child: Text(
                         '或',
                         style: Theme.of(context).textTheme.labelSmall,
@@ -264,9 +265,9 @@ class _TabButton extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: isActive ? Colors.white : null,
-                fontWeight: FontWeight.w600,
-              ),
+            color: isActive ? Colors.white : null,
+            fontWeight: FontWeight.w600,
+          ),
           textAlign: TextAlign.center,
         ),
       ),

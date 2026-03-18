@@ -1,12 +1,13 @@
 /// 應用程式設定
+///
 /// 包含 Supabase 連線設定及功能開關
 /// 註: 此檔案使用常數值，未來可改用 envied 套件進行碼代工產生
+library;
 
 class AppConfig {
   /// Supabase 項目 URL
   /// 例: https://dpqgrwoqalwfodblctqm.supabase.co
-  static const String supabaseUrl =
-      'https://dpqgrwoqalwfodblctqm.supabase.co';
+  static const String supabaseUrl = 'https://dpqgrwoqalwfodblctqm.supabase.co';
 
   /// Supabase 匿名公鑰
   /// 設置時請使用真實的 anon key

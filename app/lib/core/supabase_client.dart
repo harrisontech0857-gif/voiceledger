@@ -2,9 +2,10 @@
 ///
 /// 此模組負責初始化 Supabase 連線及提供 Riverpod 提供者
 /// 支援模擬模式（當外部 API 不可用時）
+library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 
 import 'config.dart';
 

@@ -13,7 +13,14 @@ void main() {
     });
 
     test('交易類型枚舉', () {
-      final types = ['voice', 'passive_gps', 'photo', 'notification', 'manual', 'imported'];
+      final types = [
+        'voice',
+        'passive_gps',
+        'photo',
+        'notification',
+        'manual',
+        'imported',
+      ];
       expect(types, contains('voice'));
       expect(types.length, equals(6));
     });

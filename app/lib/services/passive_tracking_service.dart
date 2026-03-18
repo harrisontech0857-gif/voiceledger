@@ -87,21 +87,22 @@ class PassiveTrackingService {
   }
 
   void _startLocationTracking() {
-    _locationSubscription = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 10, // Update only when moved 10 meters
-      ),
-    ).listen(
-      (Position position) {
-        _lastPosition = position;
-        _locationController.add(position);
-        _checkGeofences(position);
-      },
-      onError: (e) {
-        _logger.e('Error in location stream: $e');
-      },
-    );
+    _locationSubscription =
+        Geolocator.getPositionStream(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.best,
+            distanceFilter: 10, // Update only when moved 10 meters
+          ),
+        ).listen(
+          (Position position) {
+            _lastPosition = position;
+            _locationController.add(position);
+            _checkGeofences(position);
+          },
+          onError: (e) {
+            _logger.e('Error in location stream: $e');
+          },
+        );
   }
 
   void _checkGeofences(Position currentPosition) {

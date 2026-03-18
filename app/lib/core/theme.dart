@@ -151,10 +151,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(radiusMedium),
           borderSide: const BorderSide(color: primaryGradientStart, width: 2),
         ),
-        hintStyle: GoogleFonts.poppins(
-          color: lightSubtext,
-          fontSize: 14,
-        ),
+        hintStyle: GoogleFonts.poppins(color: lightSubtext, fontSize: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -200,58 +197,59 @@ class AppTheme {
         error: Color(0xFFEF5350),
         onError: darkBackground,
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme).copyWith(
-        displayLarge: GoogleFonts.poppins(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-          color: darkText,
-        ),
-        displayMedium: GoogleFonts.poppins(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: darkText,
-        ),
-        displaySmall: GoogleFonts.poppins(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: darkText,
-        ),
-        headlineMedium: GoogleFonts.poppins(
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
-          color: darkText,
-        ),
-        headlineSmall: GoogleFonts.poppins(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: darkText,
-        ),
-        titleLarge: GoogleFonts.poppins(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: darkText,
-        ),
-        titleMedium: GoogleFonts.poppins(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: darkText,
-        ),
-        bodyLarge: GoogleFonts.poppins(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          color: darkText,
-        ),
-        bodyMedium: GoogleFonts.poppins(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: darkSubtext,
-        ),
-        labelSmall: GoogleFonts.poppins(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: darkSubtext,
-        ),
-      ),
+      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme)
+          .copyWith(
+            displayLarge: GoogleFonts.poppins(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: darkText,
+            ),
+            displayMedium: GoogleFonts.poppins(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: darkText,
+            ),
+            displaySmall: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: darkText,
+            ),
+            headlineMedium: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: darkText,
+            ),
+            headlineSmall: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: darkText,
+            ),
+            titleLarge: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: darkText,
+            ),
+            titleMedium: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: darkText,
+            ),
+            bodyLarge: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: darkText,
+            ),
+            bodyMedium: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: darkSubtext,
+            ),
+            labelSmall: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: darkSubtext,
+            ),
+          ),
       appBarTheme: AppBarTheme(
         backgroundColor: darkSurface,
         elevation: 0,
@@ -289,10 +287,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(radiusMedium),
           borderSide: const BorderSide(color: primaryGradientStart, width: 2),
         ),
-        hintStyle: GoogleFonts.poppins(
-          color: darkSubtext,
-          fontSize: 14,
-        ),
+        hintStyle: GoogleFonts.poppins(color: darkSubtext, fontSize: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

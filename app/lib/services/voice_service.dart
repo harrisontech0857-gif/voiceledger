@@ -36,16 +36,12 @@ class VoiceService {
     }
   }
 
-  Stream<String> startListening({
-    String localeId = 'zh_TW',
-  }) {
+  Stream<String> startListening({String localeId = 'zh_TW'}) {
     return Stream.fromFuture(_initializeIfNeeded()).then((_) {
       return Stream.periodic(
         const Duration(milliseconds: 100),
         (_) => _speechToText.lastRecognizedWords,
-      ).takeUntil(
-        Future.delayed(const Duration(minutes: 5)),
-      );
+      ).takeUntil(Future.delayed(const Duration(minutes: 5)));
     }).asBroadcastStream();
   }
 
@@ -56,9 +52,7 @@ class VoiceService {
     try {
       await _initializeIfNeeded();
 
-      final completer = Stream.periodic(
-        const Duration(milliseconds: 100),
-      );
+      final completer = Stream.periodic(const Duration(milliseconds: 100));
 
       _speechToText.listen(
         onResult: (result) {
@@ -122,7 +116,6 @@ final voiceStreamProvider = StreamProvider<String>((ref) async* {
   yield* voiceService.startListening();
 });
 
-final currentListeningTextProvider =
-    StateProvider.autoDispose<String>((ref) {
+final currentListeningTextProvider = StateProvider.autoDispose<String>((ref) {
   return '';
 });

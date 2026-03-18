@@ -48,10 +48,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     final dayFormat = DateFormat('EEEE', 'zh_TW');
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('生活日記'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('生活日記'), centerTitle: true),
       body: Column(
         children: [
           // Date Navigation
@@ -60,9 +57,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.withOpacity(0.1),
-                ),
+                bottom: BorderSide(color: Colors.grey.withOpacity(0.1)),
               ),
             ),
             child: Column(
@@ -102,8 +97,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               controller: _pageController,
               onPageChanged: (index) {
                 setState(() {
-                  _selectedDate =
-                      DateTime.now().add(Duration(days: index - 1000));
+                  _selectedDate = DateTime.now().add(
+                    Duration(days: index - 1000),
+                  );
                 });
               },
               itemBuilder: (context, index) {
@@ -172,18 +168,18 @@ class _JournalEntryView extends ConsumerWidget {
                     Text(
                       'AI 生成日記',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppTheme.primaryGradientStart,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: AppTheme.primaryGradientStart,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 Text(
                   mockEntry,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        height: 1.6,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(height: 1.6),
                 ),
               ],
             ),
@@ -191,10 +187,7 @@ class _JournalEntryView extends ConsumerWidget {
           const SizedBox(height: AppTheme.spacingLarge),
 
           // Daily Stats
-          Text(
-            '今日統計',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('今日統計', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppTheme.spacingMedium),
           Row(
             children: [
@@ -229,10 +222,7 @@ class _JournalEntryView extends ConsumerWidget {
           const SizedBox(height: AppTheme.spacingLarge),
 
           // Emotions
-          Text(
-            '今日心情',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('今日心情', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppTheme.spacingMedium),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -246,10 +236,7 @@ class _JournalEntryView extends ConsumerWidget {
           const SizedBox(height: AppTheme.spacingLarge),
 
           // Edit Note
-          Text(
-            '個人筆記',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('個人筆記', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: AppTheme.spacingSmall),
           TextField(
             maxLines: 5,
@@ -265,9 +252,9 @@ class _JournalEntryView extends ConsumerWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('日記已保存')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('日記已保存')));
               },
               child: const Text('保存日記'),
             ),
@@ -297,9 +284,7 @@ class _StatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(
-          color: color.withOpacity(0.3),
-        ),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       padding: const EdgeInsets.all(AppTheme.spacingSmall),
       child: Column(
@@ -309,14 +294,11 @@ class _StatCard extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                ),
+              color: color,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall,
-          ),
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
         ],
       ),
     );
@@ -376,10 +358,10 @@ class _EmotionButtonState extends State<_EmotionButton> {
             Text(
               widget.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: _isSelected
-                        ? AppTheme.primaryGradientStart
-                        : Colors.grey,
-                  ),
+                color: _isSelected
+                    ? AppTheme.primaryGradientStart
+                    : Colors.grey,
+              ),
             ),
           ],
         ),

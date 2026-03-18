@@ -24,11 +24,7 @@ void main() async {
     authCallbackUrlScheme: 'voiceledger',
   );
 
-  runApp(
-    const ProviderScope(
-      child: VoiceLedgerApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: VoiceLedgerApp()));
 }
 
 class VoiceLedgerApp extends ConsumerWidget {

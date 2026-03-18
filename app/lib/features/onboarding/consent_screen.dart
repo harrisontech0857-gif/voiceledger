@@ -5,10 +5,8 @@ import 'package:flutter/material.dart';
 class ConsentScreen extends StatefulWidget {
   final VoidCallback onConsentAccepted;
 
-  const ConsentScreen({
-    Key? key,
-    required this.onConsentAccepted,
-  }) : super(key: key);
+  const ConsentScreen({Key? key, required this.onConsentAccepted})
+    : super(key: key);
 
   @override
   State<ConsentScreen> createState() => _ConsentScreenState();
@@ -41,9 +39,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
 
       widget.onConsentAccepted();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('提交同意時出錯：$e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('提交同意時出錯：$e')));
     }
   }
 
@@ -229,7 +227,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('無法使用應用'),
-                        content: const Text('您必須同意所有必需的條款才能使用語記。如果您不同意，請卸載此應用。'),
+                        content: const Text(
+                          '您必須同意所有必需的條款才能使用語記。如果您不同意，請卸載此應用。',
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),

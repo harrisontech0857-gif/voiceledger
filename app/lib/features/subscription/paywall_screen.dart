@@ -6,11 +6,8 @@ class PaywallScreen extends StatefulWidget {
   final String? currentTier;
   final VoidCallback? onPremiumSelected;
 
-  const PaywallScreen({
-    Key? key,
-    this.currentTier,
-    this.onPremiumSelected,
-  }) : super(key: key);
+  const PaywallScreen({Key? key, this.currentTier, this.onPremiumSelected})
+    : super(key: key);
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();
@@ -28,12 +25,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'description': '基礎功能',
       'monthlyPrice': 0,
       'yearlyPrice': 0,
-      'features': [
-        '語音輸入（50 次/月）',
-        '手動記帳',
-        '基礎分析',
-        '每月最多 100 筆交易',
-      ],
+      'features': ['語音輸入（50 次/月）', '手動記帳', '基礎分析', '每月最多 100 筆交易'],
       'recommended': false,
     },
     {
@@ -42,14 +34,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'description': '增強功能',
       'monthlyPrice': 99,
       'yearlyPrice': 999,
-      'features': [
-        '無限語音輸入',
-        '手動記帳',
-        'AI 分類',
-        '高級分析',
-        '被動追蹤',
-        '每月最多 1000 筆交易',
-      ],
+      'features': ['無限語音輸入', '手動記帳', 'AI 分類', '高級分析', '被動追蹤', '每月最多 1000 筆交易'],
       'recommended': true,
     },
     {
@@ -58,13 +43,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'description': '完整功能',
       'monthlyPrice': 199,
       'yearlyPrice': 1999,
-      'features': [
-        '所有 Premium 功能',
-        '照片分析',
-        'API 訪問',
-        '無限交易',
-        '優先支持',
-      ],
+      'features': ['所有 Premium 功能', '照片分析', 'API 訪問', '無限交易', '優先支持'],
       'recommended': false,
     },
     {
@@ -73,13 +52,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'description': '家庭版',
       'monthlyPrice': 299,
       'yearlyPrice': 2999,
-      'features': [
-        '所有 Pro 功能',
-        '家庭共享（最多 6 人）',
-        '分離的預算',
-        '協作管理',
-        '優先支持',
-      ],
+      'features': ['所有 Pro 功能', '家庭共享（最多 6 人）', '分離的預算', '協作管理', '優先支持'],
       'recommended': false,
     },
   ];
@@ -92,15 +65,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
       // 如果啟用 ENABLE_REVENUECAT=true，使用 RevenueCat SDK
       // 否則使用 mock 實現
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('選擇升級到 $tier（待實現）')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('選擇升級到 $tier（待實現）')));
 
       widget.onPremiumSelected?.call();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('訂閱失敗：$e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('訂閱失敗：$e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -116,10 +89,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('升級訂閱'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('升級訂閱'), elevation: 0),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -131,7 +101,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     // 標題
                     const Text(
                       '選擇適合您的方案',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -182,7 +155,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 side: BorderSide(
-                                  color: isRecommended ? Colors.blue : Colors.grey.shade200,
+                                  color: isRecommended
+                                      ? Colors.blue
+                                      : Colors.grey.shade200,
                                   width: isRecommended ? 2 : 1,
                                 ),
                               ),
@@ -193,10 +168,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                   children: [
                                     // 計劃名稱和描述
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               plan['name'] as String,
@@ -223,7 +200,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                             ),
                                             decoration: BoxDecoration(
                                               color: Colors.green.shade100,
-                                              borderRadius: BorderRadius.circular(4),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
                                             ),
                                             child: Text(
                                               '當前',
@@ -259,14 +237,27 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                     const SizedBox(height: 16),
 
                                     // 功能列表
-                                    ...(plan['features'] as List<String>).map((feature) {
+                                    ...(plan['features'] as List<String>).map((
+                                      feature,
+                                    ) {
                                       return Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 4.0,
+                                        ),
                                         child: Row(
                                           children: [
-                                            const Icon(Icons.check, size: 16, color: Colors.green),
+                                            const Icon(
+                                              Icons.check,
+                                              size: 16,
+                                              color: Colors.green,
+                                            ),
                                             const SizedBox(width: 8),
-                                            Text(feature, style: const TextStyle(fontSize: 12)),
+                                            Text(
+                                              feature,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                              ),
+                                            ),
                                           ],
                                         ),
                                       );
@@ -283,8 +274,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                               child: const Text('當前方案'),
                                             )
                                           : ElevatedButton(
-                                              onPressed: () =>
-                                                  _selectPlan(plan['tier'] as String),
+                                              onPressed: () => _selectPlan(
+                                                plan['tier'] as String,
+                                              ),
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: isRecommended
                                                     ? Colors.blue
@@ -333,7 +325,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     // 常見問題
                     const Text(
                       '常見問題',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 12),
 

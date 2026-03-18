@@ -79,9 +79,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSending = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('錯誤: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('錯誤: $e')));
       }
     }
   }
@@ -123,9 +123,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         const SizedBox(height: AppTheme.spacingMedium),
                         Text(
                           '開始對話',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineSmall
+                          style: Theme.of(context).textTheme.headlineSmall
                               ?.copyWith(color: Colors.grey),
                         ),
                       ],
@@ -150,9 +148,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
               border: Border(
-                top: BorderSide(
-                  color: Colors.grey.withOpacity(0.1),
-                ),
+                top: BorderSide(color: Colors.grey.withOpacity(0.1)),
               ),
             ),
             padding: const EdgeInsets.symmetric(
@@ -171,7 +167,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       !_messages.last.isUser)
                     Padding(
                       padding: const EdgeInsets.only(
-                          bottom: AppTheme.spacingSmall),
+                        bottom: AppTheme.spacingSmall,
+                      ),
                       child: SizedBox(
                         height: 40,
                         child: ListView.separated(
@@ -191,10 +188,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               },
                               label: Text(
                                 suggestions[index],
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelSmall
-                                    ?.copyWith(fontSize: 11),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.labelSmall?.copyWith(fontSize: 11),
                               ),
                               backgroundColor: AppTheme.primaryGradientStart
                                   .withOpacity(0.1),
@@ -219,27 +215,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           minLines: 1,
                           decoration: InputDecoration(
                             hintText: '輸入訊息...',
-                            hintStyle: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Colors.grey,
-                                ),
+                            hintStyle: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: Colors.grey),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusXLarge),
-                              borderSide:
-                                  const BorderSide(color: AppTheme.lightBorder),
+                                AppTheme.radiusXLarge,
+                              ),
+                              borderSide: const BorderSide(
+                                color: AppTheme.lightBorder,
+                              ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusXLarge),
-                              borderSide:
-                                  const BorderSide(color: AppTheme.lightBorder),
+                                AppTheme.radiusXLarge,
+                              ),
+                              borderSide: const BorderSide(
+                                color: AppTheme.lightBorder,
+                              ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusXLarge),
+                                AppTheme.radiusXLarge,
+                              ),
                               borderSide: const BorderSide(
                                 color: AppTheme.primaryGradientStart,
                                 width: 2,
@@ -247,7 +244,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                             ),
                             disabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusXLarge),
+                                AppTheme.radiusXLarge,
+                              ),
                               borderSide: BorderSide(
                                 color: Colors.grey.withOpacity(0.3),
                               ),
@@ -257,9 +255,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               vertical: AppTheme.spacingSmall,
                             ),
                             filled: true,
-                            fillColor: Theme.of(context)
-                                .colorScheme
-                                .surfaceVariant,
+                            fillColor: Theme.of(
+                              context,
+                            ).colorScheme.surfaceVariant,
                           ),
                           onSubmitted: (value) {
                             _sendMessage(value);
@@ -271,7 +269,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         decoration: BoxDecoration(
                           gradient: AppTheme.primaryGradient,
                           borderRadius: BorderRadius.circular(
-                              AppTheme.radiusXLarge),
+                            AppTheme.radiusXLarge,
+                          ),
                         ),
                         child: Material(
                           color: Colors.transparent,
@@ -280,15 +279,18 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 ? null
                                 : () {
                                     _sendMessage(
-                                        _messageController.text.trim());
+                                      _messageController.text.trim(),
+                                    );
                                   },
                             customBorder: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                  AppTheme.radiusXLarge),
+                                AppTheme.radiusXLarge,
+                              ),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(
-                                  AppTheme.spacingSmall),
+                                AppTheme.spacingSmall,
+                              ),
                               child: _isSending
                                   ? const SizedBox(
                                       width: 24,
@@ -296,7 +298,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                       child: CircularProgressIndicator(
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                                Colors.white),
+                                              Colors.white,
+                                            ),
                                         strokeWidth: 2,
                                       ),
                                     )
@@ -324,10 +327,7 @@ class _ChatBubble extends StatelessWidget {
   final ChatMessage message;
   final bool isUser;
 
-  const _ChatBubble({
-    required this.message,
-    required this.isUser,
-  });
+  const _ChatBubble({required this.message, required this.isUser});
 
   @override
   Widget build(BuildContext context) {
@@ -338,8 +338,9 @@ class _ChatBubble extends StatelessWidget {
       child: Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Column(
-          crossAxisAlignment:
-              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment: isUser
+              ? CrossAxisAlignment.end
+              : CrossAxisAlignment.start,
           children: [
             Container(
               constraints: BoxConstraints(
@@ -358,16 +359,16 @@ class _ChatBubble extends StatelessWidget {
               child: Text(
                 message.content,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isUser ? Colors.white : null,
-                    ),
+                  color: isUser ? Colors.white : null,
+                ),
               ),
             ),
             const SizedBox(height: AppTheme.spacingSmall),
             Text(
               timeFormat.format(message.timestamp),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 11,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(fontSize: 11),
             ),
           ],
         ),

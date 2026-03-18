@@ -44,9 +44,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     final voiceService = ref.read(voiceServiceProvider);
     final isInitialized = await voiceService.initialize();
     if (!isInitialized && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('語音服務初始化失敗')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('語音服務初始化失敗')));
     }
   }
 
@@ -79,9 +79,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     } catch (e) {
       if (mounted) {
         setState(() => _isListening = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('錯誤: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('錯誤: $e')));
       }
     }
 
@@ -112,9 +112,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('處理失敗: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('處理失敗: $e')));
       }
     }
   }
@@ -212,9 +212,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: AppTheme.spacingSmall),
           Container(
@@ -227,10 +227,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
               color: Theme.of(context).colorScheme.surfaceVariant,
               borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
             ),
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
           ),
         ],
       ),
@@ -305,10 +302,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('語音記帳'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('語音記帳'), centerTitle: true),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -332,10 +326,10 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                               BoxShadow(
                                 color: AppTheme.primaryGradientStart
                                     .withOpacity(0.5),
-                                blurRadius: 20 +
-                                    (_animationController.value * 10),
-                                spreadRadius: 10 +
-                                    (_animationController.value * 10),
+                                blurRadius:
+                                    20 + (_animationController.value * 10),
+                                spreadRadius:
+                                    10 + (_animationController.value * 10),
                               ),
                           ],
                         ),
@@ -354,7 +348,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                               customBorder: const CircleBorder(),
                               child: Center(
                                 child: Icon(
-                                  _isListening ? Icons.stop_rounded : Icons.mic_rounded,
+                                  _isListening
+                                      ? Icons.stop_rounded
+                                      : Icons.mic_rounded,
                                   color: Colors.white,
                                   size: 64,
                                 ),
@@ -373,11 +369,11 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                   _isListening
                       ? '正在聆聽...'
                       : _isProcessing
-                          ? '正在處理...'
-                          : '輕按麥克風開始記帳',
+                      ? '正在處理...'
+                      : '輕按麥克風開始記帳',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
@@ -429,14 +425,14 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.smart_toy_rounded,
-                                color: AppTheme.accentGreen),
+                            const Icon(
+                              Icons.smart_toy_rounded,
+                              color: AppTheme.accentGreen,
+                            ),
                             const SizedBox(width: AppTheme.spacingSmall),
                             Text(
                               'AI 秘書',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
+                              style: Theme.of(context).textTheme.labelSmall
                                   ?.copyWith(
                                     color: AppTheme.accentGreen,
                                     fontWeight: FontWeight.w600,
@@ -455,8 +451,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
 
                 if (_isProcessing)
                   const SizedBox(height: AppTheme.spacingMedium),
-                if (_isProcessing)
-                  const CircularProgressIndicator(),
+                if (_isProcessing) const CircularProgressIndicator(),
               ],
             ),
           ),

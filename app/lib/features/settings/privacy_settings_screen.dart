@@ -44,9 +44,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       //   _locationRetentionDays = consent.locationHistoryRetentionDays ?? 30;
       // });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('載入隱私設定失敗：$e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('載入隱私設定失敗：$e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -64,13 +64,13 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
       //   locationRetentionDays: _locationRetentionDays,
       // );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('隱私設定已保存')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('隱私設定已保存')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('保存隱私設定失敗：$e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('保存隱私設定失敗：$e')));
     } finally {
       setState(() => _isLoading = false);
     }
@@ -99,9 +99,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                   const SnackBar(content: Text('數據匯出請求已提交，請檢查電郵以獲取下載鏈接')),
                 );
               } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('數據匯出請求失敗：$e')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('數據匯出請求失敗：$e')));
               } finally {
                 setState(() => _isLoading = false);
               }
@@ -161,9 +161,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                   // 可選：返回登錄頁面
                   // Navigator.of(context).pushReplacementNamed('/login');
                 } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('帳戶刪除請求失敗：$e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('帳戶刪除請求失敗：$e')));
                 } finally {
                   setState(() => _isLoading = false);
                 }
@@ -179,10 +179,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('隱私設定'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('隱私設定'), elevation: 0),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -194,7 +191,10 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                     // 數據收集部分
                     const Text(
                       '數據收集',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -227,7 +227,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                               divisions: 10,
                               label: '$_locationRetentionDays 天',
                               onChanged: (value) {
-                                setState(() => _locationRetentionDays = value.toInt());
+                                setState(
+                                  () => _locationRetentionDays = value.toInt(),
+                                );
                                 _updatePrivacySettings();
                               },
                             ),
@@ -270,7 +272,10 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                     // 數據權利部分
                     const Text(
                       '您的數據權利',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -307,7 +312,11 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                     // 刪除帳戶部分
                     const Text(
                       '帳戶',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
                     ),
                     const SizedBox(height: 16),
 
