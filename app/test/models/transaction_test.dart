@@ -285,11 +285,12 @@ void main() {
         expect(copied.description, equals(baseTransaction.description));
       });
 
-      test('should clear optional fields by setting to null', () {
-        final copiedWithoutNotes = baseTransaction.copyWith(notes: null);
+      test('should preserve optional fields when passing null', () {
+        // 注意：copyWith 中 null 參數表示「保持原值」，不是「設為 null」
+        final copied = baseTransaction.copyWith(notes: null);
 
-        expect(copiedWithoutNotes.notes, isNull);
-        expect(copiedWithoutNotes.id, equals(baseTransaction.id));
+        expect(copied.notes, equals('美味')); // 保持原值
+        expect(copied.id, equals(baseTransaction.id));
       });
 
       test('should update multiple fields at once', () {
