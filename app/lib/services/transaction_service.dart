@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/transaction.dart';
 
 final transactionServiceProvider = Provider<TransactionService>((ref) {
@@ -52,7 +52,7 @@ class TransactionService {
           .select()
           .single();
 
-      return Transaction.fromSupabase(result as Map<String, dynamic>);
+      return Transaction.fromSupabase(result);
     } catch (e) {
       rethrow;
     }

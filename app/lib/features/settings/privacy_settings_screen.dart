@@ -139,6 +139,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
               );
 
               if (confirmed == true) {
+                if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('帳戶刪除請求已提交，您將在 30 天後被永久刪除')),
                 );

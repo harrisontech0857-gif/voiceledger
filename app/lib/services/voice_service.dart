@@ -55,7 +55,7 @@ class VoiceService {
         localeId: localeId,
         listenFor: timeout,
         pauseFor: const Duration(seconds: 3),
-        partialResults: true,
+        listenOptions: SpeechListenOptions(partialResults: true),
       );
 
       await Future.delayed(timeout);

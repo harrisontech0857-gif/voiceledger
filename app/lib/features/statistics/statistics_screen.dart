@@ -122,7 +122,7 @@ class _SummaryCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
+      children: const [
         Row(
           children: [
             Expanded(
@@ -134,7 +134,7 @@ class _SummaryCards extends StatelessWidget {
                 icon: Icons.trending_down_rounded,
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _StatSummaryCard(
                 title: '總收入',
@@ -146,7 +146,7 @@ class _SummaryCards extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
+        SizedBox(height: AppSpacing.sm),
         Row(
           children: [
             Expanded(
@@ -158,7 +158,7 @@ class _SummaryCards extends StatelessWidget {
                 icon: Icons.savings_rounded,
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _StatSummaryCard(
                 title: '平均日支出',

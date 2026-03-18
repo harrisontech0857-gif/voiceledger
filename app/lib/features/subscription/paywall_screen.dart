@@ -316,7 +316,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
 
                     const SizedBox(height: AppSpacing.lg),
 
