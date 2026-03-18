@@ -212,18 +212,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(
                         'VoiceLedger Premium',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: AppTheme.spacingSmall),
                       Text(
                         '解鎖所有高級功能，包括無限制的 AI 分析、高級報告和優先支援',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                        ),
+                              color: Colors.white.withOpacity(0.9),
+                            ),
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
                       ElevatedButton(
@@ -334,9 +334,9 @@ class _SettingSection extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: AppTheme.primaryGradientStart,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: AppTheme.primaryGradientStart,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
         ...children,

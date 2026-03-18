@@ -123,7 +123,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         const SizedBox(height: AppTheme.spacingMedium),
                         Text(
                           '開始對話',
-                          style: Theme.of(context).textTheme.headlineSmall
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
                               ?.copyWith(color: Colors.grey),
                         ),
                       ],
@@ -215,7 +217,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           minLines: 1,
                           decoration: InputDecoration(
                             hintText: '輸入訊息...',
-                            hintStyle: Theme.of(context).textTheme.bodyMedium
+                            hintStyle: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
                                 ?.copyWith(color: Colors.grey),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
@@ -298,8 +302,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                       child: CircularProgressIndicator(
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
+                                          Colors.white,
+                                        ),
                                         strokeWidth: 2,
                                       ),
                                     )
@@ -338,9 +342,8 @@ class _ChatBubble extends StatelessWidget {
       child: Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Column(
-          crossAxisAlignment: isUser
-              ? CrossAxisAlignment.end
-              : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             Container(
               constraints: BoxConstraints(
@@ -359,8 +362,8 @@ class _ChatBubble extends StatelessWidget {
               child: Text(
                 message.content,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isUser ? Colors.white : null,
-                ),
+                      color: isUser ? Colors.white : null,
+                    ),
               ),
             ),
             const SizedBox(height: AppTheme.spacingSmall),

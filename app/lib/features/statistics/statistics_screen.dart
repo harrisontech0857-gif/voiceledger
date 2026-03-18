@@ -104,18 +104,17 @@ class _PeriodButton extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppTheme.primaryGradientStart
-                : Colors.transparent,
+            color:
+                isSelected ? AppTheme.primaryGradientStart : Colors.transparent,
             borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
           ),
           padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingSmall),
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: isSelected ? Colors.white : null,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: isSelected ? Colors.white : null,
+                  fontWeight: FontWeight.w600,
+                ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -235,8 +234,8 @@ class _StatSummaryCard extends StatelessWidget {
             Text(
               change,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isPositive ? AppTheme.successGreen : Colors.red,
-              ),
+                    color: isPositive ? AppTheme.successGreen : Colors.red,
+                  ),
             ),
           ],
         ),
@@ -471,9 +470,9 @@ class _TopTransactions extends StatelessWidget {
               Text(
                 tx['amount'] as String,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),

@@ -7,7 +7,7 @@ class PaywallScreen extends StatefulWidget {
   final VoidCallback? onPremiumSelected;
 
   const PaywallScreen({Key? key, this.currentTier, this.onPremiumSelected})
-    : super(key: key);
+      : super(key: key);
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();

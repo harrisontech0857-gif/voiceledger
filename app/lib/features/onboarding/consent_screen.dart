@@ -6,7 +6,7 @@ class ConsentScreen extends StatefulWidget {
   final VoidCallback onConsentAccepted;
 
   const ConsentScreen({Key? key, required this.onConsentAccepted})
-    : super(key: key);
+      : super(key: key);
 
   @override
   State<ConsentScreen> createState() => _ConsentScreenState();

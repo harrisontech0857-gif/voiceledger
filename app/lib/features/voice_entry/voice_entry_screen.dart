@@ -370,11 +370,11 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                   _isListening
                       ? '正在聆聽...'
                       : _isProcessing
-                      ? '正在處理...'
-                      : '輕按麥克風開始記帳',
+                          ? '正在處理...'
+                          : '輕按麥克風開始記帳',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
@@ -433,7 +433,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                             const SizedBox(width: AppTheme.spacingSmall),
                             Text(
                               'AI 秘書',
-                              style: Theme.of(context).textTheme.labelSmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
                                   ?.copyWith(
                                     color: AppTheme.accentGreen,
                                     fontWeight: FontWeight.w600,

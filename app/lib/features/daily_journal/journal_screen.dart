@@ -168,9 +168,9 @@ class _JournalEntryView extends ConsumerWidget {
                     Text(
                       'AI 生成日記',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppTheme.primaryGradientStart,
-                        fontWeight: FontWeight.w600,
-                      ),
+                            color: AppTheme.primaryGradientStart,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
@@ -294,9 +294,9 @@ class _StatCard extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           Text(label, style: Theme.of(context).textTheme.labelSmall),
         ],
@@ -358,10 +358,10 @@ class _EmotionButtonState extends State<_EmotionButton> {
             Text(
               widget.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: _isSelected
-                    ? AppTheme.primaryGradientStart
-                    : Colors.grey,
-              ),
+                    color: _isSelected
+                        ? AppTheme.primaryGradientStart
+                        : Colors.grey,
+                  ),
             ),
           ],
         ),

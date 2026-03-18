@@ -193,9 +193,8 @@ class PrivacyService {
             'status': 'pending',
             'reason': reason,
             'confirmation_token': confirmationToken,
-            'scheduled_deletion_at': DateTime.now()
-                .add(const Duration(days: 30))
-                .toIso8601String(),
+            'scheduled_deletion_at':
+                DateTime.now().add(const Duration(days: 30)).toIso8601String(),
           })
           .select()
           .single();
@@ -213,13 +212,10 @@ class PrivacyService {
   /// 確認帳戶刪除請求
   Future<void> confirmAccountDeletion(String confirmationToken) async {
     try {
-      await _supabase
-          .from('account_deletion_requests')
-          .update({
-            'status': 'confirmed',
-            'confirmed_at': DateTime.now().toIso8601String(),
-          })
-          .eq('confirmation_token', confirmationToken);
+      await _supabase.from('account_deletion_requests').update({
+        'status': 'confirmed',
+        'confirmed_at': DateTime.now().toIso8601String(),
+      }).eq('confirmation_token', confirmationToken);
     } catch (e) {
       print('確認帳戶刪除失敗：$e');
       rethrow;
@@ -246,9 +242,9 @@ class PrivacyService {
   /// 記錄數據處理活動（用於審計）
   Future<void> logDataProcessing({
     required String
-    operationType, // 'read', 'create', 'update', 'delete', 'export', 'share'
+        operationType, // 'read', 'create', 'update', 'delete', 'export', 'share'
     required String
-    resourceType, // 'transaction', 'profile', 'location', 'photo'
+        resourceType, // 'transaction', 'profile', 'location', 'photo'
     String? resourceId,
     String? description,
     String? ipAddress,
@@ -341,17 +337,14 @@ class PrivacyService {
           .select('id')
           .eq('user_id', userId);
 
-      final photoLogs = await _supabase
-          .from('photo_logs')
-          .select('id')
-          .eq('user_id', userId);
+      final photoLogs =
+          await _supabase.from('photo_logs').select('id').eq('user_id', userId);
 
       return {
         'transactions_count': (transactions as List).length,
         'location_logs_count': (locationLogs as List).length,
         'photo_logs_count': (photoLogs as List).length,
-        'total_data_points':
-            (transactions as List).length +
+        'total_data_points': (transactions as List).length +
             (locationLogs as List).length +
             (photoLogs as List).length,
       };

@@ -95,9 +95,9 @@ class _DailyQuoteCard extends StatelessWidget {
               Text(
                 '今日金句',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),
@@ -106,9 +106,9 @@ class _DailyQuoteCard extends StatelessWidget {
             data: (quote) => Text(
               quote.isEmpty ? '每日一句，激勵人心。' : quote,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.white,
-                fontStyle: FontStyle.italic,
-              ),
+                    color: Colors.white,
+                    fontStyle: FontStyle.italic,
+                  ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
@@ -126,8 +126,8 @@ class _DailyQuoteCard extends StatelessWidget {
             error: (e, st) => Text(
               '無法加載金句',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white.withOpacity(0.8),
-              ),
+                    color: Colors.white.withOpacity(0.8),
+                  ),
             ),
           ),
         ],
@@ -164,9 +164,9 @@ class _TodaysSummaryCard extends ConsumerWidget {
                     Text(
                       'NT\$ 1,250',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: AppTheme.primaryGradientStart,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: AppTheme.primaryGradientStart,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
@@ -369,9 +369,9 @@ class _RecentTransactionsSection extends StatelessWidget {
               child: Text(
                 '查看全部',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.primaryGradientStart,
-                  fontWeight: FontWeight.w600,
-                ),
+                      color: AppTheme.primaryGradientStart,
+                      fontWeight: FontWeight.w600,
+                    ),
               ),
             ),
           ],
@@ -429,9 +429,9 @@ class _RecentTransactionsSection extends StatelessWidget {
                       Text(
                         tx['amount'] as String,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       Text(
                         tx['time'] as String,

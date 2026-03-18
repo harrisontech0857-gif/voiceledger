@@ -89,20 +89,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 Text(
                   '語記',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    background: Paint()
-                      ..shader = LinearGradient(
-                        colors: [
-                          AppTheme.primaryGradientStart,
-                          AppTheme.primaryGradientEnd,
-                        ],
-                      ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
-                  ),
+                        background: Paint()
+                          ..shader = LinearGradient(
+                            colors: [
+                              AppTheme.primaryGradientStart,
+                              AppTheme.primaryGradientEnd,
+                            ],
+                          ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
+                      ),
                 ),
                 Text(
                   'AI 財務秘書',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: AppTheme.primaryGradientStart,
-                  ),
+                        color: AppTheme.primaryGradientStart,
+                      ),
                 ),
                 const SizedBox(height: AppTheme.spacingLarge),
 
@@ -265,9 +265,9 @@ class _TabButton extends StatelessWidget {
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: isActive ? Colors.white : null,
-            fontWeight: FontWeight.w600,
-          ),
+                color: isActive ? Colors.white : null,
+                fontWeight: FontWeight.w600,
+              ),
           textAlign: TextAlign.center,
         ),
       ),

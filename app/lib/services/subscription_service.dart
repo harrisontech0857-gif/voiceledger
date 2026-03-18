@@ -117,9 +117,8 @@ class SubscriptionService {
       final userId = _supabase.auth.currentUser?.id;
       if (userId == null) throw Exception('用戶未登錄');
 
-      final trialEndsAt = DateTime.now()
-          .add(Duration(days: trialDays))
-          .toIso8601String();
+      final trialEndsAt =
+          DateTime.now().add(Duration(days: trialDays)).toIso8601String();
 
       await _supabase.from('user_subscriptions').insert({
         'user_id': userId,
