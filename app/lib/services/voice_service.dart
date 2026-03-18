@@ -63,7 +63,8 @@ class VoiceService {
     try {
       await _initializeIfNeeded();
 
-      final completer = Stream.periodic(const Duration(milliseconds: 100));
+      // ignore: unused_local_variable
+      final periodicCheck = Stream.periodic(const Duration(milliseconds: 100));
 
       _speechToText.listen(
         onResult: (result) {

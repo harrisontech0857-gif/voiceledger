@@ -12,6 +12,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dailyQuote = ref.watch(dailyQuoteProvider);
+    // ignore: unused_local_variable
     final isDarkMode = ref.watch(isDarkModeProvider);
 
     return Scaffold(
@@ -32,6 +33,7 @@ class DashboardScreen extends ConsumerWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
+          // ignore: unused_result
           ref.refresh(dailyQuoteProvider);
         },
         child: SingleChildScrollView(

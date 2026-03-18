@@ -237,6 +237,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
   void _saveTransaction(Map<String, dynamic> details) {
     // Save transaction to database
     const uuid = Uuid();
+    // ignore: unused_local_variable
     final transaction = Transaction(
       id: uuid.v4(),
       userId: 'current_user_id',

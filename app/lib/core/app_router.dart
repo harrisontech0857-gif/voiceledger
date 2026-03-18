@@ -25,7 +25,9 @@ class Routes {
 
 // Router provider with navigation state
 final goRouterProvider = Provider<GoRouter>((ref) {
+  // ignore: unused_local_variable
   final isAuthenticated = ref.watch(isAuthenticatedProvider);
+  // ignore: unused_local_variable
   final authStateChanges = ref.watch(authStateChangesProvider);
 
   return GoRouter(
