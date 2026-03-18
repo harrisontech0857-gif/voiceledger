@@ -41,8 +41,8 @@ final supabaseClientProvider = Provider<SupabaseClient>((ref) {
 
 /// Supabase 認證客戶端提供者
 ///
-/// 返回用於使用者認證操作的 GotrueClient
-final supabaseAuthProvider = Provider<GotrueClient>((ref) {
+/// 返回用於使用者認證操作的 GoTrueClient
+final supabaseAuthProvider = Provider<GoTrueClient>((ref) {
   return Supabase.instance.client.auth;
 });
 

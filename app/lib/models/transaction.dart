@@ -1,8 +1,3 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'transaction.freezed.dart';
-part 'transaction.g.dart';
-
 enum TransactionType { expense, income }
 
 enum TransactionCategory {
@@ -70,58 +65,122 @@ extension TransactionCategoryExt on TransactionCategory {
   }
 }
 
-@freezed
-class Transaction with _$Transaction {
-  const factory Transaction({
-    required String id,
-    required String userId,
-    required double amount,
-    required TransactionType type,
-    required TransactionCategory category,
-    required DateTime createdAt,
-    required String description,
+class Transaction {
+  final String id;
+  final String userId;
+  final double amount;
+  final TransactionType type;
+  final TransactionCategory category;
+  final DateTime createdAt;
+  final String description;
+  final String? notes;
+  final String? voiceTranscript;
+  final String? photoUrl;
+  final double? latitude;
+  final double? longitude;
+  final String? locationName;
+  final bool isRecurring;
+  final String? recurringFrequency;
+  final bool isSynced;
+
+  const Transaction({
+    required this.id,
+    required this.userId,
+    required this.amount,
+    required this.type,
+    required this.category,
+    required this.createdAt,
+    required this.description,
+    this.notes,
+    this.voiceTranscript,
+    this.photoUrl,
+    this.latitude,
+    this.longitude,
+    this.locationName,
+    this.isRecurring = false,
+    this.recurringFrequency,
+    this.isSynced = false,
+  });
+
+  Transaction copyWith({
+    String? id,
+    String? userId,
+    double? amount,
+    TransactionType? type,
+    TransactionCategory? category,
+    DateTime? createdAt,
+    String? description,
     String? notes,
     String? voiceTranscript,
     String? photoUrl,
     double? latitude,
     double? longitude,
     String? locationName,
-    @Default(false) bool isRecurring,
+    bool? isRecurring,
     String? recurringFrequency,
-    @Default(false) bool isSynced,
-  }) = _Transaction;
-
-  factory Transaction.fromJson(Map<String, dynamic> json) =>
-      _$TransactionFromJson(json);
-
-  factory Transaction.fromSupabase(Map<String, dynamic> map) {
+    bool? isSynced,
+  }) {
     return Transaction(
-      id: map['id'] as String,
-      userId: map['user_id'] as String,
-      amount: (map['amount'] as num).toDouble(),
-      type: TransactionType.values.firstWhere(
-        (e) => e.name == map['type'] as String,
-        orElse: () => TransactionType.expense,
-      ),
-      category: TransactionCategory.values.firstWhere(
-        (e) => e.name == map['category'] as String,
-        orElse: () => TransactionCategory.other,
-      ),
-      createdAt: DateTime.parse(map['created_at'] as String),
-      description: map['description'] as String,
-      notes: map['notes'] as String?,
-      voiceTranscript: map['voice_transcript'] as String?,
-      photoUrl: map['photo_url'] as String?,
-      latitude: (map['latitude'] as num?)?.toDouble(),
-      longitude: (map['longitude'] as num?)?.toDouble(),
-      locationName: map['location_name'] as String?,
-      isRecurring: map['is_recurring'] as bool? ?? false,
-      recurringFrequency: map['recurring_frequency'] as String?,
-      isSynced: true,
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      amount: amount ?? this.amount,
+      type: type ?? this.type,
+      category: category ?? this.category,
+      createdAt: createdAt ?? this.createdAt,
+      description: description ?? this.description,
+      notes: notes ?? this.notes,
+      voiceTranscript: voiceTranscript ?? this.voiceTranscript,
+      photoUrl: photoUrl ?? this.photoUrl,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      locationName: locationName ?? this.locationName,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurringFrequency: recurringFrequency ?? this.recurringFrequency,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
 
-  Map<String, dynamic> toSupabase() {
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'] as String,
+      userId: json['user_id'] as String? ?? json['userId'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      type: TransactionType.values.firstWhere(
+        (e) => e.name == json['type'] as String,
+        orElse: () => TransactionType.expense,
+      ),
+      category: TransactionCategory.values.firstWhere(
+        (e) => e.name == json['category'] as String,
+        orElse: () => TransactionCategory.other,
+      ),
+      createdAt: DateTime.parse(
+        json['created_at'] as String? ??
+            json['createdAt'] as String? ??
+            DateTime.now().toIso8601String(),
+      ),
+      description: json['description'] as String? ?? '',
+      notes: json['notes'] as String?,
+      voiceTranscript:
+          json['voice_transcript'] as String? ??
+          json['voiceTranscript'] as String?,
+      photoUrl: json['photo_url'] as String? ?? json['photoUrl'] as String?,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
+      locationName:
+          json['location_name'] as String? ?? json['locationName'] as String?,
+      isRecurring:
+          json['is_recurring'] as bool? ??
+          json['isRecurring'] as bool? ??
+          false,
+      recurringFrequency:
+          json['recurring_frequency'] as String? ??
+          json['recurringFrequency'] as String?,
+      isSynced:
+          json['is_synced'] as bool? ?? json['isSynced'] as bool? ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'user_id': userId,
@@ -140,4 +199,10 @@ class Transaction with _$Transaction {
       'recurring_frequency': recurringFrequency,
     };
   }
+
+  factory Transaction.fromSupabase(Map<String, dynamic> map) {
+    return Transaction.fromJson(map).copyWith(isSynced: true);
+  }
+
+  Map<String, dynamic> toSupabase() => toJson();
 }

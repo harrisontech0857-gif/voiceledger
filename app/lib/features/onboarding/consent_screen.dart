@@ -87,19 +87,21 @@ class _ConsentScreenState extends State<ConsentScreen> {
                 title: const Text('我同意服務條款'),
                 subtitle: const Text('了解使用語記的規則和限制'),
                 controlAffinity: ListTileControlAffinity.leading,
-                onSecondaryTap: () {
-                  // 打開服務條款
-                  _showLegalDocument(
-                    context,
-                    '服務條款',
-                    '這是一份示範性的服務條款。\n\n'
-                        '通過使用語記，您同意：\n'
-                        '• 為個人、非商業用途使用應用\n'
-                        '• 不進行任何非法活動\n'
-                        '• 遵守所有適用的法律和法規\n\n'
-                        '有關完整的服務條款，請參閱應用內的法律文件。',
-                  );
-                },
+                secondary: IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () {
+                    _showLegalDocument(
+                      context,
+                      '服務條款',
+                      '這是一份示範性的服務條款。\n\n'
+                          '通過使用語記，您同意：\n'
+                          '• 為個人、非商業用途使用應用\n'
+                          '• 不進行任何非法活動\n'
+                          '• 遵守所有適用的法律和法規\n\n'
+                          '有關完整的服務條款，請參閱應用內的法律文件。',
+                    );
+                  },
+                ),
               ),
 
               const SizedBox(height: 12),
@@ -113,19 +115,21 @@ class _ConsentScreenState extends State<ConsentScreen> {
                 title: const Text('我同意隱私政策'),
                 subtitle: const Text('了解我們如何收集和使用您的數據'),
                 controlAffinity: ListTileControlAffinity.leading,
-                onSecondaryTap: () {
-                  // 打開隱私政策
-                  _showLegalDocument(
-                    context,
-                    '隱私政策',
-                    '隱私政策概述：\n\n'
-                        '• 我們收集：姓名、電郵、交易信息\n'
-                        '• 我們使用您的數據來改進服務\n'
-                        '• 您有權訪問和刪除您的數據\n'
-                        '• 我們不會出售您的數據\n\n'
-                        '有關完整的隱私政策，請參閱應用內的法律文件。',
-                  );
-                },
+                secondary: IconButton(
+                  icon: const Icon(Icons.info_outline),
+                  onPressed: () {
+                    _showLegalDocument(
+                      context,
+                      '隱私政策',
+                      '隱私政策概述：\n\n'
+                          '• 我們收集：姓名、電郵、交易信息\n'
+                          '• 我們使用您的數據來改進服務\n'
+                          '• 您有權訪問和刪除您的數據\n'
+                          '• 我們不會出售您的數據\n\n'
+                          '有關完整的隱私政策，請參閱應用內的法律文件。',
+                    );
+                  },
+                ),
               ),
 
               const SizedBox(height: 12),

@@ -5,6 +5,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'core/env.dart';
 import 'core/app_router.dart';
 import 'core/theme.dart';
+// ignore: unused_import
 import 'core/supabase_client.dart';
 
 void main() async {
@@ -18,11 +19,7 @@ void main() async {
   // Hive.registerAdapter(UserProfileAdapter());
 
   // Initialize Supabase
-  await Supabase.initialize(
-    url: Env.supabaseUrl,
-    anonKey: Env.supabaseAnonKey,
-    authCallbackUrlScheme: 'voiceledger',
-  );
+  await Supabase.initialize(url: Env.supabaseUrl, anonKey: Env.supabaseAnonKey);
 
   runApp(const ProviderScope(child: VoiceLedgerApp()));
 }
@@ -44,7 +41,9 @@ class VoiceLedgerApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: const TextScaler.linear(1.0)),
           child: child ?? const SizedBox.shrink(),
         );
       },

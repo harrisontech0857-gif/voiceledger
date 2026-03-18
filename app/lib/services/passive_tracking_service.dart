@@ -60,7 +60,7 @@ class PassiveTrackingService {
   List<GeofenceLocation> _geofences = [];
   Position? _lastPosition;
   StreamSubscription<Position>? _locationSubscription;
-  StreamSubscription<ServiceStatus>? _serviceStatusSubscription;
+  StreamSubscription<dynamic>? _serviceStatusSubscription;
 
   PassiveTrackingService() {
     _initializeLocationService();

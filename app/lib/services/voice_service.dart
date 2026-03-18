@@ -36,13 +36,24 @@ class VoiceService {
     }
   }
 
-  Stream<String> startListening({String localeId = 'zh_TW'}) {
-    return Stream.fromFuture(_initializeIfNeeded()).then((_) {
-      return Stream.periodic(
-        const Duration(milliseconds: 100),
-        (_) => _speechToText.lastRecognizedWords,
-      ).takeUntil(Future.delayed(const Duration(minutes: 5)));
-    }).asBroadcastStream();
+  Stream<String> startListening({String localeId = 'zh_TW'}) async* {
+    await _initializeIfNeeded();
+
+    _speechToText.listen(
+      onResult: (result) {
+        // Results handled via periodic polling below
+      },
+      localeId: localeId,
+      listenFor: const Duration(minutes: 5),
+      pauseFor: const Duration(seconds: 3),
+      partialResults: true,
+    );
+
+    final endTime = DateTime.now().add(const Duration(minutes: 5));
+    while (DateTime.now().isBefore(endTime) && _speechToText.isListening) {
+      yield _speechToText.lastRecognizedWords;
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
   }
 
   Future<String> listenOnce({
@@ -92,7 +103,8 @@ class VoiceService {
 
   Future<List<String>> getAvailableLanguages() async {
     try {
-      return _speechToText.locales();
+      final locales = await _speechToText.locales();
+      return locales.map((l) => l.localeId).toList();
     } catch (e) {
       _logger.e('Error getting available languages: $e');
       return [];

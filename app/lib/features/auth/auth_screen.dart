@@ -53,7 +53,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           password: _passwordController.text,
         );
       } else {
-        await client.auth.signUpWithPassword(
+        await client.auth.signUp(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
