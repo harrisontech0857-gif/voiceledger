@@ -20,10 +20,7 @@ class TransactionService {
     DateTime? endDate,
   }) async {
     try {
-      var query = _client
-          .from('transactions')
-          .select()
-          .order('created_at', ascending: false);
+      var query = _client.from('transactions').select();
 
       if (userId != null) {
         query = query.eq('user_id', userId);
@@ -37,7 +34,7 @@ class TransactionService {
         query = query.lte('created_at', endDate.toIso8601String());
       }
 
-      final data = await query;
+      final data = await query.order('created_at', ascending: false);
       return (data as List<dynamic>)
           .map((e) => Transaction.fromSupabase(e as Map<String, dynamic>))
           .toList();

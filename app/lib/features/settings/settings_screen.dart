@@ -40,7 +40,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             onPressed: () async {
               await Supabase.instance.client.auth.signOut();
               if (mounted) {
-                GoRouter.of(context).go(Routes.auth);
+                context.go('/auth');
               }
             },
             child: const Text('登出'),
@@ -111,7 +111,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: _isDarkMode,
                     onChanged: (value) {
                       setState(() => _isDarkMode = value);
-                      ref.read(isDarkModeProvider.notifier).state = value;
+                      ref.read(themeModeProvider.notifier).state =
+                          value ? ThemeMode.dark : ThemeMode.light;
                     },
                   ),
                 ),

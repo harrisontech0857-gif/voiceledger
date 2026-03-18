@@ -109,7 +109,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             right: 0,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   children: [
                     // Page Indicators
@@ -124,13 +124,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: _currentPage == index
-                                ? AppTheme.primaryGradientStart
-                                : Colors.grey.withOpacity(0.3),
+                                ? Theme.of(context).colorScheme.primary
+                                : Colors.grey.withAlpha((255 * 0.3).round()),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppTheme.spacingLarge),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // Buttons
                     Row(
@@ -155,7 +155,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               child: const Text('跳過'),
                             ),
                           ),
-                        const SizedBox(width: AppTheme.spacingSmall),
+                        const SizedBox(width: AppSpacing.sm),
                         Expanded(
                           child: ElevatedButton.icon(
                             icon: Icon(
@@ -219,7 +219,7 @@ class _OnboardingPage extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: color.withAlpha((255 * 0.1).round()),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 60),

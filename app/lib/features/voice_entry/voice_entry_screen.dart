@@ -324,7 +324,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                                 color: Theme.of(context)
                                     .colorScheme
                                     .primary
-                                    .withValues(alpha: 0.5),
+                                    .withAlpha((255 * 0.5).round()),
                                 blurRadius:
                                     20 + (_animationController.value * 10),
                                 spreadRadius:
@@ -341,7 +341,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                                 Theme.of(context)
                                     .colorScheme
                                     .primary
-                                    .withValues(alpha: 0.7),
+                                    .withAlpha((255 * 0.7).round()),
                               ],
                             ),
                           ),
@@ -397,7 +397,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         color: Theme.of(context)
                             .colorScheme
                             .primary
-                            .withValues(alpha: 0.3),
+                            .withAlpha((255 * 0.3).round()),
                       ),
                     ),
                     child: Column(
@@ -430,7 +430,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         color: Theme.of(context)
                             .colorScheme
                             .tertiary
-                            .withValues(alpha: 0.3),
+                            .withAlpha((255 * 0.3).round()),
                       ),
                     ),
                     child: Column(

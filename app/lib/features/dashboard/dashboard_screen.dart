@@ -78,7 +78,10 @@ class _DailyQuoteCard extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+            Theme.of(context)
+                .colorScheme
+                .primary
+                .withAlpha((255 * 0.7).round()),
           ],
         ),
         borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -117,8 +120,8 @@ class _DailyQuoteCard extends StatelessWidget {
             loading: () => Container(
               height: 60,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onPrimary.withValues(
-                      alpha: 0.2,
+                color: Theme.of(context).colorScheme.onPrimary.withAlpha(
+                      (255 * 0.2).round(),
                     ),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
@@ -129,7 +132,7 @@ class _DailyQuoteCard extends StatelessWidget {
                     color: Theme.of(context)
                         .colorScheme
                         .onPrimary
-                        .withValues(alpha: 0.8),
+                        .withAlpha((255 * 0.8).round()),
                   ),
             ),
           ),
@@ -308,9 +311,9 @@ class _QuickActionButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withAlpha((255 * 0.1).round()),
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
+          border: Border.all(color: color.withAlpha((255 * 0.3).round())),
         ),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,

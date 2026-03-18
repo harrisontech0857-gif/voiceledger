@@ -253,71 +253,144 @@ class _CategoryBreakdown extends StatelessWidget {
       {'name': '其他', 'amount': 'NT\$ 1,800', 'percentage': 22.0, 'icon': '📝'},
     ];
 
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: categories.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-      itemBuilder: (context, index) {
-        final cat = categories[index];
-        final percentage = cat['percentage'] as double;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      cat['icon'] as String,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          cat['name'] as String,
-                          style: Theme.of(context).textTheme.titleSmall,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // PieChart visualization
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: SizedBox(
+              height: 250,
+              child: PieChart(
+                PieChartData(
+                  sections: List.generate(
+                    categories.length,
+                    (index) {
+                      final percentage =
+                          categories[index]['percentage'] as double;
+                      return PieChartSectionData(
+                        value: percentage,
+                        color: _getCategoryColor(index),
+                        title: '${percentage.toStringAsFixed(0)}%',
+                        radius: 80,
+                        titleStyle: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
-                        Text(
-                          cat['amount'] as String,
-                          style: Theme.of(context).textTheme.labelSmall,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Text(
-                  '${percentage.toStringAsFixed(1)}%',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: percentage / 100,
-                minHeight: 8,
-                backgroundColor: Colors.grey.withAlpha((255 * 0.2).round()),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  _getCategoryColor(index),
+                      );
+                    },
+                  ),
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 40,
                 ),
               ),
             ),
-          ],
-        );
-      },
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // Legend
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: List.generate(
+            categories.length,
+            (index) {
+              final cat = categories[index];
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: _getCategoryColor(index),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    '${cat['name']} (${cat['percentage']}%)',
+                    style: Theme.of(context).textTheme.labelSmall,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        // Category breakdown list
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: categories.length,
+          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+          itemBuilder: (context, index) {
+            final cat = categories[index];
+            final percentage = cat['percentage'] as double;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          cat['icon'] as String,
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              cat['name'] as String,
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            Text(
+                              cat['amount'] as String,
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Text(
+                      '${percentage.toStringAsFixed(1)}%',
+                      style: Theme.of(
+                        context,
+                      )
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: percentage / 100,
+                    minHeight: 8,
+                    backgroundColor: Colors.grey.withAlpha((255 * 0.2).round()),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      _getCategoryColor(index),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 
   Color _getCategoryColor(int index) {
-    final colors = [
+    final colors = const [
       Color(0xFFFF9500),
       Color(0xFF2196F3),
       Color(0xFF4CAF50),

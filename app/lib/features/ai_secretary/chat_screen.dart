@@ -230,7 +230,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               borderRadius: BorderRadius.circular(
                                 AppRadius.xl,
                               ),
-                              borderSide: const BorderSide(
+                              borderSide: BorderSide(
                                 color:
                                     Colors.grey.withAlpha((255 * 0.2).round()),
                               ),
@@ -239,7 +239,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               borderRadius: BorderRadius.circular(
                                 AppRadius.xl,
                               ),
-                              borderSide: const BorderSide(
+                              borderSide: BorderSide(
                                 color:
                                     Colors.grey.withAlpha((255 * 0.2).round()),
                               ),
