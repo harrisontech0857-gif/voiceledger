@@ -27,3 +27,7 @@ doc/api/
 
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# Temp files
+gh_*/
+backend/supabase/.temp/
