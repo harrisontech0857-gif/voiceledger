@@ -162,22 +162,50 @@ jobs:
 
       - name: Fix Android SDK versions
         run: |
-          # 修復 app/build.gradle.kts（Flutter 3.24+ 預設生成 .kts）
+          # 為所有子專案（含 plugins）強制設定 compileSdk
+          # 在 android/build.gradle 或 build.gradle.kts 的末尾加入 subprojects 區塊
+          if [ -f "android/build.gradle.kts" ]; then
+            cat >> android/build.gradle.kts << 'GRADLE'
+
+          subprojects {
+              afterEvaluate {
+                  if (extensions.findByName("android") != null) {
+                      extensions.configure<com.android.build.gradle.BaseExtension> {
+                          compileSdkVersion(35)
+                          defaultConfig {
+                              if (minSdkVersion == null || (minSdkVersion?.apiLevel ?: 0) < 21) {
+                                  minSdk = 21
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+          GRADLE
+          elif [ -f "android/build.gradle" ]; then
+            cat >> android/build.gradle << 'GRADLE'
+
+          subprojects {
+              afterEvaluate {
+                  if (it.hasProperty('android')) {
+                      android {
+                          if (namespace == null) {
+                              namespace = it.group.toString()
+                          }
+                          compileSdkVersion 35
+                      }
+                  }
+              }
+          }
+          GRADLE
+          fi
+          # 也直接替換 app 層的 flutter.xxx 引用
           for f in android/app/build.gradle.kts android/app/build.gradle; do
             if [ -f "$f" ]; then
-              sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/' "$f"
-              sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 35/' "$f"
-              sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/' "$f"
-              sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/' "$f"
-              sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 35/' "$f"
-              sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 35/' "$f"
+              sed -i 's/flutter\.compileSdkVersion/35/g' "$f"
+              sed -i 's/flutter\.minSdkVersion/21/g' "$f"
+              sed -i 's/flutter\.targetSdkVersion/35/g' "$f"
             fi
-          done
-          # 同時修復 plugin 子專案的 build.gradle.kts
-          find android -name "build.gradle.kts" -o -name "build.gradle" | while read f; do
-            sed -i 's/flutter\.compileSdkVersion/35/g' "$f"
-            sed -i 's/flutter\.minSdkVersion/21/g' "$f"
-            sed -i 's/flutter\.targetSdkVersion/35/g' "$f"
           done
 
       - name: Get dependencies
