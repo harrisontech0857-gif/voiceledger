@@ -199,14 +199,15 @@ class _TransactionTile extends ConsumerWidget {
             ],
           ),
           onTap: () {
-            _showTransactionDetails(context, transaction);
+            _showTransactionDetails(context, ref, transaction);
           },
         ),
       ),
     );
   }
 
-  void _showTransactionDetails(BuildContext context, Transaction transaction) {
+  void _showTransactionDetails(
+      BuildContext context, WidgetRef ref, Transaction transaction) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Padding(
