@@ -149,7 +149,7 @@ void main() {
 
     group('toJson', () {
       test('should convert Transaction to JSON with all fields', () {
-        final transaction = const Transaction(
+        final transaction = Transaction(
           id: 'tx_123',
           userId: 'user_456',
           amount: 100.50,
@@ -187,7 +187,7 @@ void main() {
       });
 
       test('should handle null optional fields', () {
-        final transaction = const Transaction(
+        final transaction = Transaction(
           id: 'tx_001',
           userId: 'user_001',
           amount: 50.0,
@@ -209,7 +209,7 @@ void main() {
       });
 
       test('should correctly serialize enum values', () {
-        final transaction = const Transaction(
+        final transaction = Transaction(
           id: 'tx_002',
           userId: 'user_002',
           amount: 200.0,
@@ -227,7 +227,7 @@ void main() {
     });
 
     group('copyWith', () {
-      const baseTransaction = Transaction(
+      final baseTransaction = Transaction(
         id: 'tx_001',
         userId: 'user_001',
         amount: 100.0,
@@ -333,7 +333,7 @@ void main() {
       });
 
       test('toSupabase should produce valid JSON for database', () {
-        const transaction = Transaction(
+        final transaction = Transaction(
           id: 'tx_001',
           userId: 'user_001',
           amount: 100.0,
@@ -382,7 +382,7 @@ void main() {
 
     group('Transaction constructor', () {
       test('should create Transaction with required parameters', () {
-        const transaction = Transaction(
+        final transaction = Transaction(
           id: 'tx_001',
           userId: 'user_001',
           amount: 100.0,
@@ -398,7 +398,7 @@ void main() {
       });
 
       test('should respect custom values for optional parameters', () {
-        const transaction = Transaction(
+        final transaction = Transaction(
           id: 'tx_001',
           userId: 'user_001',
           amount: 100.0,
