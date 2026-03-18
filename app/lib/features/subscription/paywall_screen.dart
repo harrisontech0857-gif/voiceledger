@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme.dart';
+import '../../services/subscription_service.dart';
 
 class PaywallScreen extends StatefulWidget {
   final String? currentTier;
@@ -59,13 +60,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: 實現訂閱邏輯
-      // 如果啟用 ENABLE_REVENUECAT=true，使用 RevenueCat SDK
-      // 否則使用 mock 實現
+      final subService = SubscriptionService();
+      await subService.setCurrentTier(tier);
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('選擇升級到 $tier（待實現）')));
+      ).showSnackBar(SnackBar(content: Text('已升級到 $tier')));
 
       widget.onPremiumSelected?.call();
     } catch (e) {

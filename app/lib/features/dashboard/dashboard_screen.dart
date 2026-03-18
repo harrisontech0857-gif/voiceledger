@@ -7,7 +7,6 @@ import '../../services/ai_service.dart';
 import '../../models/pet.dart';
 import '../../services/pet_service.dart';
 import '../../widgets/pet_companion_widget.dart';
-import '../../widgets/pet_debug_panel.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -38,10 +37,6 @@ class DashboardScreen extends ConsumerWidget {
 
                   // 寵物主視覺（首頁核心）
                   const PetCompanionWidget(),
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // 🐛 除錯面板（開發測試用，正式版移除）
-                  const PetDebugPanel(),
                   const SizedBox(height: AppSpacing.md),
 
                   // 寵物數據字卡列 — 等級 / 連續天數 / 記錄筆數

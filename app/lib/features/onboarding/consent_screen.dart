@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../services/privacy_service.dart';
 
 /// 用戶同意畫面
 /// 在首次使用應用時，用戶必須同意隱私政策和數據收集條款
@@ -27,14 +28,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
 
   Future<void> _submitConsent() async {
     try {
-      // TODO: 實現保存同意到 Supabase
-      // await _privacyService.submitConsent(
-      //   termsOfServiceAgreed: _agreedToTermsOfService,
-      //   privacyPolicyAgreed: _agreedToPrivacyPolicy,
-      //   dataProcessingAgreed: _agreedToDataProcessing,
-      //   locationTrackingAgreed: _agreedToLocationTracking,
-      //   photoAnalysisAgreed: _agreedToPhotoAnalysis,
-      // );
+      final privacyService = PrivacyService();
+      await privacyService
+          .setLocationTrackingConsent(_agreedToLocationTracking);
+      await privacyService.setPhotoAnalysisConsent(_agreedToPhotoAnalysis);
 
       if (mounted) {
         Navigator.of(context).pop(true);

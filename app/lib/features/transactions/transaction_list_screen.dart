@@ -274,9 +274,16 @@ class _TransactionTile extends ConsumerWidget {
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: 實現刪除邏輯
+              final txService = ref.read(transactionServiceProvider);
+              await txService.deleteTransaction(transaction.id);
+              if (mounted) {
+                setState(() {});
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('交易已刪除')),
+                );
+              }
             },
             child: const Text('刪除'),
           ),

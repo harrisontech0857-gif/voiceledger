@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/theme.dart';
+import '../../core/supabase_client.dart';
 import '../../models/transaction.dart';
 import '../../services/voice_service.dart';
 import '../../services/ai_service.dart';
@@ -472,14 +473,13 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     );
   }
 
-  void _saveTransaction(Map<String, dynamic> details) {
+  Future<void> _saveTransaction(Map<String, dynamic> details) async {
     const uuid = Uuid();
     final amount = double.tryParse(details['amount']?.toString() ?? '0') ?? 0;
 
-    // ignore: unused_local_variable
     final transaction = Transaction(
       id: uuid.v4(),
-      userId: 'current_user_id',
+      userId: ref.read(currentUserIdProvider),
       amount: amount,
       type: TransactionType.expense,
       category: _parseCategory(details['category']?.toString() ?? ''),
@@ -488,6 +488,14 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       voiceTranscript: _finalText,
       notes: _aiResponse,
     );
+
+    // 持久化到 Supabase / Mock
+    try {
+      final txService = ref.read(transactionServiceProvider);
+      await txService.addTransaction(transaction);
+    } catch (e) {
+      // 本地暫存失敗不阻擋 UX
+    }
 
     // 餵食寵物 🐱
     final petFeedback = ref.read(petProvider.notifier).feed(

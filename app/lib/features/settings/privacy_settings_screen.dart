@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 
 class PrivacySettingsScreen extends StatefulWidget {
@@ -274,10 +275,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                     // 隱私政策連結
                     OutlinedButton.icon(
                       onPressed: () {
-                        // TODO: 打開隱私政策
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('打開隱私政策（待實現）')),
-                        );
+                        context.push('/privacy-policy');
                       },
                       icon: const Icon(Icons.description),
                       label: const Text('查看隱私政策'),
