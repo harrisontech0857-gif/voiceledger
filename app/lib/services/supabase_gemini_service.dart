@@ -111,7 +111,7 @@ class SupabaseGeminiService implements AiServiceBase {
     List<ChatMessage> conversationHistory,
   ) async {
     try {
-      final history = conversationHistory.map((msg) => {
+      final history = conversationHistory.map((msg) {
         return {
           'role': msg.isUser ? 'user' : 'model',
           'content': msg.content,
@@ -175,15 +175,26 @@ class SupabaseGeminiService implements AiServiceBase {
   /// 將中文類別對應回 app 內部類別
   String _mapCategory(String category) {
     const map = {
-      '餐飲': '餐飲', 'food': '餐飲', 'dining_out': '餐飲',
-      '交通': '交通', 'transport': '交通',
-      '購物': '購物', 'shopping': '購物',
-      '娛樂': '娛樂', 'entertainment': '娛樂',
-      '日用': '日用', 'utilities': '日用',
-      '健康': '健康', 'health': '健康', 'medical': '健康',
-      '教育': '教育', 'education': '教育',
-      '投資': '投資', 'investment': '投資',
-      '薪資': '薪資', 'salary': '薪資',
+      '餐飲': '餐飲',
+      'food': '餐飲',
+      'dining_out': '餐飲',
+      '交通': '交通',
+      'transport': '交通',
+      '購物': '購物',
+      'shopping': '購物',
+      '娛樂': '娛樂',
+      'entertainment': '娛樂',
+      '日用': '日用',
+      'utilities': '日用',
+      '健康': '健康',
+      'health': '健康',
+      'medical': '健康',
+      '教育': '教育',
+      'education': '教育',
+      '投資': '投資',
+      'investment': '投資',
+      '薪資': '薪資',
+      'salary': '薪資',
     };
     return map[category] ?? '其他';
   }

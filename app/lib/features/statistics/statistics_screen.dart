@@ -221,10 +221,7 @@ class _StatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withAlpha(20),
+                  color: Theme.of(context).colorScheme.primary.withAlpha(20),
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Icon(
@@ -502,10 +499,7 @@ class _TopTransactions extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withAlpha(20),
+                    color: Theme.of(context).colorScheme.primary.withAlpha(20),
                     borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                   child: Center(

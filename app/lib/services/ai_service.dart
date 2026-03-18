@@ -353,11 +353,141 @@ class MockAiService implements AiServiceBase {
     String transcript,
   ) async {
     await Future.delayed(const Duration(milliseconds: 500));
+
+    // 從文字中提取金額
+    final amountMatch = RegExp(r'(\d+(?:\.\d+)?)').firstMatch(transcript);
+    final amount = amountMatch != null
+        ? double.tryParse(amountMatch.group(1)!) ?? 0.0
+        : 0.0;
+
+    // 根據關鍵字判斷分類
+    final category = _detectCategory(transcript);
+
+    // 生成描述（移除金額數字，保留語意）
+    final description = transcript.isNotEmpty ? transcript : '未命名消費';
+
     return {
-      'amount': 180,
-      'category': 'food',
-      'description': transcript,
+      'amount': amount.round(),
+      'category': category,
+      'description': description,
       'currency': 'TWD',
+      'feedback': _generateFeedback(category, amount),
     };
+  }
+
+  /// 根據關鍵字智慧判斷分類
+  static String _detectCategory(String text) {
+    final t = text.toLowerCase();
+
+    const categoryKeywords = <String, List<String>>{
+      '餐飲': [
+        '吃',
+        '飯',
+        '餐',
+        '食',
+        '便當',
+        '麵',
+        '咖啡',
+        '奶茶',
+        '早餐',
+        '午餐',
+        '晚餐',
+        '宵夜',
+        '小吃',
+        '餐廳',
+        '火鍋',
+        '壽司',
+        '飲料',
+        '雞排',
+        '牛排',
+        '漢堡',
+        'pizza',
+        '甜點',
+        '蛋糕',
+        '茶'
+      ],
+      '交通': [
+        '車',
+        '捷運',
+        '公車',
+        '計程車',
+        '油',
+        '停車',
+        '高鐵',
+        '台鐵',
+        'uber',
+        '加油',
+        '機票',
+        '火車',
+        'youbike',
+        '騎'
+      ],
+      '購物': [
+        '買',
+        '購',
+        '網購',
+        '衣服',
+        '鞋',
+        '包',
+        '淘寶',
+        '蝦皮',
+        '商品',
+        '百貨',
+        '手機',
+        '電腦',
+        '3C',
+        '禮物'
+      ],
+      '娛樂': [
+        '電影',
+        '遊戲',
+        '唱歌',
+        'ktv',
+        '旅遊',
+        '門票',
+        'netflix',
+        'spotify',
+        '演唱會',
+        '展覽',
+        '玩'
+      ],
+      '日用': [
+        '超市',
+        '便利商店',
+        '衛生紙',
+        '洗衣',
+        '電費',
+        '水費',
+        '網路費',
+        '瓦斯',
+        '房租',
+        '管理費',
+        '日用品',
+        '全聯',
+        '家樂福'
+      ],
+      '健康': ['醫', '藥', '看診', '掛號', '健身', '牙', '診所', '醫院', '保健', '維他命'],
+      '教育': ['書', '課', '學費', '補習', '培訓', '文具', '考試', '教材'],
+      '投資': ['投資', '股票', '基金', '利息', '定存', '保險'],
+      '薪資': ['薪水', '薪資', '工資', '獎金', '收入', '稿費', '兼職'],
+    };
+
+    for (final entry in categoryKeywords.entries) {
+      for (final keyword in entry.value) {
+        if (t.contains(keyword)) {
+          return entry.key;
+        }
+      }
+    }
+
+    return '其他';
+  }
+
+  /// 根據分類生成回饋語
+  static String _generateFeedback(String category, double amount) {
+    if (amount == 0) return '沒有偵測到金額，請確認後再保存';
+    if (amount > 1000) return '大筆支出要注意預算喔！';
+    if (amount > 500) return '中等花費，記錄下來很棒！';
+    return '小額消費也不放過，好習慣！';
   }
 }

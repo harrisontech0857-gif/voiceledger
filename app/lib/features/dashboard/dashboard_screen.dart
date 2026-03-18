@@ -4,6 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
 import '../../services/ai_service.dart';
+import '../../models/pet.dart';
+import '../../services/pet_service.dart';
+import '../../widgets/pet_companion_widget.dart';
+import '../../widgets/pet_debug_panel.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -11,6 +15,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dailyQuote = ref.watch(dailyQuoteProvider);
+    final pet = ref.watch(petProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -20,38 +25,41 @@ class DashboardScreen extends ConsumerWidget {
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 頂部問候區域
-                _TopGreetingBar(onSettingsTap: () => context.go('/settings')),
-                const SizedBox(height: AppSpacing.sm),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppSpacing.md),
 
-                // Hero 財務摘要卡片
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: _HeroSummaryCard(),
-                ),
-                const SizedBox(height: AppSpacing.lg),
+                  // 頂部問候
+                  _TopGreetingBar(onSettingsTap: () => context.go('/settings')),
+                  const SizedBox(height: AppSpacing.md),
 
-                // 每日金句
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: _DailyQuoteCard(dailyQuote: dailyQuote),
-                ),
-                const SizedBox(height: AppSpacing.lg),
+                  // 寵物主視覺（首頁核心）
+                  const PetCompanionWidget(),
+                  const SizedBox(height: AppSpacing.sm),
 
-                // 快速操作（水平捲動）
-                const _QuickActionsRow(),
-                const SizedBox(height: AppSpacing.lg),
+                  // 🐛 除錯面板（開發測試用，正式版移除）
+                  const PetDebugPanel(),
+                  const SizedBox(height: AppSpacing.md),
 
-                // 最近交易
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: _RecentTransactionsSection(),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-              ],
+                  // 寵物數據字卡列 — 等級 / 連續天數 / 記錄筆數
+                  _StatsCardRow(pet: pet),
+                  const SizedBox(height: AppSpacing.md),
+
+                  // 功能入口字卡 — 語音記帳 / 問秘書
+                  _ActionCardRow(
+                    onVoiceTap: () => context.push('/voice-entry'),
+                    onChatTap: () => context.push('/ai-secretary'),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+
+                  // 每日金句
+                  _DailyQuoteCard(dailyQuote: dailyQuote),
+                  const SizedBox(height: 100), // 底部留白給導航列
+                ],
+              ),
             ),
           ),
         ),
@@ -75,221 +83,253 @@ class _TopGreetingBar extends StatelessWidget {
             ? '午安'
             : '晚安';
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
-        0,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$greeting 👋',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '今天的財務狀況如何？',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: onSettingsTap,
-            child: CircleAvatar(
-              radius: 22,
-              backgroundColor:
-                  Theme.of(context).colorScheme.primaryContainer,
-              child: Icon(
-                Icons.person_rounded,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Hero 財務摘要卡片 — 收入/支出/結餘合一
-class _HeroSummaryCard extends StatelessWidget {
-  const _HeroSummaryCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final now = DateTime.now();
-    final monthLabel = DateFormat('yyyy 年 M 月', 'zh_TW').format(now);
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [cs.primary, cs.tertiary],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        boxShadow: [
-          BoxShadow(
-            color: cs.primary.withAlpha(60),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                monthLabel,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Colors.white.withAlpha(200),
-                    ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(40),
-                  borderRadius: BorderRadius.circular(AppRadius.full),
-                ),
-                child: Text(
-                  '已用 45%',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'NT\$ 16,550',
-            style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -1,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '本月結餘',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withAlpha(180),
-                ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          // 預算進度條
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: 0.45,
-              minHeight: 6,
-              backgroundColor: Colors.white.withAlpha(50),
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          // 收入 / 支出 Row
-          Row(
-            children: [
-              Expanded(
-                child: _MiniStat(
-                  icon: Icons.arrow_downward_rounded,
-                  label: '收入',
-                  amount: 'NT\$ 25,000',
-                  iconBgColor: Colors.white.withAlpha(40),
-                ),
-              ),
-              Container(
-                width: 1,
-                height: 36,
-                color: Colors.white.withAlpha(50),
-              ),
-              Expanded(
-                child: _MiniStat(
-                  icon: Icons.arrow_upward_rounded,
-                  label: '支出',
-                  amount: 'NT\$ 8,450',
-                  iconBgColor: Colors.white.withAlpha(40),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MiniStat extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String amount;
-  final Color iconBgColor;
-
-  const _MiniStat({
-    required this.icon,
-    required this.label,
-    required this.amount,
-    required this.iconBgColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: iconBgColor,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: Colors.white, size: 16),
-        ),
-        const SizedBox(width: AppSpacing.sm),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: Colors.white.withAlpha(180),
-                  ),
-            ),
-            Text(
-              amount,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.white,
+              '$greeting 👋',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
+            const SizedBox(height: 2),
+            Text(
+              DateFormat('M月d日 EEEE', 'zh_TW').format(DateTime.now()),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
           ],
+        ),
+        GestureDetector(
+          onTap: onSettingsTap,
+          child: CircleAvatar(
+            radius: 22,
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            child: Icon(
+              Icons.person_rounded,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
         ),
       ],
     );
   }
 }
 
-/// 每日金句卡片（精簡版）
+/// 寵物數據字卡列 — 三張字卡橫排
+class _StatsCardRow extends StatelessWidget {
+  final PetModel pet;
+
+  const _StatsCardRow({required this.pet});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _StatCard(
+            icon: Icons.star_rounded,
+            iconColor: Colors.amber,
+            label: '等級',
+            value: 'Lv.${pet.level}',
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _StatCard(
+            icon: Icons.local_fire_department_rounded,
+            iconColor: Colors.deepOrange,
+            label: '連續',
+            value: '${pet.streak} 天',
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _StatCard(
+            icon: Icons.receipt_long_rounded,
+            iconColor: Colors.teal,
+            label: '記錄',
+            value: '${pet.totalEntries} 筆',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 單一數據字卡
+class _StatCard extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final String value;
+
+  const _StatCard({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: cs.outlineVariant.withAlpha(60)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconColor.withAlpha(25),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 功能入口字卡列 — 語音記帳 + 問秘書
+class _ActionCardRow extends StatelessWidget {
+  final VoidCallback onVoiceTap;
+  final VoidCallback onChatTap;
+
+  const _ActionCardRow({
+    required this.onVoiceTap,
+    required this.onChatTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _ActionCard(
+            icon: Icons.mic_rounded,
+            label: '語音記帳',
+            subtitle: '說一句就記好',
+            onTap: onVoiceTap,
+            isPrimary: true,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _ActionCard(
+            icon: Icons.chat_rounded,
+            label: '問秘書',
+            subtitle: 'AI 財務分析',
+            onTap: onChatTap,
+            isPrimary: false,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 單一功能字卡按鈕
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String subtitle;
+  final VoidCallback onTap;
+  final bool isPrimary;
+
+  const _ActionCard({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+    required this.isPrimary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: isPrimary ? cs.primaryContainer : cs.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: isPrimary
+              ? null
+              : Border.all(color: cs.outlineVariant.withAlpha(60)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isPrimary
+                    ? cs.primary.withAlpha(30)
+                    : cs.tertiary.withAlpha(25),
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+              child: Icon(
+                icon,
+                color: isPrimary ? cs.primary : cs.tertiary,
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: isPrimary ? cs.onPrimaryContainer : cs.onSurface,
+                  ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: isPrimary
+                        ? cs.onPrimaryContainer.withAlpha(180)
+                        : cs.onSurfaceVariant,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 每日金句卡片
 class _DailyQuoteCard extends StatelessWidget {
   final AsyncValue<String> dailyQuote;
 
@@ -308,10 +348,7 @@ class _DailyQuoteCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .primary
-                  .withAlpha(25),
+              color: Theme.of(context).colorScheme.primary.withAlpha(25),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -347,201 +384,6 @@ class _DailyQuoteCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// 水平捲動快速操作
-class _QuickActionsRow extends StatelessWidget {
-  const _QuickActionsRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final actions = [
-      _QA(Icons.mic_rounded, '語音記帳', '/voice-entry', Theme.of(context).colorScheme.primary),
-      _QA(Icons.add_rounded, '手動記帳', '/add-transaction', Theme.of(context).colorScheme.secondary),
-      _QA(Icons.chat_rounded, '詢問秘書', '/ai-secretary', Theme.of(context).colorScheme.tertiary),
-      _QA(Icons.bar_chart_rounded, '查看統計', '/statistics', Theme.of(context).colorScheme.error),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Text(
-            '快速操作',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        SizedBox(
-          height: 100,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            itemCount: actions.length,
-            separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
-            itemBuilder: (context, index) {
-              final a = actions[index];
-              return GestureDetector(
-                onTap: () {
-                  if (a.route.startsWith('/statistics')) {
-                    context.go(a.route);
-                  } else {
-                    context.push(a.route);
-                  }
-                },
-                child: SizedBox(
-                  width: 80,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: a.color.withAlpha(25),
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: Border.all(
-                            color: a.color.withAlpha(60),
-                          ),
-                        ),
-                        child: Icon(a.icon, color: a.color, size: 28),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        a.label,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _QA {
-  final IconData icon;
-  final String label;
-  final String route;
-  final Color color;
-  const _QA(this.icon, this.label, this.route, this.color);
-}
-
-/// 最近交易區段
-class _RecentTransactionsSection extends StatelessWidget {
-  _RecentTransactionsSection();
-
-  final transactions = const [
-    {'category': '餐飲', 'icon': '🍜', 'description': '中午便當', 'amount': '-NT\$ 85', 'time': '12:30'},
-    {'category': '交通', 'icon': '🚗', 'description': '計程車', 'amount': '-NT\$ 250', 'time': '10:45'},
-    {'category': '購物', 'icon': '🛍️', 'description': '便利店購物', 'amount': '-NT\$ 125', 'time': '08:20'},
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '最近交易',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            GestureDetector(
-              onTap: () => context.go('/transactions'),
-              child: Text(
-                '查看全部 →',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.md),
-        ...transactions.map((tx) => _TransactionTile(tx: tx)),
-      ],
-    );
-  }
-}
-
-class _TransactionTile extends StatelessWidget {
-  final Map<String, String> tx;
-  const _TransactionTile({required this.tx});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(AppRadius.md),
-        ),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-              child: Center(
-                child: Text(
-                  tx['icon'] ?? '',
-                  style: const TextStyle(fontSize: 22),
-                ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tx['description'] ?? '',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${tx['category']} · ${tx['time']}',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              tx['amount'] ?? '',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
-        ),
       ),
     );
   }

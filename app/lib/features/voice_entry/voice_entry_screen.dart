@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../models/transaction.dart';
 import '../../services/voice_service.dart';
 import '../../services/ai_service.dart';
+import '../../services/pet_service.dart';
 
 class VoiceEntryScreen extends ConsumerStatefulWidget {
   const VoiceEntryScreen({super.key});
@@ -76,7 +77,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
 
     final voiceService = ref.read(voiceServiceProvider);
 
-    // 設定即時回呼
+    // 設定即時回呼 — 手動停止模式，不自動處理
     voiceService.onResult = (text, isFinal) {
       if (!mounted) return;
       setState(() {
@@ -85,23 +86,15 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
           _finalText = text;
         }
       });
-
-      // 如果收到最終結果，自動停止
-      if (isFinal && text.isNotEmpty) {
-        _onRecognitionDone(text);
-      }
+      // 手動停止模式：不在 isFinal 時自動處理
     };
 
     voiceService.onStatus = (status) {
       if (!mounted) return;
-      // 'done' 或 'notListening' 表示語音引擎結束
       if (status == 'done' || status == 'notListening') {
-        if (_isListening && _partialText.isNotEmpty) {
-          _onRecognitionDone(_partialText);
-        } else if (_isListening) {
-          setState(() => _isListening = false);
-          _pulseController.stop();
-          _pulseController.reset();
+        // 手動停止模式：語音引擎因平台限制暫停時，自動重啟繼續聆聽
+        if (_isListening) {
+          voiceService.restartListening(localeId: 'zh_TW');
         }
       } else if (status == 'not_supported' || status == 'error') {
         setState(() {
@@ -260,10 +253,8 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: Theme.of(ctx)
-                                .colorScheme
-                                .primary
-                                .withAlpha(20),
+                            color:
+                                Theme.of(ctx).colorScheme.primary.withAlpha(20),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Icon(
@@ -290,11 +281,10 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         ),
                         Text(
                           'NT\$ ${t['amount'] ?? 0}',
-                          style:
-                              Theme.of(ctx).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(ctx).colorScheme.error,
-                                  ),
+                          style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(ctx).colorScheme.error,
+                              ),
                         ),
                       ],
                     ),
@@ -314,8 +304,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         Icon(
                           Icons.smart_toy_rounded,
                           size: 16,
-                          color:
-                              Theme.of(ctx).colorScheme.onTertiaryContainer,
+                          color: Theme.of(ctx).colorScheme.onTertiaryContainer,
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
@@ -485,11 +474,13 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
 
   void _saveTransaction(Map<String, dynamic> details) {
     const uuid = Uuid();
+    final amount = double.tryParse(details['amount']?.toString() ?? '0') ?? 0;
+
     // ignore: unused_local_variable
     final transaction = Transaction(
       id: uuid.v4(),
       userId: 'current_user_id',
-      amount: double.tryParse(details['amount']?.toString() ?? '0') ?? 0,
+      amount: amount,
       type: TransactionType.expense,
       category: _parseCategory(details['category']?.toString() ?? ''),
       createdAt: DateTime.now(),
@@ -498,11 +489,17 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       notes: _aiResponse,
     );
 
+    // 餵食寵物 🐱
+    final petFeedback = ref.read(petProvider.notifier).feed(
+          amount: amount.round(),
+        );
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('交易已保存！'),
+          content: Text('交易已保存！$petFeedback'),
           backgroundColor: Theme.of(context).colorScheme.primary,
+          duration: const Duration(seconds: 2),
         ),
       );
       Future.delayed(const Duration(seconds: 1), () {
@@ -612,10 +609,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: (_isListening
-                                            ? Colors.red
-                                            : cs.primary)
-                                        .withAlpha(100),
+                                    color:
+                                        (_isListening ? Colors.red : cs.primary)
+                                            .withAlpha(100),
                                     blurRadius: _isListening ? 30 : 15,
                                     spreadRadius: _isListening ? 5 : 0,
                                   ),
@@ -638,27 +634,34 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                     // 狀態文字
                     Text(
                       _isListening
-                          ? '正在聆聽... 再按一次停止'
+                          ? '正在聆聽中...'
                           : _isProcessing
                               ? 'AI 正在分析中...'
                               : _voiceAvailable
                                   ? '按下麥克風開始說話'
                                   : '語音不可用，請用下方文字輸入',
-                      style:
-                          Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 4),
+                    if (_isListening)
+                      Text(
+                        '說完後按紅色按鈕停止',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.red.shade200,
+                              fontWeight: FontWeight.w500,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
                     if (!_isListening && !_isProcessing)
                       Text(
                         '例如：「午餐便當 85 元」「搭計程車 250 塊」',
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.white.withAlpha(100),
-                                ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.white.withAlpha(100),
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     const SizedBox(height: AppSpacing.lg),
@@ -727,10 +730,8 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
                           color: cs.tertiary.withAlpha(30),
-                          borderRadius:
-                              BorderRadius.circular(AppRadius.lg),
-                          border:
-                              Border.all(color: cs.tertiary.withAlpha(60)),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                          border: Border.all(color: cs.tertiary.withAlpha(60)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -791,8 +792,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                             color: Colors.white.withAlpha(80),
                           ),
                           border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.full),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
                             borderSide: BorderSide.none,
                           ),
                           filled: true,

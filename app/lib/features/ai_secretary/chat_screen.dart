@@ -325,15 +325,10 @@ class _QuickReplies extends StatelessWidget {
                 suggestions[index],
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              backgroundColor: Theme.of(context)
-                  .colorScheme
-                  .primaryContainer
-                  .withAlpha(100),
+              backgroundColor:
+                  Theme.of(context).colorScheme.primaryContainer.withAlpha(100),
               side: BorderSide(
-                color: Theme.of(context)
-                    .colorScheme
-                    .primary
-                    .withAlpha(60),
+                color: Theme.of(context).colorScheme.primary.withAlpha(60),
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppRadius.full),

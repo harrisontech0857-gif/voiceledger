@@ -111,7 +111,8 @@ class GeminiAiService implements AiServiceBase {
       _logger.e('Gemini sendMessage error: $e');
       return ChatMessage(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: '連線失敗：${e.toString().length > 50 ? e.toString().substring(0, 50) : e}',
+        content:
+            '連線失敗：${e.toString().length > 50 ? e.toString().substring(0, 50) : e}',
         isUser: false,
         timestamp: DateTime.now(),
       );
@@ -174,15 +175,14 @@ class GeminiAiService implements AiServiceBase {
       // 嘗試解析 JSON
       try {
         // 移除可能的 markdown 包裹
-        final jsonStr = text
-            .replaceAll('```json', '')
-            .replaceAll('```', '')
-            .trim();
+        final jsonStr =
+            text.replaceAll('```json', '').replaceAll('```', '').trim();
         final decoded = Uri.decodeFull(jsonStr);
         // 用簡單的方式解析
         if (decoded.contains('"amount"')) {
           // 提取數字
-          final amountMatch = RegExp(r'"amount"\s*:\s*(\d+)').firstMatch(decoded);
+          final amountMatch =
+              RegExp(r'"amount"\s*:\s*(\d+)').firstMatch(decoded);
           final categoryMatch =
               RegExp(r'"category"\s*:\s*"([^"]+)"').firstMatch(decoded);
           final descMatch =

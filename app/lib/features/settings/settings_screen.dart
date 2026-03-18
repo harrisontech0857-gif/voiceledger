@@ -107,8 +107,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: '啟用通知',
                   trailing: Switch.adaptive(
                     value: _notificationsEnabled,
-                    onChanged: (v) =>
-                        setState(() => _notificationsEnabled = v),
+                    onChanged: (v) => setState(() => _notificationsEnabled = v),
                   ),
                 ),
                 _SettingsTile(
@@ -574,9 +573,8 @@ class _SettingsTile extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                 ],

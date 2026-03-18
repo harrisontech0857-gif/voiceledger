@@ -40,6 +40,10 @@ dependencies:
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.0
   fl_chart: ^0.69.0
+  table_calendar: ^3.1.0
+
+  # AI
+  google_generative_ai: ^0.4.0
 
   # AI
   google_generative_ai: ^0.4.0
@@ -60,6 +64,7 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/images/pet/
     - assets/animations/
     - assets/icons/
     - assets/fonts/

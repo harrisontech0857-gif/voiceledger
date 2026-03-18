@@ -130,7 +130,8 @@ void main() {
         expect(transaction.type, equals(TransactionType.expense));
       });
 
-      test('should default to TransactionCategory.other for unknown category', () {
+      test('should default to TransactionCategory.other for unknown category',
+          () {
         final json = {
           'id': 'tx_005',
           'user_id': 'user_005',
@@ -238,7 +239,8 @@ void main() {
         notes: '美味',
       );
 
-      test('should copy all fields unchanged when called with no arguments', () {
+      test('should copy all fields unchanged when called with no arguments',
+          () {
         final copied = baseTransaction.copyWith();
 
         expect(copied.id, equals(baseTransaction.id));

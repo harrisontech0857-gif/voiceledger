@@ -113,9 +113,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// 主導覽頁面 Shell
-///
-/// 提供底部導覽欄的佈局結構
+/// 主導覽頁面 Shell — 懸浮底部導航 + 語音圓形按鈕
 class MainShell extends StatefulWidget {
   final Widget child;
 
@@ -136,41 +134,153 @@ class _MainShellState extends State<MainShell> {
     final idx = _routes.indexOf(location);
     if (idx >= 0) _currentIndex = idx;
 
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
       body: widget.child,
-      floatingActionButton: FloatingActionButton.large(
-        onPressed: () => context.push('/voice-entry'),
-        child: const Icon(Icons.mic, size: 32),
+      extendBody: true,
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Stack(
+          alignment: Alignment.topCenter,
+          clipBehavior: Clip.none,
+          children: [
+            // 懸浮導航列本體
+            Container(
+              height: 64,
+              decoration: BoxDecoration(
+                color: cs.surface,
+                borderRadius: BorderRadius.circular(32),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withAlpha(20),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _NavItem(
+                    icon: Icons.home_rounded,
+                    label: '首頁',
+                    isSelected: _currentIndex == 0,
+                    onTap: () => _goTo(0),
+                    color: cs,
+                  ),
+                  _NavItem(
+                    icon: Icons.bar_chart_rounded,
+                    label: '統計',
+                    isSelected: _currentIndex == 1,
+                    onTap: () => _goTo(1),
+                    color: cs,
+                  ),
+                  // 中間留空給語音按鈕
+                  const SizedBox(width: 56),
+                  _NavItem(
+                    icon: Icons.book_rounded,
+                    label: '日記',
+                    isSelected: _currentIndex == 2,
+                    onTap: () => _goTo(2),
+                    color: cs,
+                  ),
+                  _NavItem(
+                    icon: Icons.settings_rounded,
+                    label: '設定',
+                    isSelected: _currentIndex == 3,
+                    onTap: () => _goTo(3),
+                    color: cs,
+                  ),
+                ],
+              ),
+            ),
+
+            // 語音圓形按鈕（突出在導航列上方）
+            Positioned(
+              top: -22,
+              child: GestureDetector(
+                onTap: () => context.push('/voice-entry'),
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [cs.primary, cs.tertiary],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: cs.primary.withAlpha(60),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.mic_rounded,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (i) {
-          setState(() => _currentIndex = i);
-          context.go(_routes[i]);
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: '首頁',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.bar_chart_outlined),
-            selectedIcon: Icon(Icons.bar_chart),
-            label: '統計',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.book_outlined),
-            selectedIcon: Icon(Icons.book),
-            label: '日記',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: '設定',
-          ),
-        ],
+    );
+  }
+
+  void _goTo(int index) {
+    setState(() => _currentIndex = index);
+    context.go(_routes[index]);
+  }
+}
+
+/// 導航列單一項目
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final ColorScheme color;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: 56,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isSelected ? color.primary : color.onSurfaceVariant,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: isSelected ? color.primary : color.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
