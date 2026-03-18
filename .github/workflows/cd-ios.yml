@@ -18,11 +18,16 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
           cache: true
 
-      - name: Create platform directories
-        run: flutter create --org com.voiceledger --project-name voiceledger .
+      - name: Generate missing platform directories
+        run: |
+          if [ ! -d "ios" ]; then
+            mv pubspec.yaml pubspec.yaml.bak && mv lib lib.bak
+            flutter create --org com.voiceledger --project-name voiceledger --platforms ios .
+            mv pubspec.yaml.bak pubspec.yaml && rm -rf lib && mv lib.bak lib
+          fi
 
       - name: Extract version from tag
         id: version
@@ -146,7 +151,7 @@ jobs:
           body: |
             Release v${{ steps.version.outputs.VERSION }}
 
-            Built on Flutter 3.19.x
+            Built on Flutter 3.24.x
 
             Changes: ${{ github.event.head_commit.message }}
           draft: false

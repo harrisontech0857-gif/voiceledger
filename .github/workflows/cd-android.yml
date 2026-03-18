@@ -18,7 +18,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
           cache: true
 
       - name: Setup Java
@@ -27,8 +27,13 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Create platform directories
-        run: flutter create --org com.voiceledger --project-name voiceledger .
+      - name: Generate missing platform directories
+        run: |
+          if [ ! -d "android" ]; then
+            mv pubspec.yaml pubspec.yaml.bak && mv lib lib.bak
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android .
+            mv pubspec.yaml.bak pubspec.yaml && rm -rf lib && mv lib.bak lib
+          fi
 
       - name: Get dependencies
         run: flutter pub get
@@ -131,7 +136,7 @@ jobs:
           body: |
             Release v${{ steps.version.outputs.VERSION }}
 
-            Built on Flutter 3.19.x
+            Built on Flutter 3.24.x
 
             Changes: ${{ github.event.head_commit.message }}
           draft: false

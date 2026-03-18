@@ -23,13 +23,24 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
           cache: true
           cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
           cache-path: ${{ runner.tool_cache }}/flutter
 
-      - name: Create platform directories
-        run: flutter create --org com.voiceledger --project-name voiceledger .
+      - name: Generate missing platform directories
+        run: |
+          if [ ! -d "android" ] || [ ! -d "ios" ]; then
+            mv pubspec.yaml pubspec.yaml.bak
+            mv lib lib.bak
+            mv test test.bak 2>/dev/null || true
+            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+            mv pubspec.yaml.bak pubspec.yaml
+            rm -rf lib && mv lib.bak lib
+            rm -rf test && mv test.bak test 2>/dev/null || true
+            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
+          fi
 
       - name: Get dependencies
         run: flutter pub get
@@ -50,13 +61,24 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
           cache: true
           cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
           cache-path: ${{ runner.tool_cache }}/flutter
 
-      - name: Create platform directories
-        run: flutter create --org com.voiceledger --project-name voiceledger .
+      - name: Generate missing platform directories
+        run: |
+          if [ ! -d "android" ] || [ ! -d "ios" ]; then
+            mv pubspec.yaml pubspec.yaml.bak
+            mv lib lib.bak
+            mv test test.bak 2>/dev/null || true
+            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+            mv pubspec.yaml.bak pubspec.yaml
+            rm -rf lib && mv lib.bak lib
+            rm -rf test && mv test.bak test 2>/dev/null || true
+            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
+          fi
 
       - name: Get dependencies
         run: flutter pub get
@@ -95,7 +117,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
           cache: true
           cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
           cache-path: ${{ runner.tool_cache }}/flutter
@@ -106,8 +128,19 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Create platform directories
-        run: flutter create --org com.voiceledger --project-name voiceledger .
+      - name: Generate missing platform directories
+        run: |
+          if [ ! -d "android" ] || [ ! -d "ios" ]; then
+            mv pubspec.yaml pubspec.yaml.bak
+            mv lib lib.bak
+            mv test test.bak 2>/dev/null || true
+            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+            mv pubspec.yaml.bak pubspec.yaml
+            rm -rf lib && mv lib.bak lib
+            rm -rf test && mv test.bak test 2>/dev/null || true
+            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
+          fi
 
       - name: Get dependencies
         run: flutter pub get
@@ -135,13 +168,24 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
           cache: true
           cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
           cache-path: ${{ runner.tool_cache }}/flutter
 
-      - name: Create platform directories
-        run: flutter create --org com.voiceledger --project-name voiceledger .
+      - name: Generate missing platform directories
+        run: |
+          if [ ! -d "android" ] || [ ! -d "ios" ]; then
+            mv pubspec.yaml pubspec.yaml.bak
+            mv lib lib.bak
+            mv test test.bak 2>/dev/null || true
+            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+            mv pubspec.yaml.bak pubspec.yaml
+            rm -rf lib && mv lib.bak lib
+            rm -rf test && mv test.bak test 2>/dev/null || true
+            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
+          fi
 
       - name: Get dependencies
         run: flutter pub get
@@ -168,13 +212,24 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
           cache: true
           cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
           cache-path: ${{ runner.tool_cache }}/flutter
 
-      - name: Create platform directories
-        run: flutter create --org com.voiceledger --project-name voiceledger .
+      - name: Generate missing platform directories
+        run: |
+          if [ ! -d "android" ] || [ ! -d "ios" ]; then
+            mv pubspec.yaml pubspec.yaml.bak
+            mv lib lib.bak
+            mv test test.bak 2>/dev/null || true
+            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+            mv pubspec.yaml.bak pubspec.yaml
+            rm -rf lib && mv lib.bak lib
+            rm -rf test && mv test.bak test 2>/dev/null || true
+            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
+          fi
 
       - name: Get dependencies
         run: flutter pub get
@@ -197,11 +252,22 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.x'
+          flutter-version: '3.24.x'
           cache: true
 
-      - name: Create platform directories
-        run: flutter create --org com.voiceledger --project-name voiceledger .
+      - name: Generate missing platform directories
+        run: |
+          if [ ! -d "android" ] || [ ! -d "ios" ]; then
+            mv pubspec.yaml pubspec.yaml.bak
+            mv lib lib.bak
+            mv test test.bak 2>/dev/null || true
+            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+            mv pubspec.yaml.bak pubspec.yaml
+            rm -rf lib && mv lib.bak lib
+            rm -rf test && mv test.bak test 2>/dev/null || true
+            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
+          fi
 
       - name: Get dependencies
         run: flutter pub get
