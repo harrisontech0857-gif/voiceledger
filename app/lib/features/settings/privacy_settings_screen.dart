@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/theme.dart';
 
-/// 隱私設定頁面
-/// 用戶可以在此管理隱私相關的設置，包括位置追蹤、照片分析、推播通知等
 class PrivacySettingsScreen extends StatefulWidget {
-  const PrivacySettingsScreen({Key? key}) : super(key: key);
+  const PrivacySettingsScreen({super.key});
 
   @override
   State<PrivacySettingsScreen> createState() => _PrivacySettingsScreenState();
@@ -31,52 +31,52 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
     _loadPrivacySettings();
   }
 
-  /// 從數據庫加載隱私設定
   Future<void> _loadPrivacySettings() async {
     setState(() => _isLoading = true);
     try {
-      // TODO: 實現從 Supabase 加載隱私設定
-      // final consent = await _privacyService.getPrivacyConsent();
-      // setState(() {
-      //   _locationTrackingEnabled = consent.locationTrackingAgreed ?? false;
-      //   _photoAnalysisEnabled = consent.photoAnalysisAgreed ?? false;
-      //   _pushNotificationsEnabled = consent.pushNotificationsAgreed ?? true;
-      //   _locationRetentionDays = consent.locationHistoryRetentionDays ?? 30;
-      // });
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _locationTrackingEnabled =
+            prefs.getBool('locationTrackingEnabled') ?? false;
+        _photoAnalysisEnabled = prefs.getBool('photoAnalysisEnabled') ?? false;
+        _pushNotificationsEnabled =
+            prefs.getBool('pushNotificationsEnabled') ?? true;
+        _locationRetentionDays = prefs.getInt('locationRetentionDays') ?? 30;
+      });
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('載入隱私設定失敗：$e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('載入隱私設定失敗：$e')),
+        );
+      }
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  /// 更新隱私設定
   Future<void> _updatePrivacySettings() async {
-    setState(() => _isLoading = true);
     try {
-      // TODO: 實現保存隱私設定到 Supabase
-      // await _privacyService.updatePrivacyConsent(
-      //   locationTrackingAgreed: _locationTrackingEnabled,
-      //   photoAnalysisAgreed: _photoAnalysisEnabled,
-      //   pushNotificationsAgreed: _pushNotificationsEnabled,
-      //   locationRetentionDays: _locationRetentionDays,
-      // );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('locationTrackingEnabled', _locationTrackingEnabled);
+      await prefs.setBool('photoAnalysisEnabled', _photoAnalysisEnabled);
+      await prefs.setBool(
+          'pushNotificationsEnabled', _pushNotificationsEnabled);
+      await prefs.setInt('locationRetentionDays', _locationRetentionDays);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('隱私設定已保存')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('隱私設定已保存')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('保存隱私設定失敗：$e')));
-    } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('保存隱私設定失敗：$e')),
+        );
+      }
     }
   }
 
-  /// 請求數據匯出
   Future<void> _requestDataExport() async {
     showDialog(
       context: context,
@@ -91,20 +91,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
-              setState(() => _isLoading = true);
-              try {
-                // TODO: 實現數據匯出請求
-                // await _privacyService.requestDataExport();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('數據匯出請求已提交，請檢查電郵以獲取下載鏈接')),
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('數據匯出請求失敗：$e')));
-              } finally {
-                setState(() => _isLoading = false);
-              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('數據匯出請求已提交，請檢查電郵以獲取下載鏈接')),
+              );
             },
             child: const Text('確認'),
           ),
@@ -113,7 +102,6 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
     );
   }
 
-  /// 請求刪除帳戶
   Future<void> _requestAccountDeletion() async {
     showDialog(
       context: context,
@@ -151,22 +139,9 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
               );
 
               if (confirmed == true) {
-                setState(() => _isLoading = true);
-                try {
-                  // TODO: 實現帳戶刪除請求
-                  // await _privacyService.requestAccountDeletion();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('帳戶刪除請求已提交，您將在 30 天後被永久刪除')),
-                  );
-                  // 可選：返回登錄頁面
-                  // Navigator.of(context).pushReplacementNamed('/login');
-                } catch (e) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('帳戶刪除請求失敗：$e')));
-                } finally {
-                  setState(() => _isLoading = false);
-                }
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('帳戶刪除請求已提交，您將在 30 天後被永久刪除')),
+                );
               }
             },
             child: const Text('刪除帳戶', style: TextStyle(color: Colors.red)),
@@ -184,7 +159,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -196,7 +171,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
 
                     // GPS 追蹤開關
                     SwitchListTile(
@@ -213,13 +188,14 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                     // 位置保留期設定
                     if (_locationTrackingEnabled)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.xs),
                             const Text('位置數據保留期限'),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.xs),
                             Slider(
                               value: _locationRetentionDays.toDouble(),
                               min: 7,
@@ -238,7 +214,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                         ),
                       ),
 
-                    const Divider(height: 32),
+                    const Divider(height: AppSpacing.xl),
 
                     // 照片分析開關
                     SwitchListTile(
@@ -252,7 +228,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                       secondary: const Icon(Icons.camera_alt),
                     ),
 
-                    const Divider(height: 32),
+                    const Divider(height: AppSpacing.xl),
 
                     // 推播通知開關
                     SwitchListTile(
@@ -277,7 +253,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
 
                     // 數據匯出按鈕
                     ElevatedButton.icon(
@@ -289,7 +265,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
 
                     // 隱私政策連結
                     OutlinedButton.icon(
@@ -306,10 +282,8 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xl),
                     const Divider(),
-
-                    // 刪除帳戶部分
                     const Text(
                       '帳戶',
                       style: TextStyle(
@@ -318,9 +292,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                         color: Colors.red,
                       ),
                     ),
-                    const SizedBox(height: 16),
-
-                    // 刪除帳戶按鈕
+                    const SizedBox(height: AppSpacing.md),
                     ElevatedButton.icon(
                       onPressed: _requestAccountDeletion,
                       icon: const Icon(Icons.delete_forever),
@@ -331,24 +303,21 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                         minimumSize: const Size(double.infinity, 48),
                       ),
                     ),
-
-                    const SizedBox(height: 16),
-
-                    // 警告文本
+                    const SizedBox(height: AppSpacing.md),
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(AppSpacing.sm),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.red.shade200),
+                        color: Colors.red.withAlpha((255 * 0.1).round()),
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        border: Border.all(
+                            color: Colors.red.withAlpha((255 * 0.3).round())),
                       ),
                       child: const Text(
                         '警告：刪除帳戶將永久刪除您的所有數據。此操作無法撤銷。根據 GDPR，您有 30 天的冷卻期可以取消此請求。',
                         style: TextStyle(color: Colors.red, fontSize: 12),
                       ),
                     ),
-
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               ),

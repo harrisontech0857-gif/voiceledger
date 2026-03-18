@@ -1,43 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../../core/theme.dart';
 
 class StatisticsScreen extends ConsumerWidget {
-  const StatisticsScreen({Key? key}) : super(key: key);
+  const StatisticsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('財務統計'), centerTitle: true),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppTheme.spacingMedium),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Period Selector
-            _PeriodSelector(),
-            const SizedBox(height: AppTheme.spacingLarge),
-
-            // Summary Cards
-            _SummaryCards(),
-            const SizedBox(height: AppTheme.spacingLarge),
-
-            // Spending by Category
+            const _PeriodSelector(),
+            const SizedBox(height: AppSpacing.lg),
+            const _SummaryCards(),
+            const SizedBox(height: AppSpacing.lg),
             Text('分類支出', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppTheme.spacingMedium),
-            _CategoryBreakdown(),
-            const SizedBox(height: AppTheme.spacingLarge),
-
-            // Trend Chart
+            const SizedBox(height: AppSpacing.md),
+            const _CategoryBreakdown(),
+            const SizedBox(height: AppSpacing.lg),
             Text('支出趨勢', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppTheme.spacingMedium),
-            _TrendChart(),
-            const SizedBox(height: AppTheme.spacingLarge),
-
-            // Top Transactions
+            const SizedBox(height: AppSpacing.md),
+            const _TrendChart(),
+            const SizedBox(height: AppSpacing.lg),
             Text('最大支出', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: AppTheme.spacingMedium),
-            _TopTransactions(),
+            const SizedBox(height: AppSpacing.md),
+            const _TopTransactions(),
           ],
         ),
       ),
@@ -59,10 +51,10 @@ class _PeriodSelectorState extends State<_PeriodSelector> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
-      padding: const EdgeInsets.all(AppTheme.spacingSmall),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
           _PeriodButton(
@@ -104,11 +96,12 @@ class _PeriodButton extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color:
-                isSelected ? AppTheme.primaryGradientStart : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
-          padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingSmall),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -141,7 +134,7 @@ class _SummaryCards extends StatelessWidget {
                 icon: Icons.trending_down_rounded,
               ),
             ),
-            const SizedBox(width: AppTheme.spacingSmall),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _StatSummaryCard(
                 title: '總收入',
@@ -153,7 +146,7 @@ class _SummaryCards extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: AppTheme.spacingSmall),
+        const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
             Expanded(
@@ -165,7 +158,7 @@ class _SummaryCards extends StatelessWidget {
                 icon: Icons.savings_rounded,
               ),
             ),
-            const SizedBox(width: AppTheme.spacingSmall),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _StatSummaryCard(
                 title: '平均日支出',
@@ -201,7 +194,7 @@ class _StatSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingMedium),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -211,30 +204,33 @@ class _StatSummaryCard extends StatelessWidget {
                 Text(title, style: Theme.of(context).textTheme.labelSmall),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryGradientStart.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withAlpha((255 * 0.1).round()),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
-                  padding: const EdgeInsets.all(AppTheme.spacingSmall),
+                  padding: const EdgeInsets.all(AppSpacing.sm),
                   child: Icon(
                     icon,
-                    color: AppTheme.primaryGradientStart,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 16,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.spacingSmall),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               amount,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: AppTheme.spacingSmall),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               change,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isPositive ? AppTheme.successGreen : Colors.red,
+                    color: isPositive ? Colors.green : Colors.red,
                   ),
             ),
           ],
@@ -261,8 +257,7 @@ class _CategoryBreakdown extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: categories.length,
-      separatorBuilder: (_, __) =>
-          const SizedBox(height: AppTheme.spacingSmall),
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         final cat = categories[index];
         final percentage = cat['percentage'] as double;
@@ -279,7 +274,7 @@ class _CategoryBreakdown extends StatelessWidget {
                       cat['icon'] as String,
                       style: const TextStyle(fontSize: 20),
                     ),
-                    const SizedBox(width: AppTheme.spacingSmall),
+                    const SizedBox(width: AppSpacing.sm),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -303,13 +298,13 @@ class _CategoryBreakdown extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.spacingSmall),
+            const SizedBox(height: AppSpacing.sm),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
                 value: percentage / 100,
                 minHeight: 8,
-                backgroundColor: Colors.grey.withOpacity(0.2),
+                backgroundColor: Colors.grey.withAlpha((255 * 0.2).round()),
                 valueColor: AlwaysStoppedAnimation<Color>(
                   _getCategoryColor(index),
                 ),
@@ -344,7 +339,7 @@ class _TrendChart extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingMedium),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -364,18 +359,18 @@ class _TrendChart extends StatelessWidget {
                           'NT\$${amount}',
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
-                        const SizedBox(height: AppTheme.spacingSmall),
+                        const SizedBox(height: AppSpacing.sm),
                         Container(
                           width: double.infinity,
                           height: height,
                           decoration: BoxDecoration(
-                            gradient: AppTheme.primaryGradient,
+                            color: Theme.of(context).colorScheme.primary,
                             borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(AppTheme.radiusSmall),
+                              top: Radius.circular(AppRadius.sm),
                             ),
                           ),
                         ),
-                        const SizedBox(height: AppTheme.spacingSmall),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(
                           days[index],
                           style: Theme.of(context).textTheme.labelSmall,
@@ -424,25 +419,27 @@ class _TopTransactions extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: transactions.length,
-      separatorBuilder: (_, __) =>
-          const SizedBox(height: AppTheme.spacingSmall),
+      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, index) {
         final tx = transactions[index];
 
         return Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+            color: Theme.of(context).colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(AppRadius.md),
           ),
-          padding: const EdgeInsets.all(AppTheme.spacingMedium),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
               Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryGradientStart.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withAlpha((255 * 0.1).round()),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Center(
                   child: Text(
@@ -451,7 +448,7 @@ class _TopTransactions extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingMedium),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import '../../core/theme.dart';
 import '../../core/app_router.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -59,24 +59,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           children: [
             // User Profile Section
             Container(
-              padding: const EdgeInsets.all(AppTheme.spacingMedium),
-              margin: const EdgeInsets.all(AppTheme.spacingMedium),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              margin: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
               child: Row(
                 children: [
                   CircleAvatar(
                     radius: 32,
-                    backgroundColor: AppTheme.primaryGradientStart,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     child: const Icon(
                       Icons.person_rounded,
                       color: Colors.white,
                       size: 32,
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingMedium),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,7 +94,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   Icon(
                     Icons.edit_rounded,
-                    color: AppTheme.primaryGradientStart,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ],
               ),
@@ -199,13 +199,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 Container(
                   margin: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacingMedium,
-                    vertical: AppTheme.spacingSmall,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
-                  padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    gradient: AppTheme.primaryGradient,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                    gradient: LinearGradient(colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.primaryContainer
+                    ]),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,18 +221,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   fontWeight: FontWeight.bold,
                                 ),
                       ),
-                      const SizedBox(height: AppTheme.spacingSmall),
+                      const SizedBox(height: AppSpacing.sm),
                       Text(
                         '解鎖所有高級功能，包括無限制的 AI 分析、高級報告和優先支援',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withOpacity(0.9),
+                              color:
+                                  Colors.white.withAlpha((255 * 0.9).round()),
                             ),
                       ),
-                      const SizedBox(height: AppTheme.spacingMedium),
+                      const SizedBox(height: AppSpacing.md),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          foregroundColor: AppTheme.primaryGradientStart,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.primary,
                         ),
                         onPressed: () {},
                         child: const Text('升級到 Premium'),
@@ -259,14 +264,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
             // Logout
             Padding(
-              padding: const EdgeInsets.all(AppTheme.spacingMedium),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.logout_rounded),
                   label: const Text('登出'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red.withOpacity(0.1),
+                    backgroundColor: Colors.red.withAlpha((255 * 0.1).round()),
                     foregroundColor: Colors.red,
                   ),
                   onPressed: _logout,
@@ -274,7 +279,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
 
-            const SizedBox(height: AppTheme.spacingLarge),
+            const SizedBox(height: AppSpacing.lg),
           ],
         ),
       ),
@@ -326,15 +331,15 @@ class _SettingSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            AppTheme.spacingMedium,
-            AppTheme.spacingMedium,
-            AppTheme.spacingMedium,
-            AppTheme.spacingSmall,
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.md,
+            AppSpacing.sm,
           ),
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: AppTheme.primaryGradientStart,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
                 ),
           ),
@@ -366,13 +371,16 @@ class _SettingTile extends StatelessWidget {
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.symmetric(
-          horizontal: AppTheme.spacingMedium,
-          vertical: AppTheme.spacingSmall,
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
         ),
-        padding: const EdgeInsets.all(AppTheme.spacingMedium),
+        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          color: Theme.of(context)
+              .colorScheme
+              .surfaceContainerLow
+              .withAlpha((255 * 0.5).round()),
+          borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Row(
           children: [
@@ -380,12 +388,16 @@ class _SettingTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: AppTheme.primaryGradientStart.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withAlpha((255 * 0.1).round()),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: Icon(icon, color: AppTheme.primaryGradientStart, size: 20),
+              child: Icon(icon,
+                  color: Theme.of(context).colorScheme.primary, size: 20),
             ),
-            const SizedBox(width: AppTheme.spacingMedium),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

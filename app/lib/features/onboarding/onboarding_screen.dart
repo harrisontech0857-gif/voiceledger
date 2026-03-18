@@ -3,10 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../core/theme.dart';
-import '../../core/app_router.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
 
   @override
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -40,7 +39,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _skipToHome() {
-    GoRouter.of(context).go(Routes.dashboard);
+    context.go('/dashboard');
   }
 
   Future<void> _requestPermissions() async {
@@ -54,7 +53,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     await Permission.photos.request();
 
     if (mounted) {
-      GoRouter.of(context).go(Routes.dashboard);
+      context.go('/dashboard');
     }
   }
 
@@ -74,31 +73,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 icon: Icons.mic_rounded,
                 title: '語音記帳',
                 description: '用自然的語言記錄您的每筆消費，讓 AI 幫您分類和分析',
-                color: AppTheme.primaryGradientStart,
+                color: Theme.of(context).colorScheme.primary,
               ),
               _OnboardingPage(
                 icon: Icons.smart_toy_rounded,
                 title: 'AI 財務秘書',
                 description: '隨時詢問秘書，獲得個人化的財務建議和支出分析',
-                color: Color(0xFF2196F3),
+                color: Theme.of(context).colorScheme.secondary,
               ),
               _OnboardingPage(
                 icon: Icons.location_on_rounded,
                 title: '被動記帳',
                 description: '地理圍欄自動提醒，照片分析購物詳情，讓記帳更輕鬆',
-                color: Color(0xFF4CAF50),
+                color: Theme.of(context).colorScheme.tertiary,
               ),
               _OnboardingPage(
                 icon: Icons.trending_up_rounded,
                 title: '智慧統計',
                 description: '詳細的支出分析、趨勢圖表和月度報告，掌握財務全局',
-                color: Color(0xFFFFC107),
+                color: Theme.of(context).colorScheme.error,
               ),
               _OnboardingPage(
                 icon: Icons.book_rounded,
                 title: '生活日記',
                 description: 'AI 生成的個人化日記，記錄您的消費故事和財務成長',
-                color: Color(0xFFFF6B6B),
+                color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),
@@ -179,8 +178,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           // Skip Button (Top Right)
           if (_currentPage < 4)
             Positioned(
-              top: MediaQuery.of(context).padding.top + AppTheme.spacingMedium,
-              right: AppTheme.spacingMedium,
+              top: MediaQuery.of(context).padding.top + AppSpacing.md,
+              right: AppSpacing.md,
               child: TextButton(
                 onPressed: _skipToHome,
                 child: Text(
@@ -212,7 +211,7 @@ class _OnboardingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingMedium),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -220,12 +219,12 @@ class _OnboardingPage extends StatelessWidget {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 60),
             ),
-            const SizedBox(height: AppTheme.spacingLarge),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               title,
               style: Theme.of(
@@ -233,7 +232,7 @@ class _OnboardingPage extends StatelessWidget {
               ).textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: AppTheme.spacingMedium),
+            const SizedBox(height: AppSpacing.md),
             Text(
               description,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(

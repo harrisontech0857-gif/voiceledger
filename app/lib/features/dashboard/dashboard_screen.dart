@@ -3,29 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme.dart';
-import '../../core/app_router.dart';
 import '../../services/ai_service.dart';
 
 class DashboardScreen extends ConsumerWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dailyQuote = ref.watch(dailyQuoteProvider);
-    // ignore: unused_local_variable
-    final isDarkMode = ref.watch(isDarkModeProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('語記'),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: AppTheme.spacingMedium),
+            padding: const EdgeInsets.only(right: AppSpacing.md),
             child: GestureDetector(
-              onTap: () => GoRouter.of(context).go(Routes.settings),
+              onTap: () => context.go('/settings'),
               child: CircleAvatar(
-                backgroundColor: AppTheme.primaryGradientStart.withOpacity(0.2),
-                child: const Icon(Icons.person_rounded),
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                child: Icon(
+                  Icons.person_rounded,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
               ),
             ),
           ),
@@ -33,44 +33,39 @@ class DashboardScreen extends ConsumerWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          // ignore: unused_result
           ref.refresh(dailyQuoteProvider);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spacingMedium),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Daily Quote Card
+                // 每日金句卡片
                 _DailyQuoteCard(dailyQuote: dailyQuote),
-                const SizedBox(height: AppTheme.spacingLarge),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Today's Summary
-                _TodaysSummaryCard(),
-                const SizedBox(height: AppTheme.spacingLarge),
+                // 今日摘要
+                const _TodaysSummaryCard(),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Quick Actions
-                _QuickActionsSection(),
-                const SizedBox(height: AppTheme.spacingLarge),
+                // 快速操作
+                const _QuickActionsSection(),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Recent Transactions
-                _RecentTransactionsSection(),
+                // 最近交易
+                const _RecentTransactionsSection(),
               ],
             ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => GoRouter.of(context).go(Routes.voiceEntry),
-        icon: const Icon(Icons.mic_rounded),
-        label: const Text('快速記帳'),
-      ),
     );
   }
 }
 
+/// 每日金句卡片
 class _DailyQuoteCard extends StatelessWidget {
   final AsyncValue<String> dailyQuote;
 
@@ -80,53 +75,61 @@ class _DailyQuoteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-        boxShadow: [AppTheme.mediumShadow],
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
-      padding: const EdgeInsets.all(AppTheme.spacingMedium),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.lightbulb_rounded, color: Colors.white),
-              const SizedBox(width: AppTheme.spacingSmall),
+              Icon(
+                Icons.lightbulb_rounded,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 '今日金句',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                       fontWeight: FontWeight.bold,
                     ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingMedium),
+          const SizedBox(height: AppSpacing.md),
           dailyQuote.when(
             data: (quote) => Text(
               quote.isEmpty ? '每日一句，激勵人心。' : quote,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontStyle: FontStyle.italic,
                   ),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
-            loading: () => Shimmer.fromColors(
-              baseColor: Colors.white.withOpacity(0.3),
-              highlightColor: Colors.white.withOpacity(0.5),
-              child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                ),
+            loading: () => Container(
+              height: 60,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.onPrimary.withValues(
+                      alpha: 0.2,
+                    ),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
             ),
             error: (e, st) => Text(
               '無法加載金句',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onPrimary
+                        .withValues(alpha: 0.8),
                   ),
             ),
           ),
@@ -136,17 +139,18 @@ class _DailyQuoteCard extends StatelessWidget {
   }
 }
 
-class _TodaysSummaryCard extends ConsumerWidget {
+/// 今日摘要卡片
+class _TodaysSummaryCard extends StatelessWidget {
   const _TodaysSummaryCard();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final now = DateTime.now();
     final dateFormat = DateFormat('MMM dd, yyyy', 'zh_TW');
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppTheme.spacingMedium),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -160,11 +164,11 @@ class _TodaysSummaryCard extends ConsumerWidget {
                       '今日花費',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const SizedBox(height: AppTheme.spacingSmall),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       'NT\$ 1,250',
                       style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: AppTheme.primaryGradientStart,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -172,36 +176,36 @@ class _TodaysSummaryCard extends ConsumerWidget {
                 ),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppTheme.successGreen.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    color: Theme.of(context).colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                  padding: const EdgeInsets.all(AppTheme.spacingMedium),
-                  child: const Icon(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Icon(
                     Icons.trending_down_rounded,
-                    color: AppTheme.successGreen,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer,
                     size: 32,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.spacingMedium),
+            const SizedBox(height: AppSpacing.md),
             Container(
               height: 8,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.2),
+                color: Theme.of(context).colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: FractionallySizedBox(
-                widthFactor: 0.45, // 45% of daily budget used
+                widthFactor: 0.45,
                 child: Container(
                   decoration: BoxDecoration(
-                    gradient: AppTheme.primaryGradient,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: AppTheme.spacingSmall),
+            const SizedBox(height: AppSpacing.sm),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -222,6 +226,7 @@ class _TodaysSummaryCard extends ConsumerWidget {
   }
 }
 
+/// 快速操作區段
 class _QuickActionsSection extends StatelessWidget {
   const _QuickActionsSection();
 
@@ -230,49 +235,50 @@ class _QuickActionsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('快速操作', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: AppTheme.spacingMedium),
+        Text(
+          '快速操作',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: AppSpacing.md),
         Row(
           children: [
             Expanded(
               child: _QuickActionButton(
                 icon: Icons.mic_rounded,
                 label: '語音記帳',
-                color: AppTheme.primaryGradientStart,
-                onTap: () => GoRouter.of(context).go(Routes.voiceEntry),
+                color: Theme.of(context).colorScheme.primary,
+                onTap: () => context.push('/voice-entry'),
               ),
             ),
-            const SizedBox(width: AppTheme.spacingSmall),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _QuickActionButton(
-                icon: Icons.camera_alt_rounded,
-                label: '拍照記帳',
-                color: Color(0xFF4CAF50),
-                onTap: () {
-                  // Implement photo capture
-                },
+                icon: Icons.add_rounded,
+                label: '手動記帳',
+                color: Theme.of(context).colorScheme.secondary,
+                onTap: () => context.push('/add-transaction'),
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppTheme.spacingSmall),
+        const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
             Expanded(
               child: _QuickActionButton(
                 icon: Icons.chat_rounded,
                 label: '詢問秘書',
-                color: Color(0xFF2196F3),
-                onTap: () => GoRouter.of(context).go(Routes.aiSecretary),
+                color: Theme.of(context).colorScheme.tertiary,
+                onTap: () => context.push('/ai-secretary'),
               ),
             ),
-            const SizedBox(width: AppTheme.spacingSmall),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _QuickActionButton(
                 icon: Icons.trending_up_rounded,
                 label: '查看統計',
-                color: Color(0xFFFFC107),
-                onTap: () => GoRouter.of(context).go(Routes.statistics),
+                color: Theme.of(context).colorScheme.error,
+                onTap: () => context.go('/statistics'),
               ),
             ),
           ],
@@ -282,6 +288,7 @@ class _QuickActionsSection extends StatelessWidget {
   }
 }
 
+/// 快速操作按鈕
 class _QuickActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -301,23 +308,23 @@ class _QuickActionButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          border: Border.all(color: color.withOpacity(0.3)),
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.spacingSmall,
-          vertical: AppTheme.spacingMedium,
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.md,
         ),
         child: Column(
           children: [
             Icon(icon, color: color, size: 28),
-            const SizedBox(height: AppTheme.spacingSmall),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: color),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: color,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -327,12 +334,12 @@ class _QuickActionButton extends StatelessWidget {
   }
 }
 
+/// 最近交易區段
 class _RecentTransactionsSection extends StatelessWidget {
   const _RecentTransactionsSection();
 
   @override
   Widget build(BuildContext context) {
-    // Mock data
     final transactions = [
       {
         'category': '餐飲',
@@ -363,42 +370,44 @@ class _RecentTransactionsSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('最近交易', style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              '最近交易',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             GestureDetector(
-              onTap: () => GoRouter.of(context).go(Routes.statistics),
+              onTap: () => context.go('/transactions'),
               child: Text(
                 '查看全部',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.primaryGradientStart,
+                      color: Theme.of(context).colorScheme.primary,
                       fontWeight: FontWeight.w600,
                     ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppTheme.spacingMedium),
+        const SizedBox(height: AppSpacing.md),
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: transactions.length,
-          separatorBuilder: (_, __) =>
-              const SizedBox(height: AppTheme.spacingSmall),
+          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
           itemBuilder: (context, index) {
             final tx = transactions[index];
             return Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
-              padding: const EdgeInsets.all(AppTheme.spacingSmall),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               child: Row(
                 children: [
                   Container(
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                      color: Theme.of(context).colorScheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     child: Center(
                       child: Text(
@@ -407,7 +416,7 @@ class _RecentTransactionsSection extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacingSmall),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -429,7 +438,7 @@ class _RecentTransactionsSection extends StatelessWidget {
                       Text(
                         tx['amount'] as String,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Colors.red,
+                              color: Theme.of(context).colorScheme.error,
                               fontWeight: FontWeight.bold,
                             ),
                       ),
@@ -445,96 +454,6 @@ class _RecentTransactionsSection extends StatelessWidget {
           },
         ),
       ],
-    );
-  }
-}
-
-// Shimmer widget for loading states
-class Shimmer extends StatefulWidget {
-  final Widget child;
-  final Color baseColor;
-  final Color highlightColor;
-  final Duration period;
-
-  const Shimmer({
-    Key? key,
-    required this.child,
-    required this.baseColor,
-    required this.highlightColor,
-    this.period = const Duration(milliseconds: 1500),
-  }) : super(key: key);
-
-  static ShimmerState? of(BuildContext context) {
-    return context.findAncestorStateOfType<ShimmerState>();
-  }
-
-  factory Shimmer.fromColors({
-    Key? key,
-    required Widget child,
-    required Color baseColor,
-    required Color highlightColor,
-    Duration period = const Duration(milliseconds: 1500),
-  }) {
-    return Shimmer(
-      key: key,
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      period: period,
-      child: child,
-    );
-  }
-
-  @override
-  State<Shimmer> createState() => ShimmerState();
-}
-
-class ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
-  late AnimationController _shimmerController;
-
-  @override
-  void initState() {
-    super.initState();
-    _shimmerController = AnimationController.unbounded(vsync: this)
-      ..repeat(min: -0.5, max: 1.5, period: widget.period);
-  }
-
-  @override
-  void dispose() {
-    _shimmerController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _shimmerController,
-      builder: (context, child) {
-        return ShaderMask(
-          blendMode: BlendMode.srcATop,
-          shaderCallback: (bounds) {
-            return LinearGradient(
-              begin: Alignment(-1.0, -0.3),
-              end: Alignment(1.0, 0.3),
-              stops: const [0.0, 0.5, 1.0],
-              colors: [
-                widget.baseColor,
-                widget.highlightColor,
-                widget.baseColor,
-              ],
-              tileMode: TileMode.clamp,
-            ).createShader(
-              Rect.fromLTWH(
-                0,
-                0,
-                bounds.width,
-                bounds.height,
-              ).shift(Offset(_shimmerController.value * bounds.width * 2, 0)),
-            );
-          },
-          child: child,
-        );
-      },
-      child: widget.child,
     );
   }
 }

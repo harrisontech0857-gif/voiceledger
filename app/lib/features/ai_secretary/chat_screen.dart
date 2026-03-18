@@ -5,7 +5,7 @@ import '../../core/theme.dart';
 import '../../services/ai_service.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({Key? key}) : super(key: key);
+  const ChatScreen({super.key});
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -118,9 +118,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         Icon(
                           Icons.chat_bubble_outline_rounded,
                           size: 64,
-                          color: Colors.grey.withOpacity(0.3),
+                          color: Colors.grey.withAlpha((255 * 0.3).round()),
                         ),
-                        const SizedBox(height: AppTheme.spacingMedium),
+                        const SizedBox(height: AppSpacing.md),
                         Text(
                           '開始對話',
                           style: Theme.of(context)
@@ -133,7 +133,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   )
                 : ListView.builder(
                     controller: _scrollController,
-                    padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     itemCount: _messages.length,
                     itemBuilder: (context, index) {
                       final message = _messages[index];
@@ -150,12 +150,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).scaffoldBackgroundColor,
               border: Border(
-                top: BorderSide(color: Colors.grey.withOpacity(0.1)),
+                top: BorderSide(
+                    color: Colors.grey.withAlpha((255 * 0.1).round())),
               ),
             ),
             padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.spacingMedium,
-              vertical: AppTheme.spacingSmall,
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
             ),
             child: SafeArea(
               top: false,
@@ -169,7 +170,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       !_messages.last.isUser)
                     Padding(
                       padding: const EdgeInsets.only(
-                        bottom: AppTheme.spacingSmall,
+                        bottom: AppSpacing.sm,
                       ),
                       child: SizedBox(
                         height: 40,
@@ -177,7 +178,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           scrollDirection: Axis.horizontal,
                           itemCount: 3,
                           separatorBuilder: (_, __) =>
-                              const SizedBox(width: AppTheme.spacingSmall),
+                              const SizedBox(width: AppSpacing.sm),
                           itemBuilder: (context, index) {
                             final suggestions = [
                               _messages.last.suggestion ?? '',
@@ -194,11 +195,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   context,
                                 ).textTheme.labelSmall?.copyWith(fontSize: 11),
                               ),
-                              backgroundColor: AppTheme.primaryGradientStart
-                                  .withOpacity(0.1),
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withAlpha((255 * 0.1).round()),
                               side: BorderSide(
-                                color: AppTheme.primaryGradientStart
-                                    .withOpacity(0.3),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withAlpha((255 * 0.3).round()),
                               ),
                             );
                           },
@@ -223,57 +228,63 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 ?.copyWith(color: Colors.grey),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
-                                AppTheme.radiusXLarge,
+                                AppRadius.xl,
                               ),
                               borderSide: const BorderSide(
-                                color: AppTheme.lightBorder,
+                                color:
+                                    Colors.grey.withAlpha((255 * 0.2).round()),
                               ),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
-                                AppTheme.radiusXLarge,
+                                AppRadius.xl,
                               ),
                               borderSide: const BorderSide(
-                                color: AppTheme.lightBorder,
+                                color:
+                                    Colors.grey.withAlpha((255 * 0.2).round()),
                               ),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
-                                AppTheme.radiusXLarge,
+                                AppRadius.xl,
                               ),
                               borderSide: const BorderSide(
-                                color: AppTheme.primaryGradientStart,
+                                color: Theme.of(context).colorScheme.primary,
                                 width: 2,
                               ),
                             ),
                             disabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
-                                AppTheme.radiusXLarge,
+                                AppRadius.xl,
                               ),
                               borderSide: BorderSide(
-                                color: Colors.grey.withOpacity(0.3),
+                                color:
+                                    Colors.grey.withAlpha((255 * 0.3).round()),
                               ),
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: AppTheme.spacingMedium,
-                              vertical: AppTheme.spacingSmall,
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
                             ),
                             filled: true,
                             fillColor: Theme.of(
                               context,
-                            ).colorScheme.surfaceVariant,
+                            ).colorScheme.surfaceContainerLow,
                           ),
                           onSubmitted: (value) {
                             _sendMessage(value);
                           },
                         ),
                       ),
-                      const SizedBox(width: AppTheme.spacingSmall),
+                      const SizedBox(width: AppSpacing.sm),
                       Container(
                         decoration: BoxDecoration(
-                          gradient: AppTheme.primaryGradient,
+                          gradient: LinearGradient(colors: [
+                            Theme.of(context).colorScheme.primary,
+                            Theme.of(context).colorScheme.primaryContainer
+                          ]),
                           borderRadius: BorderRadius.circular(
-                            AppTheme.radiusXLarge,
+                            AppRadius.xl,
                           ),
                         ),
                         child: Material(
@@ -288,12 +299,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                   },
                             customBorder: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
-                                AppTheme.radiusXLarge,
+                                AppRadius.xl,
                               ),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(
-                                AppTheme.spacingSmall,
+                                AppSpacing.sm,
                               ),
                               child: _isSending
                                   ? const SizedBox(
@@ -338,7 +349,7 @@ class _ChatBubble extends StatelessWidget {
     final timeFormat = DateFormat('HH:mm');
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppTheme.spacingMedium),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Align(
         alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
         child: Column(
@@ -351,13 +362,13 @@ class _ChatBubble extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: isUser
-                    ? AppTheme.primaryGradientStart
-                    : Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
               padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacingMedium,
-                vertical: AppTheme.spacingSmall,
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.sm,
               ),
               child: Text(
                 message.content,
@@ -366,7 +377,7 @@ class _ChatBubble extends StatelessWidget {
                     ),
               ),
             ),
-            const SizedBox(height: AppTheme.spacingSmall),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               timeFormat.format(message.timestamp),
               style: Theme.of(

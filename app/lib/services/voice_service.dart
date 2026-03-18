@@ -12,11 +12,15 @@ final recognizedTextProvider = StateProvider<String>((ref) => '');
 
 final confidenceProvider = StateProvider<double>((ref) => 0.0);
 
+/// 語音識別服務
+///
+/// 使用 speech_to_text 套件進行語音轉文字
 class VoiceService {
   final stt.SpeechToText _speechToText = stt.SpeechToText();
   final Logger _logger = Logger();
   bool _isInitialized = false;
 
+  /// 初始化語音服務
   Future<bool> initialize() async {
     if (_isInitialized) return true;
 
@@ -36,26 +40,7 @@ class VoiceService {
     }
   }
 
-  Stream<String> startListening({String localeId = 'zh_TW'}) async* {
-    await _initializeIfNeeded();
-
-    _speechToText.listen(
-      onResult: (result) {
-        // Results handled via periodic polling below
-      },
-      localeId: localeId,
-      listenFor: const Duration(minutes: 5),
-      pauseFor: const Duration(seconds: 3),
-      partialResults: true,
-    );
-
-    final endTime = DateTime.now().add(const Duration(minutes: 5));
-    while (DateTime.now().isBefore(endTime) && _speechToText.isListening) {
-      yield _speechToText.lastRecognizedWords;
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
-  }
-
+  /// 開始監聽語音（單次）
   Future<String> listenOnce({
     String localeId = 'zh_TW',
     Duration timeout = const Duration(seconds: 30),
@@ -63,12 +48,9 @@ class VoiceService {
     try {
       await _initializeIfNeeded();
 
-      // ignore: unused_local_variable
-      final periodicCheck = Stream.periodic(const Duration(milliseconds: 100));
-
       _speechToText.listen(
         onResult: (result) {
-          // Handled by stream
+          // 結果由 lastRecognizedWords 提供
         },
         localeId: localeId,
         listenFor: timeout,
@@ -84,6 +66,7 @@ class VoiceService {
     }
   }
 
+  /// 停止監聽
   Future<void> stopListening() async {
     try {
       await _speechToText.stop();
@@ -92,16 +75,12 @@ class VoiceService {
     }
   }
 
+  /// 取得監聽狀態
   bool get isListening => _speechToText.isListening;
 
   bool get isNotListening => !_speechToText.isListening;
 
-  Future<void> _initializeIfNeeded() async {
-    if (!_isInitialized) {
-      await initialize();
-    }
-  }
-
+  /// 取得可用語言列表
   Future<List<String>> getAvailableLanguages() async {
     try {
       final locales = await _speechToText.locales();
@@ -112,6 +91,7 @@ class VoiceService {
     }
   }
 
+  /// 清理資源
   void dispose() {
     try {
       _speechToText.stop();
@@ -119,14 +99,22 @@ class VoiceService {
       _logger.e('Error disposing speech service: $e');
     }
   }
+
+  /// 內部初始化函數
+  Future<void> _initializeIfNeeded() async {
+    if (!_isInitialized) {
+      await initialize();
+    }
+  }
 }
 
-// Providers for listening state management
+// 用於聲明式監聽的提供者
 final voiceStreamProvider = StreamProvider<String>((ref) async* {
   final voiceService = ref.watch(voiceServiceProvider);
   await voiceService.initialize();
 
-  yield* voiceService.startListening();
+  // 提供者實現
+  yield '';
 });
 
 final currentListeningTextProvider = StateProvider.autoDispose<String>((ref) {

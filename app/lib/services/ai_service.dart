@@ -7,10 +7,8 @@ final aiServiceProvider = Provider<AiService>((ref) {
   return AiService(client);
 });
 
-final aiResponseProvider = FutureProvider.family<String, String>((
-  ref,
-  prompt,
-) async {
+final aiResponseProvider =
+    FutureProvider.family<String, String>((ref, prompt) async {
   final aiService = ref.watch(aiServiceProvider);
   return aiService.analyzeTransaction(prompt);
 });
@@ -24,6 +22,7 @@ final chatMessageProvider = StateProvider<List<ChatMessage>>((ref) {
   return [];
 });
 
+/// 聊天訊息
 class ChatMessage {
   final String id;
   final String content;
@@ -60,13 +59,14 @@ class ChatMessage {
   }
 }
 
+/// AI 服務 - 使用 Supabase Edge Functions
 class AiService {
   final SupabaseClient _supabaseClient;
   final Logger _logger = Logger();
 
   AiService(this._supabaseClient);
 
-  /// Analyze a transaction description and extract details
+  /// 分析交易描述並提取詳情
   Future<String> analyzeTransaction(String description) async {
     try {
       final response = await _supabaseClient.functions.invoke(
@@ -87,7 +87,7 @@ class AiService {
     }
   }
 
-  /// Get AI financial advice based on user's spending
+  /// 取得 AI 財務建議
   Future<String> getFinancialAdvice(Map<String, dynamic> spendingData) async {
     try {
       final response = await _supabaseClient.functions.invoke(
@@ -108,12 +108,11 @@ class AiService {
     }
   }
 
-  /// Get daily motivational quote
+  /// 取得每日勵志語句
   Future<String> getDailyQuote() async {
     try {
-      final response = await _supabaseClient.functions.invoke(
-        'get-daily-quote',
-      );
+      final response =
+          await _supabaseClient.functions.invoke('get-daily-quote');
 
       if (response.status == 200) {
         final result = response.data as Map<String, dynamic>;
@@ -128,7 +127,7 @@ class AiService {
     }
   }
 
-  /// Send a message to AI secretary and get response
+  /// 發送訊息給 AI 秘書並取得回應
   Future<ChatMessage> sendMessage(
     String content,
     List<ChatMessage> conversationHistory,
@@ -182,7 +181,7 @@ class AiService {
     }
   }
 
-  /// Analyze spending patterns
+  /// 分析支出型態
   Future<Map<String, dynamic>> analyzeSpendingPatterns(
     List<Map<String, dynamic>> transactions,
   ) async {
@@ -204,7 +203,7 @@ class AiService {
     }
   }
 
-  /// Generate a journal entry based on the day's transactions
+  /// 產生日記項目
   Future<String> generateJournalEntry(
     List<Map<String, dynamic>> dailyTransactions,
   ) async {
@@ -227,7 +226,7 @@ class AiService {
     }
   }
 
-  /// Extract transaction details from voice transcript
+  /// 從語音文字中提取交易詳情
   Future<Map<String, dynamic>> extractTransactionDetails(
     String transcript,
   ) async {

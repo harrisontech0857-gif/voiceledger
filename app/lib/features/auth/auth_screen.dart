@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
-import '../../core/app_router.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
-  const AuthScreen({Key? key}) : super(key: key);
+  const AuthScreen({super.key});
 
   @override
   ConsumerState<AuthScreen> createState() => _AuthScreenState();
@@ -60,7 +59,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
 
       if (mounted) {
-        GoRouter.of(context).go(Routes.onboarding);
+        context.go('/onboarding');
       }
     } on AuthException catch (e) {
       setState(() => _errorMessage = e.message);
@@ -79,40 +78,36 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spacingMedium),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: AppTheme.spacingLarge),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Header
+                // 標題
                 Text(
                   '語記',
                   style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                        background: Paint()
-                          ..shader = LinearGradient(
-                            colors: [
-                              AppTheme.primaryGradientStart,
-                              AppTheme.primaryGradientEnd,
-                            ],
-                          ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                 ),
                 Text(
                   'AI 財務秘書',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: AppTheme.primaryGradientStart,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                 ),
-                const SizedBox(height: AppTheme.spacingLarge),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Tab Switcher
+                // 標籤切換器
                 Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                  padding: const EdgeInsets.all(AppTheme.spacingSmall),
+                  padding: const EdgeInsets.all(AppSpacing.sm),
                   child: Row(
                     children: [
                       Expanded(
@@ -132,64 +127,62 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingLarge),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Error Message
-                if (_errorMessage != null)
+                // 錯誤訊息
+                if (_errorMessage != null) ...[
                   Container(
-                    padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(
-                        AppTheme.radiusMedium,
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.error,
                       ),
-                      border: Border.all(color: Colors.red.withOpacity(0.3)),
                     ),
                     child: Text(
                       _errorMessage!,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodySmall?.copyWith(color: Colors.red),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
                     ),
                   ),
-                if (_errorMessage != null)
-                  const SizedBox(height: AppTheme.spacingMedium),
+                  const SizedBox(height: AppSpacing.md),
+                ],
 
-                // Email Input
+                // 郵箱輸入
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   enabled: !_isLoading,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: '郵箱',
-                    prefixIcon: const Icon(Icons.email_rounded),
+                    prefixIcon: Icon(Icons.email_rounded),
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingMedium),
+                const SizedBox(height: AppSpacing.md),
 
-                // Password Input
+                // 密碼輸入
                 TextField(
                   controller: _passwordController,
                   obscureText: true,
                   enabled: !_isLoading,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: '密碼',
-                    prefixIcon: const Icon(Icons.lock_rounded),
+                    prefixIcon: Icon(Icons.lock_rounded),
                   ),
                 ),
                 if (_isLogin)
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
-                        // Handle password reset
-                      },
+                      onPressed: null,
                       child: const Text('忘記密碼？'),
                     ),
                   ),
-                const SizedBox(height: AppTheme.spacingLarge),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Submit Button
+                // 提交按鈕
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -203,31 +196,39 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         : Text(_isLogin ? '登入' : '建立帳戶'),
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingMedium),
+                const SizedBox(height: AppSpacing.md),
 
-                // Divider
+                // 分隔線
                 Row(
                   children: [
-                    Expanded(child: Divider()),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.spacingSmall,
+                        horizontal: AppSpacing.sm,
                       ),
                       child: Text(
                         '或',
                         style: Theme.of(context).textTheme.labelSmall,
                       ),
                     ),
-                    Expanded(child: Divider()),
+                    Expanded(
+                      child: Divider(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: AppTheme.spacingMedium),
+                const SizedBox(height: AppSpacing.md),
 
-                // Social Login
+                // Google 登入按鈕
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    icon: const Icon(Icons.phone_rounded),
+                    icon: const Icon(Icons.login_rounded),
                     label: const Text('用 Google 帳戶登入'),
                     onPressed: _isLoading ? null : () {},
                   ),
@@ -241,6 +242,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   }
 }
 
+/// 標籤按鈕小部件
 class _TabButton extends StatelessWidget {
   final String label;
   final bool isActive;
@@ -258,14 +260,17 @@ class _TabButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isActive ? AppTheme.primaryGradientStart : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+          color: isActive
+              ? Theme.of(context).colorScheme.primary
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
-        padding: const EdgeInsets.symmetric(vertical: AppTheme.spacingSmall),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         child: Text(
           label,
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: isActive ? Colors.white : null,
+                color:
+                    isActive ? Theme.of(context).colorScheme.onPrimary : null,
                 fontWeight: FontWeight.w600,
               ),
           textAlign: TextAlign.center,

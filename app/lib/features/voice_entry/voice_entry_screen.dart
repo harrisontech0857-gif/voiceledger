@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/theme.dart';
+import '../../models/transaction.dart';
 import '../../services/voice_service.dart';
 import '../../services/ai_service.dart';
-import 'package:uuid/uuid.dart';
-import '../../models/transaction.dart';
 
 class VoiceEntryScreen extends ConsumerStatefulWidget {
-  const VoiceEntryScreen({Key? key}) : super(key: key);
+  const VoiceEntryScreen({super.key});
 
   @override
   ConsumerState<VoiceEntryScreen> createState() => _VoiceEntryScreenState();
@@ -44,9 +44,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     final voiceService = ref.read(voiceServiceProvider);
     final isInitialized = await voiceService.initialize();
     if (!isInitialized && mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('語音服務初始化失敗')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('語音服務初始化失敗')),
+      );
     }
   }
 
@@ -79,9 +79,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     } catch (e) {
       if (mounted) {
         setState(() => _isListening = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('錯誤: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('錯誤: $e')),
+        );
       }
     }
 
@@ -94,10 +94,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     try {
       final aiService = ref.read(aiServiceProvider);
 
-      // Extract transaction details from transcript
       final details = await aiService.extractTransactionDetails(transcript);
-
-      // Get AI response
       final response = await aiService.analyzeTransaction(transcript);
 
       if (mounted) {
@@ -106,15 +103,14 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
           _isProcessing = false;
         });
 
-        // Show confirmation dialog
         _showConfirmationDialog(details);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('處理失敗: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('處理失敗: $e')),
+        );
       }
     }
   }
@@ -124,10 +120,10 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       context: context,
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spacingMedium),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -146,7 +142,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                     ),
                   ],
                 ),
-                const SizedBox(height: AppTheme.spacingMedium),
+                const SizedBox(height: AppSpacing.md),
                 _buildDetailField(
                   context,
                   '金額',
@@ -162,20 +158,20 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                   '描述',
                   details['description']?.toString() ?? _recognizedText,
                 ),
-                const SizedBox(height: AppTheme.spacingMedium),
+                const SizedBox(height: AppSpacing.md),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(AppTheme.spacingSmall),
+                  padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryGradientStart.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                   child: Text(
                     'AI 回饋: $_aiResponse',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingLarge),
+                const SizedBox(height: AppSpacing.lg),
                 Row(
                   children: [
                     Expanded(
@@ -184,7 +180,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         child: const Text('取消'),
                       ),
                     ),
-                    const SizedBox(width: AppTheme.spacingSmall),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
@@ -206,28 +202,31 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
 
   Widget _buildDetailField(BuildContext context, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppTheme.spacingMedium),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
           ),
-          const SizedBox(height: AppTheme.spacingSmall),
+          const SizedBox(height: AppSpacing.sm),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(
-              horizontal: AppTheme.spacingSmall,
-              vertical: AppTheme.spacingSmall,
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
-            child: Text(value, style: Theme.of(context).textTheme.bodyMedium),
+            child: Text(
+              value,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
         ],
       ),
@@ -235,9 +234,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
   }
 
   void _saveTransaction(Map<String, dynamic> details) {
-    // Save transaction to database
     const uuid = Uuid();
-    // ignore: unused_local_variable
     final transaction = Transaction(
       id: uuid.v4(),
       userId: 'current_user_id',
@@ -250,17 +247,16 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       notes: _aiResponse,
     );
 
-    // TODO: Save to Supabase
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('交易已保存'),
-          backgroundColor: AppTheme.successGreen,
+          backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
         ),
       );
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
-          GoRouter.of(context).go('/dashboard');
+          context.go('/dashboard');
         }
       });
     }
@@ -307,11 +303,11 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spacingMedium),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Animated Microphone Button
+                // 動畫麥克風按鈕
                 GestureDetector(
                   onTap: _isListening || _isProcessing ? null : _startListening,
                   child: AnimatedBuilder(
@@ -325,8 +321,10 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                           boxShadow: [
                             if (_isListening)
                               BoxShadow(
-                                color: AppTheme.primaryGradientStart
-                                    .withOpacity(0.5),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.5),
                                 blurRadius:
                                     20 + (_animationController.value * 10),
                                 spreadRadius:
@@ -337,8 +335,15 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: AppTheme.primaryGradient,
-                            boxShadow: [AppTheme.mediumShadow],
+                            gradient: LinearGradient(
+                              colors: [
+                                Theme.of(context).colorScheme.primary,
+                                Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.7),
+                              ],
+                            ),
                           ),
                           child: Material(
                             color: Colors.transparent,
@@ -363,9 +368,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                     },
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingLarge),
+                const SizedBox(height: AppSpacing.lg),
 
-                // Status Text
+                // 狀態文字
                 Text(
                   _isListening
                       ? '正在聆聽...'
@@ -377,18 +382,22 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                       ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: AppTheme.spacingMedium),
+                const SizedBox(height: AppSpacing.md),
 
-                // Recognized Text Display
+                // 辨識結果顯示
                 if (_recognizedText.isNotEmpty)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                       border: Border.all(
-                        color: AppTheme.primaryGradientStart.withOpacity(0.3),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withValues(alpha: 0.3),
                       ),
                     ),
                     child: Column(
@@ -398,7 +407,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                           '辨識結果',
                           style: Theme.of(context).textTheme.labelSmall,
                         ),
-                        const SizedBox(height: AppTheme.spacingSmall),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(
                           _recognizedText,
                           style: Theme.of(context).textTheme.bodyLarge,
@@ -407,18 +416,21 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                     ),
                   ),
                 if (_recognizedText.isNotEmpty)
-                  const SizedBox(height: AppTheme.spacingMedium),
+                  const SizedBox(height: AppSpacing.md),
 
-                // AI Response Display
+                // AI 回應顯示
                 if (_aiResponse.isNotEmpty)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(AppTheme.spacingMedium),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
-                      color: AppTheme.accentGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                      color: Theme.of(context).colorScheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                       border: Border.all(
-                        color: AppTheme.accentGreen.withOpacity(0.3),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .tertiary
+                            .withValues(alpha: 0.3),
                       ),
                     ),
                     child: Column(
@@ -426,24 +438,28 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                       children: [
                         Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.smart_toy_rounded,
-                              color: AppTheme.accentGreen,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onTertiaryContainer,
                             ),
-                            const SizedBox(width: AppTheme.spacingSmall),
+                            const SizedBox(width: AppSpacing.sm),
                             Text(
                               'AI 秘書',
                               style: Theme.of(context)
                                   .textTheme
                                   .labelSmall
                                   ?.copyWith(
-                                    color: AppTheme.accentGreen,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onTertiaryContainer,
                                     fontWeight: FontWeight.w600,
                                   ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppTheme.spacingSmall),
+                        const SizedBox(height: AppSpacing.sm),
                         Text(
                           _aiResponse,
                           style: Theme.of(context).textTheme.bodyMedium,
@@ -452,8 +468,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                     ),
                   ),
 
-                if (_isProcessing)
-                  const SizedBox(height: AppTheme.spacingMedium),
+                if (_isProcessing) const SizedBox(height: AppSpacing.md),
                 if (_isProcessing) const CircularProgressIndicator(),
               ],
             ),

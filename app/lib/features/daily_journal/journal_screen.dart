@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme.dart';
 
 class JournalScreen extends ConsumerStatefulWidget {
-  const JournalScreen({Key? key}) : super(key: key);
+  const JournalScreen({super.key});
 
   @override
   ConsumerState<JournalScreen> createState() => _JournalScreenState();
@@ -51,13 +52,13 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       appBar: AppBar(title: const Text('生活日記'), centerTitle: true),
       body: Column(
         children: [
-          // Date Navigation
           Container(
-            padding: const EdgeInsets.all(AppTheme.spacingMedium),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               border: Border(
-                bottom: BorderSide(color: Colors.grey.withOpacity(0.1)),
+                bottom: BorderSide(
+                    color: Colors.grey.withAlpha((255 * 0.1).round())),
               ),
             ),
             child: Column(
@@ -139,19 +140,21 @@ class _JournalEntryView extends ConsumerWidget {
 ''';
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppTheme.spacingMedium),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Generated Entry
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(AppTheme.spacingMedium),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(
-                color: AppTheme.primaryGradientStart.withOpacity(0.2),
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withAlpha((255 * 0.2).round()),
               ),
             ),
             child: Column(
@@ -159,22 +162,22 @@ class _JournalEntryView extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.auto_awesome_rounded,
-                      color: AppTheme.primaryGradientStart,
+                      color: Theme.of(context).colorScheme.primary,
                       size: 20,
                     ),
-                    const SizedBox(width: AppTheme.spacingSmall),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       'AI 生成日記',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: AppTheme.primaryGradientStart,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppTheme.spacingMedium),
+                const SizedBox(height: AppSpacing.md),
                 Text(
                   mockEntry,
                   style: Theme.of(
@@ -184,11 +187,9 @@ class _JournalEntryView extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: AppTheme.spacingLarge),
-
-          // Daily Stats
+          const SizedBox(height: AppSpacing.lg),
           Text('今日統計', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: AppTheme.spacingMedium),
+          const SizedBox(height: AppSpacing.md),
           Row(
             children: [
               Expanded(
@@ -196,34 +197,32 @@ class _JournalEntryView extends ConsumerWidget {
                   icon: Icons.shopping_bag_rounded,
                   label: '交易筆數',
                   value: '5',
-                  color: Color(0xFF2196F3),
+                  color: Colors.blue,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingSmall),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: _StatCard(
                   icon: Icons.trending_down_rounded,
                   label: '總支出',
                   value: 'NT\$ 1,250',
-                  color: AppTheme.primaryGradientStart,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
-              const SizedBox(width: AppTheme.spacingSmall),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: _StatCard(
                   icon: Icons.trending_up_rounded,
                   label: '預算使用',
                   value: '45%',
-                  color: AppTheme.successGreen,
+                  color: Colors.green,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingLarge),
-
-          // Emotions
+          const SizedBox(height: AppSpacing.lg),
           Text('今日心情', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: AppTheme.spacingMedium),
+          const SizedBox(height: AppSpacing.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -233,28 +232,26 @@ class _JournalEntryView extends ConsumerWidget {
               _EmotionButton(emoji: '😤', label: '煩躁'),
             ],
           ),
-          const SizedBox(height: AppTheme.spacingLarge),
-
-          // Edit Note
+          const SizedBox(height: AppSpacing.lg),
           Text('個人筆記', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: AppTheme.spacingSmall),
+          const SizedBox(height: AppSpacing.sm),
           TextField(
             maxLines: 5,
             decoration: InputDecoration(
               hintText: '添加您的個人筆記...',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
             ),
           ),
-          const SizedBox(height: AppTheme.spacingMedium),
+          const SizedBox(height: AppSpacing.md),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('日記已保存')));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('日記已保存')),
+                );
               },
               child: const Text('保存日記'),
             ),
@@ -282,15 +279,15 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: color.withOpacity(0.3)),
+        color: color.withAlpha((255 * 0.1).round()),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: color.withAlpha((255 * 0.3).round())),
       ),
-      padding: const EdgeInsets.all(AppTheme.spacingSmall),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       child: Column(
         children: [
           Icon(icon, color: color, size: 24),
-          const SizedBox(height: AppTheme.spacingSmall),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             value,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -331,6 +328,7 @@ class _EmotionButtonState extends State<_EmotionButton> {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return GestureDetector(
       onTap: () {
         setState(() => _isSelected = !_isSelected);
@@ -338,29 +336,27 @@ class _EmotionButtonState extends State<_EmotionButton> {
       child: Container(
         decoration: BoxDecoration(
           color: _isSelected
-              ? AppTheme.primaryGradientStart.withOpacity(0.1)
+              ? primary.withAlpha((255 * 0.1).round())
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          borderRadius: BorderRadius.circular(AppRadius.md),
           border: Border.all(
             color: _isSelected
-                ? AppTheme.primaryGradientStart
-                : Colors.grey.withOpacity(0.2),
+                ? primary
+                : Colors.grey.withAlpha((255 * 0.2).round()),
           ),
         ),
         padding: const EdgeInsets.symmetric(
-          horizontal: AppTheme.spacingMedium,
-          vertical: AppTheme.spacingSmall,
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
         ),
         child: Column(
           children: [
             Text(widget.emoji, style: const TextStyle(fontSize: 24)),
-            const SizedBox(height: AppTheme.spacingSmall),
+            const SizedBox(height: AppSpacing.sm),
             Text(
               widget.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: _isSelected
-                        ? AppTheme.primaryGradientStart
-                        : Colors.grey,
+                    color: _isSelected ? primary : Colors.grey,
                   ),
             ),
           ],

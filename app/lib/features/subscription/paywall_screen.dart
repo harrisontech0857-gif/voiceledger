@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import '../../core/theme.dart';
 
-/// 付費牆 UI
-/// 展示不同的訂閱方案，用戶可以選擇升級
 class PaywallScreen extends StatefulWidget {
   final String? currentTier;
   final VoidCallback? onPremiumSelected;
 
-  const PaywallScreen({Key? key, this.currentTier, this.onPremiumSelected})
-      : super(key: key);
+  const PaywallScreen({super.key, this.currentTier, this.onPremiumSelected});
 
   @override
   State<PaywallScreen> createState() => _PaywallScreenState();
@@ -94,7 +92,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -106,12 +104,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.xs),
                     const Text(
                       '立即升級以解鎖更多功能',
                       style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // 計費周期選擇
                     Row(
@@ -139,7 +137,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // 訂閱方案卡片
                     ..._plans.map((plan) {
@@ -215,7 +213,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                       ],
                                     ),
 
-                                    const SizedBox(height: 16),
+                                    const SizedBox(height: AppSpacing.md),
 
                                     // 價格
                                     Text(
@@ -234,7 +232,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                         ),
                                       ),
 
-                                    const SizedBox(height: 16),
+                                    const SizedBox(height: AppSpacing.md),
 
                                     // 功能列表
                                     ...(plan['features'] as List<String>).map((
@@ -263,7 +261,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                       );
                                     }),
 
-                                    const SizedBox(height: 16),
+                                    const SizedBox(height: AppSpacing.md),
 
                                     // 按鈕
                                     SizedBox(
@@ -320,7 +318,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       );
                     }).toList(),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // 常見問題
                     const Text(
@@ -330,7 +328,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
 
                     _buildFAQItem(
                       '我可以隨時取消訂閱嗎？',
@@ -352,7 +350,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       '根據應用市場的政策，應用內購買通常是不可退款的。但是，您可以根據您所在區域的應用市場政策申請退款。',
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // 隱私政策連結
                     Center(
@@ -378,7 +376,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.md),
                   ],
                 ),
               ),

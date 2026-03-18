@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 /// 用戶同意畫面
 /// 在首次使用應用時，用戶必須同意隱私政策和數據收集條款
-class ConsentScreen extends StatefulWidget {
-  final VoidCallback onConsentAccepted;
-
-  const ConsentScreen({Key? key, required this.onConsentAccepted})
-      : super(key: key);
+class ConsentScreen extends ConsumerStatefulWidget {
+  const ConsentScreen({super.key});
 
   @override
-  State<ConsentScreen> createState() => _ConsentScreenState();
+  ConsumerState<ConsentScreen> createState() => _ConsentScreenState();
 }
 
-class _ConsentScreenState extends State<ConsentScreen> {
+class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   // 同意狀態
   bool _agreedToPrivacyPolicy = false;
   bool _agreedToTermsOfService = false;
@@ -37,7 +36,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
       //   photoAnalysisAgreed: _agreedToPhotoAnalysis,
       // );
 
-      widget.onConsentAccepted();
+      if (mounted) {
+        Navigator.of(context).pop(true);
+      }
     } catch (e) {
       ScaffoldMessenger.of(
         context,
@@ -170,7 +171,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
                 secondary: Icon(
                   Icons.location_on,
-                  color: _agreedToLocationTracking ? Colors.blue : Colors.grey,
+                  color: _agreedToLocationTracking
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey,
                 ),
               ),
 
@@ -187,7 +190,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
                 secondary: Icon(
                   Icons.camera_alt,
-                  color: _agreedToPhotoAnalysis ? Colors.blue : Colors.grey,
+                  color: _agreedToPhotoAnalysis
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.grey,
                 ),
               ),
 

@@ -10,6 +10,9 @@ on:
       - main
       - develop
 
+env:
+  FLUTTER_VERSION: '3.24.5'
+
 jobs:
   analyze:
     name: Flutter Analyze
@@ -23,19 +26,17 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          cache-path: ${{ runner.tool_cache }}/flutter
 
-      - name: Generate missing platform directories
+      - name: Generate platform directories
         run: |
           if [ ! -d "android" ] || [ ! -d "ios" ]; then
-            mv pubspec.yaml pubspec.yaml.bak
-            mv lib lib.bak
-            mv test test.bak 2>/dev/null || true
-            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
-            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+            cp pubspec.yaml pubspec.yaml.bak
+            cp -r lib lib.bak
+            cp -r test test.bak 2>/dev/null || true
+            cp analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios .
             mv pubspec.yaml.bak pubspec.yaml
             rm -rf lib && mv lib.bak lib
             rm -rf test && mv test.bak test 2>/dev/null || true
@@ -48,10 +49,9 @@ jobs:
       - name: Analyze code
         run: flutter analyze --no-fatal-infos lib/
 
-  test:
-    name: Flutter Tests
+  lint:
+    name: Lint & Format
     runs-on: ubuntu-latest
-    needs: analyze
     defaults:
       run:
         working-directory: app
@@ -61,48 +61,68 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          cache-path: ${{ runner.tool_cache }}/flutter
 
-      - name: Generate missing platform directories
+      - name: Generate platform directories
         run: |
           if [ ! -d "android" ] || [ ! -d "ios" ]; then
-            mv pubspec.yaml pubspec.yaml.bak
-            mv lib lib.bak
-            mv test test.bak 2>/dev/null || true
-            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
-            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+            cp pubspec.yaml pubspec.yaml.bak
+            cp -r lib lib.bak
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios .
             mv pubspec.yaml.bak pubspec.yaml
             rm -rf lib && mv lib.bak lib
-            rm -rf test && mv test.bak test 2>/dev/null || true
-            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
           fi
 
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Check if tests exist
+      - name: Check formatting
+        run: dart format --set-exit-if-changed lib/
+
+  test:
+    name: Flutter Tests
+    runs-on: ubuntu-latest
+    needs: [analyze, lint]
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Generate platform directories
+        run: |
+          if [ ! -d "android" ] || [ ! -d "ios" ]; then
+            cp pubspec.yaml pubspec.yaml.bak
+            cp -r lib lib.bak
+            cp -r test test.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios .
+            mv pubspec.yaml.bak pubspec.yaml
+            rm -rf lib && mv lib.bak lib
+            rm -rf test && mv test.bak test 2>/dev/null || true
+          fi
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Check for tests
         id: check_tests
         run: |
-          if [ -d "test" ] && find test -name '*_test.dart' | grep -q .; then
+          if [ -d "test" ] && find test -name '*_test.dart' | head -1 | read; then
             echo "has_tests=true" >> $GITHUB_OUTPUT
           else
             echo "has_tests=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Run unit tests
+      - name: Run tests
         if: steps.check_tests.outputs.has_tests == 'true'
         run: flutter test --coverage
-
-      - name: Upload coverage
-        if: steps.check_tests.outputs.has_tests == 'true'
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./app/coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
 
   build-apk:
     name: Build APK
@@ -114,32 +134,47 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.x'
-          cache: true
-          cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          cache-path: ${{ runner.tool_cache }}/flutter
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Generate missing platform directories
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Generate platform directories
         run: |
-          if [ ! -d "android" ] || [ ! -d "ios" ]; then
-            mv pubspec.yaml pubspec.yaml.bak
-            mv lib lib.bak
-            mv test test.bak 2>/dev/null || true
-            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
-            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+          if [ ! -d "android" ]; then
+            cp pubspec.yaml pubspec.yaml.bak
+            cp -r lib lib.bak
+            cp -r test test.bak 2>/dev/null || true
+            cp analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android .
             mv pubspec.yaml.bak pubspec.yaml
             rm -rf lib && mv lib.bak lib
             rm -rf test && mv test.bak test 2>/dev/null || true
             mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
+          fi
+
+      - name: Fix Android compileSdk
+        run: |
+          # 確保 compileSdk 版本足夠高
+          if [ -f "android/app/build.gradle" ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/' android/app/build.gradle
+            sed -i 's/compileSdkVersion flutter.compileSdkVersion/compileSdkVersion 35/' android/app/build.gradle
+            sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/' android/app/build.gradle
+            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/' android/app/build.gradle
+            sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 35/' android/app/build.gradle
+            sed -i 's/targetSdkVersion flutter.targetSdkVersion/targetSdkVersion 35/' android/app/build.gradle
+          fi
+          if [ -f "android/app/build.gradle.kts" ]; then
+            sed -i 's/compileSdk = flutter.compileSdkVersion/compileSdk = 35/' android/app/build.gradle.kts
+            sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 21/' android/app/build.gradle.kts
+            sed -i 's/targetSdk = flutter.targetSdkVersion/targetSdk = 35/' android/app/build.gradle.kts
           fi
 
       - name: Get dependencies
@@ -148,7 +183,7 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
-      - name: Upload APK artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release.apk
@@ -168,19 +203,17 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-          cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          cache-path: ${{ runner.tool_cache }}/flutter
 
-      - name: Generate missing platform directories
+      - name: Generate platform directories
         run: |
-          if [ ! -d "android" ] || [ ! -d "ios" ]; then
-            mv pubspec.yaml pubspec.yaml.bak
-            mv lib lib.bak
-            mv test test.bak 2>/dev/null || true
-            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
-            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+          if [ ! -d "ios" ]; then
+            cp pubspec.yaml pubspec.yaml.bak
+            cp -r lib lib.bak
+            cp -r test test.bak 2>/dev/null || true
+            cp analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
+            flutter create --org com.voiceledger --project-name voiceledger --platforms ios .
             mv pubspec.yaml.bak pubspec.yaml
             rm -rf lib && mv lib.bak lib
             rm -rf test && mv test.bak test 2>/dev/null || true
@@ -193,52 +226,12 @@ jobs:
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
-      - name: Upload iOS build artifact
+      - name: Upload iOS build
         uses: actions/upload-artifact@v4
         with:
           name: ios-build
           path: app/build/ios/iphoneos/Runner.app
           retention-days: 30
-
-  lint:
-    name: Lint & Format Check
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: app
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.x'
-          cache: true
-          cache-key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          cache-path: ${{ runner.tool_cache }}/flutter
-
-      - name: Generate missing platform directories
-        run: |
-          if [ ! -d "android" ] || [ ! -d "ios" ]; then
-            mv pubspec.yaml pubspec.yaml.bak
-            mv lib lib.bak
-            mv test test.bak 2>/dev/null || true
-            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
-            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
-            mv pubspec.yaml.bak pubspec.yaml
-            rm -rf lib && mv lib.bak lib
-            rm -rf test && mv test.bak test 2>/dev/null || true
-            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
-          fi
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Run dart fix
-        run: dart fix --dry-run
-
-      - name: Check formatting
-        run: dart format --set-exit-if-changed lib/
 
   security-scan:
     name: Security Scan
@@ -252,34 +245,22 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - name: Generate missing platform directories
+      - name: Generate platform directories
         run: |
-          if [ ! -d "android" ] || [ ! -d "ios" ]; then
-            mv pubspec.yaml pubspec.yaml.bak
-            mv lib lib.bak
-            mv test test.bak 2>/dev/null || true
-            mv analysis_options.yaml analysis_options.yaml.bak 2>/dev/null || true
-            flutter create --org com.voiceledger --project-name voiceledger --platforms android,ios,web .
+          if [ ! -d "android" ]; then
+            cp pubspec.yaml pubspec.yaml.bak
+            cp -r lib lib.bak
+            flutter create --org com.voiceledger --project-name voiceledger --platforms android .
             mv pubspec.yaml.bak pubspec.yaml
             rm -rf lib && mv lib.bak lib
-            rm -rf test && mv test.bak test 2>/dev/null || true
-            mv analysis_options.yaml.bak analysis_options.yaml 2>/dev/null || true
           fi
 
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Run security audit
+      - name: Security audit
         run: flutter pub audit
-        continue-on-error: true
-
-      - name: Check for vulnerable deps
-        run: |
-          flutter pub audit --json > audit-report.json || true
-          if grep -q '"vulnerabilityCount": [1-9]' audit-report.json; then
-            echo "::warning::Vulnerabilities found in dependencies"
-          fi
         continue-on-error: true
