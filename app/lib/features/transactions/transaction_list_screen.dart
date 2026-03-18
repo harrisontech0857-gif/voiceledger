@@ -247,7 +247,7 @@ class _TransactionTile extends ConsumerWidget {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
-                  _deleteTransaction(context, transaction);
+                  _deleteTransaction(context, ref, transaction);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.errorContainer,
@@ -262,27 +262,35 @@ class _TransactionTile extends ConsumerWidget {
     );
   }
 
-  void _deleteTransaction(BuildContext context, Transaction transaction) {
+  void _deleteTransaction(
+      BuildContext context, WidgetRef ref, Transaction transaction) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: const Text('確認刪除'),
         content: const Text('確定要刪除此交易嗎？'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogCtx),
             child: const Text('取消'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context);
-              final txService = ref.read(transactionServiceProvider);
-              await txService.deleteTransaction(transaction.id);
-              if (mounted) {
-                setState(() {});
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('交易已刪除')),
-                );
+              Navigator.pop(dialogCtx);
+              try {
+                final txService = ref.read(transactionServiceProvider);
+                await txService.deleteTransaction(transaction.id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('交易已刪除')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('刪除失敗: $e')),
+                  );
+                }
               }
             },
             child: const Text('刪除'),

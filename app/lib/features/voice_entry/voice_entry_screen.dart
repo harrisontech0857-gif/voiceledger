@@ -8,6 +8,7 @@ import '../../models/transaction.dart';
 import '../../services/voice_service.dart';
 import '../../services/ai_service.dart';
 import '../../services/pet_service.dart';
+import '../../services/transaction_service.dart';
 
 class VoiceEntryScreen extends ConsumerStatefulWidget {
   const VoiceEntryScreen({super.key});
@@ -479,7 +480,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
 
     final transaction = Transaction(
       id: uuid.v4(),
-      userId: ref.read(currentUserIdProvider),
+      userId: ref.read(currentUserIdProvider) ?? 'anonymous',
       amount: amount,
       type: TransactionType.expense,
       category: _parseCategory(details['category']?.toString() ?? ''),
