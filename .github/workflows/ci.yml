@@ -170,10 +170,24 @@ jobs:
               sed -i 's/flutter\.targetSdkVersion/35/g' "$f"
             fi
           done
-          # 替換 pub-cache 中 plugin 的 build.gradle
-          PUB_CACHE="${PUB_CACHE:-$HOME/.pub-cache}"
-          find "$PUB_CACHE" -path "*/android/build.gradle" -exec \
-            sed -i 's/flutter\.compileSdkVersion/35/g; s/flutter\.minSdkVersion/21/g; s/flutter\.targetSdkVersion/35/g' {} + 2>/dev/null || true
+          # 在根 build.gradle 或 build.gradle.kts 中為所有子專案定義 flutter 擴展
+          # 這樣 plugin 的 build.gradle 中的 flutter.compileSdkVersion 就能正確解析
+          if [ -f "android/build.gradle" ]; then
+            # Groovy DSL
+            sed -i '1i\
+          allprojects {\
+              ext {\
+                  set("flutter", [compileSdkVersion: 35, minSdkVersion: 21, targetSdkVersion: 35, ndkVersion: "25.1.8937393"])\
+              }\
+          }' android/build.gradle
+          fi
+          if [ -f "android/build.gradle.kts" ]; then
+            # Kotlin DSL
+            sed -i '1i\
+          allprojects {\
+              extra.set("flutter", mapOf("compileSdkVersion" to 35, "minSdkVersion" to 21, "targetSdkVersion" to 35, "ndkVersion" to "25.1.8937393"))\
+          }' android/build.gradle.kts
+          fi
 
       - name: Get dependencies
         run: flutter pub get
