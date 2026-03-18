@@ -74,9 +74,8 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                 var filtered = transactions;
 
                 if (_selectedType != null) {
-                  filtered = filtered
-                      .where((tx) => tx.type == _selectedType)
-                      .toList();
+                  filtered =
+                      filtered.where((tx) => tx.type == _selectedType).toList();
                 }
 
                 if (_selectedCategory != null) {
@@ -187,11 +186,11 @@ class _TransactionTile extends ConsumerWidget {
               Text(
                 '${isIncome ? '+' : '-'}NT\$ ${transaction.amount.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: isIncome
-                      ? Theme.of(context).colorScheme.tertiaryContainer
-                      : Theme.of(context).colorScheme.error,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: isIncome
+                          ? Theme.of(context).colorScheme.tertiaryContainer
+                          : Theme.of(context).colorScheme.error,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               Text(
                 timeFormat.format(transaction.createdAt),

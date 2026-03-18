@@ -105,9 +105,9 @@ class _PeriodButton extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: isSelected ? Colors.white : null,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: isSelected ? Colors.white : null,
+                  fontWeight: FontWeight.w600,
+                ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -229,8 +229,8 @@ class _StatSummaryCard extends StatelessWidget {
             Text(
               change,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isPositive ? Colors.green : Colors.red,
-              ),
+                    color: isPositive ? Colors.green : Colors.red,
+                  ),
             ),
           ],
         ),
@@ -354,8 +354,8 @@ class _CategoryBreakdown extends StatelessWidget {
                     Text(
                       '${percentage.toStringAsFixed(1)}%',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ],
                 ),
@@ -529,9 +529,9 @@ class _TopTransactions extends StatelessWidget {
               Text(
                 tx['amount'] as String,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
             ],
           ),

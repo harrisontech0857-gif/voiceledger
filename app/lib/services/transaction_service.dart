@@ -302,27 +302,29 @@ class MockTransactionService implements TransactionServiceBase {
 }
 
 // Providers for transaction data
-final userTransactionsProvider =
-    FutureProvider.family<
-      List<Transaction>,
-      ({String userId, DateTime? startDate, DateTime? endDate})
-    >((ref, params) async {
-      final service = ref.watch(transactionServiceProvider);
-      return service.getTransactions(
-        userId: params.userId,
-        startDate: params.startDate,
-        endDate: params.endDate,
-      );
-    });
+final userTransactionsProvider = FutureProvider.family<
+    List<Transaction>,
+    ({
+      String userId,
+      DateTime? startDate,
+      DateTime? endDate
+    })>((ref, params) async {
+  final service = ref.watch(transactionServiceProvider);
+  return service.getTransactions(
+    userId: params.userId,
+    startDate: params.startDate,
+    endDate: params.endDate,
+  );
+});
 
 final monthlySummaryProvider =
     FutureProvider.family<Map<String, double>, DateTime>((ref, month) async {
-      final service = ref.watch(transactionServiceProvider);
-      return service.getMonthlySummary(month);
-    });
+  final service = ref.watch(transactionServiceProvider);
+  return service.getMonthlySummary(month);
+});
 
 final categorySummaryProvider =
     FutureProvider.family<Map<String, double>, DateTime>((ref, month) async {
-      final service = ref.watch(transactionServiceProvider);
-      return service.getCategorySummary(month);
-    });
+  final service = ref.watch(transactionServiceProvider);
+  return service.getCategorySummary(month);
+});

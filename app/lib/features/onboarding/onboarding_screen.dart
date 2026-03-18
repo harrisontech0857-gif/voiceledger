@@ -236,9 +236,9 @@ class _OnboardingPage extends StatelessWidget {
             Text(
               description,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-                height: 1.5,
-              ),
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    height: 1.5,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],

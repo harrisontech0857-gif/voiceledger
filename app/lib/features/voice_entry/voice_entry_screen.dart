@@ -319,7 +319,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                           boxShadow: [
                             if (_isListening)
                               BoxShadow(
-                                color: Theme.of(context).colorScheme.primary
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
                                     .withAlpha((255 * 0.5).round()),
                                 blurRadius:
                                     20 + (_animationController.value * 10),
@@ -335,8 +337,8 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                               colors: [
                                 Theme.of(context).colorScheme.primary,
                                 Theme.of(context).colorScheme.primary.withAlpha(
-                                  (255 * 0.7).round(),
-                                ),
+                                      (255 * 0.7).round(),
+                                    ),
                               ],
                             ),
                           ),
@@ -370,11 +372,11 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                   _isListening
                       ? '正在聆聽...'
                       : _isProcessing
-                      ? '正在處理...'
-                      : '輕按麥克風開始記帳',
+                          ? '正在處理...'
+                          : '輕按麥克風開始記帳',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -441,7 +443,9 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                             const SizedBox(width: AppSpacing.sm),
                             Text(
                               'AI 秘書',
-                              style: Theme.of(context).textTheme.labelSmall
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
                                   ?.copyWith(
                                     color: Theme.of(
                                       context,
