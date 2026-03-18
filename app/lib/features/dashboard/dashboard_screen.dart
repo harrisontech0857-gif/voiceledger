@@ -18,13 +18,20 @@ class DashboardScreen extends ConsumerWidget {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.md),
-            child: GestureDetector(
+            child: Semantics(
+              label: '前往設定',
+              button: true,
+              enabled: true,
               onTap: () => context.go('/settings'),
-              child: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                child: Icon(
-                  Icons.person_rounded,
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+              child: GestureDetector(
+                onTap: () => context.go('/settings'),
+                child: CircleAvatar(
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.person_rounded,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                 ),
               ),
             ),
@@ -92,9 +99,12 @@ class _DailyQuoteCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.lightbulb_rounded,
-                color: Theme.of(context).colorScheme.onPrimary,
+              Semantics(
+                enabled: false,
+                child: Icon(
+                  Icons.lightbulb_rounded,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
@@ -183,10 +193,13 @@ class _TodaysSummaryCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Icon(
-                    Icons.trending_down_rounded,
-                    color: Theme.of(context).colorScheme.onTertiaryContainer,
-                    size: 32,
+                  child: Semantics(
+                    enabled: false,
+                    child: Icon(
+                      Icons.trending_down_rounded,
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
+                      size: 32,
+                    ),
                   ),
                 ),
               ],
@@ -307,30 +320,39 @@ class _QuickActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      enabled: true,
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: color.withAlpha((255 * 0.1).round()),
-          borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: color.withAlpha((255 * 0.3).round())),
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.md,
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: color,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: color.withAlpha((255 * 0.1).round()),
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: color.withAlpha((255 * 0.3).round())),
+          ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.md,
+          ),
+          child: Column(
+            children: [
+              Semantics(
+                enabled: false,
+                child: Icon(icon, color: color, size: 28),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: color,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -377,14 +399,20 @@ class _RecentTransactionsSection extends StatelessWidget {
               '最近交易',
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            GestureDetector(
+            Semantics(
+              label: '查看所有交易',
+              button: true,
+              enabled: true,
               onTap: () => context.go('/transactions'),
-              child: Text(
-                '查看全部',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
+              child: GestureDetector(
+                onTap: () => context.go('/transactions'),
+                child: Text(
+                  '查看全部',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
               ),
             ),
           ],
@@ -413,9 +441,12 @@ class _RecentTransactionsSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppRadius.sm),
                     ),
                     child: Center(
-                      child: Text(
-                        tx['icon'] as String,
-                        style: const TextStyle(fontSize: 24),
+                      child: Semantics(
+                        enabled: false,
+                        child: Text(
+                          tx['icon'] as String,
+                          style: const TextStyle(fontSize: 24),
+                        ),
                       ),
                     ),
                   ),

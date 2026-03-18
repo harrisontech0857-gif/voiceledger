@@ -151,25 +151,33 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 ],
 
                 // 郵箱輸入
-                TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  enabled: !_isLoading,
-                  decoration: const InputDecoration(
-                    labelText: '郵箱',
-                    prefixIcon: Icon(Icons.email_rounded),
+                Semantics(
+                  label: '郵箱地址輸入欄',
+                  textField: true,
+                  child: TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    enabled: !_isLoading,
+                    decoration: const InputDecoration(
+                      labelText: '郵箱',
+                      prefixIcon: Icon(Icons.email_rounded),
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
 
                 // 密碼輸入
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  enabled: !_isLoading,
-                  decoration: const InputDecoration(
-                    labelText: '密碼',
-                    prefixIcon: Icon(Icons.lock_rounded),
+                Semantics(
+                  label: '密碼輸入欄',
+                  textField: true,
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    enabled: !_isLoading,
+                    decoration: const InputDecoration(
+                      labelText: '密碼',
+                      prefixIcon: Icon(Icons.lock_rounded),
+                    ),
                   ),
                 ),
                 if (_isLogin)
@@ -183,17 +191,23 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 const SizedBox(height: AppSpacing.lg),
 
                 // 提交按鈕
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _authenticate,
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(_isLogin ? '登入' : '建立帳戶'),
+                Semantics(
+                  button: true,
+                  enabled: !_isLoading,
+                  label: _isLogin ? '登入帳戶' : '建立新帳戶',
+                  onTap: _isLoading ? null : _authenticate,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _authenticate,
+                      child: _isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(_isLogin ? '登入' : '建立帳戶'),
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -225,12 +239,18 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 const SizedBox(height: AppSpacing.md),
 
                 // Google 登入按鈕
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.login_rounded),
-                    label: const Text('用 Google 帳戶登入'),
-                    onPressed: _isLoading ? null : () {},
+                Semantics(
+                  button: true,
+                  enabled: !_isLoading,
+                  label: '用 Google 帳戶登入',
+                  onTap: _isLoading ? null : () {},
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.login_rounded),
+                      label: const Text('用 Google 帳戶登入'),
+                      onPressed: _isLoading ? null : () {},
+                    ),
                   ),
                 ),
               ],
@@ -256,24 +276,31 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      enabled: true,
+      selected: isActive,
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isActive
-              ? Theme.of(context).colorScheme.primary
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color:
-                    isActive ? Theme.of(context).colorScheme.onPrimary : null,
-                fontWeight: FontWeight.w600,
-              ),
-          textAlign: TextAlign.center,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isActive
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color:
+                      isActive ? Theme.of(context).colorScheme.onPrimary : null,
+                  fontWeight: FontWeight.w600,
+                ),
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );

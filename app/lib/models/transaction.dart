@@ -73,6 +73,7 @@ class Transaction {
   final TransactionCategory category;
   final DateTime createdAt;
   final String description;
+  final String currency;
   final String? notes;
   final String? voiceTranscript;
   final String? photoUrl;
@@ -91,6 +92,7 @@ class Transaction {
     required this.category,
     required this.createdAt,
     required this.description,
+    this.currency = 'TWD',
     this.notes,
     this.voiceTranscript,
     this.photoUrl,
@@ -110,6 +112,7 @@ class Transaction {
     TransactionCategory? category,
     DateTime? createdAt,
     String? description,
+    String? currency,
     String? notes,
     String? voiceTranscript,
     String? photoUrl,
@@ -128,6 +131,7 @@ class Transaction {
       category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
       description: description ?? this.description,
+      currency: currency ?? this.currency,
       notes: notes ?? this.notes,
       voiceTranscript: voiceTranscript ?? this.voiceTranscript,
       photoUrl: photoUrl ?? this.photoUrl,
@@ -159,6 +163,8 @@ class Transaction {
             DateTime.now().toIso8601String(),
       ),
       description: json['description'] as String? ?? '',
+      currency:
+          json['currency'] as String? ?? json['currency'] as String? ?? 'TWD',
       notes: json['notes'] as String?,
       voiceTranscript: json['voice_transcript'] as String? ??
           json['voiceTranscript'] as String?,
@@ -186,6 +192,7 @@ class Transaction {
       'category': category.name,
       'created_at': createdAt.toIso8601String(),
       'description': description,
+      'currency': currency,
       'notes': notes,
       'voice_transcript': voiceTranscript,
       'photo_url': photoUrl,
