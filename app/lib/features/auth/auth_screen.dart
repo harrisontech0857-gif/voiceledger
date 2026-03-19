@@ -141,6 +141,38 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      setState(() => _errorMessage = '請先輸入郵箱，再點擊忘記密碼');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await Supabase.instance.client.auth.resetPasswordForEmail(email);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('密碼重設信已寄出，請查看收件匣'),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    } on AuthException catch (e) {
+      setState(() => _errorMessage = _translateAuthError(e.message));
+    } catch (e) {
+      setState(() => _errorMessage = '發送重設信失敗: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   String _translateAuthError(String message) {
     if (message.contains('Invalid login credentials')) {
       return '郵箱或密碼錯誤';
@@ -270,7 +302,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: null,
+                      onPressed: _isLoading ? null : _resetPassword,
                       child: const Text('忘記密碼？'),
                     ),
                   ),
