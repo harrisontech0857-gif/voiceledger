@@ -111,63 +111,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     onChanged: (v) => setState(() => _notificationsEnabled = v),
                   ),
                 ),
-                _SettingsTile(
-                  icon: Icons.location_on_rounded,
-                  iconColor: Colors.green,
-                  title: '位置追蹤',
-                  subtitle: '自動偵測消費地點',
-                  trailing: Switch.adaptive(
-                    value: _locationTrackingEnabled,
-                    onChanged:
-                        (v) => setState(() => _locationTrackingEnabled = v),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
 
-            // 預算設定
-            _SettingsGroup(
-              title: '預算',
-              children: [
-                _SettingsTile(
-                  icon: Icons.wallet_rounded,
-                  iconColor: Colors.teal,
-                  title: '每日預算',
-                  subtitle: 'NT\$ 300',
-                  showArrow: true,
-                  onTap: () => _showBudgetDialog(context),
-                ),
-                _SettingsTile(
-                  icon: Icons.calendar_month_rounded,
-                  iconColor: Colors.purple,
-                  title: '月度預算',
-                  subtitle: 'NT\$ 9,000',
-                  showArrow: true,
-                  onTap: () => _showBudgetDialog(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // AI 設定
-            _SettingsGroup(
-              title: 'AI 模型',
-              children: [
-                _SettingsTile(
-                  icon: Icons.auto_awesome_rounded,
-                  iconColor: Colors.amber,
-                  title: 'Gemini API Key',
-                  subtitle:
-                      kGeminiApiKey.isEmpty
-                          ? '未設定（使用 Mock 模式）'
-                          : '已連接 Gemini 2.0 Flash',
-                  showArrow: true,
-                  onTap: () => _showGeminiKeyDialog(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.md),
+            // 以下為付費功能（預算、位置追蹤、AI 模型設定）
+            // MVP 免費版隱藏，未來 Premium 版開放
 
             // 訂閱
             Padding(
@@ -345,6 +294,16 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 從 Supabase Auth 取得真實使用者資訊
+    final user = kMockMode ? null : Supabase.instance.client.auth.currentUser;
+    final displayName =
+        user?.userMetadata?['full_name'] as String? ??
+        user?.userMetadata?['name'] as String? ??
+        '語記用戶';
+    final email = user?.email ?? (kMockMode ? 'mock-user@demo.app' : '未登入');
+    final avatarUrl = user?.userMetadata?['avatar_url'] as String?;
+    final initial = displayName.isNotEmpty ? displayName[0] : '語';
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -357,13 +316,19 @@ class _ProfileCard extends StatelessWidget {
           CircleAvatar(
             radius: 32,
             backgroundColor: colorScheme.primaryContainer,
-            child: Text(
-              '語',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+            child:
+                avatarUrl == null
+                    ? Text(
+                      initial,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineSmall?.copyWith(
+                        color: colorScheme.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                    : null,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -371,31 +336,19 @@ class _ProfileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '語記用戶',
+                  displayName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  kMockMode ? 'mock-user@demo.app' : 'user@example.com',
+                  email,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: colorScheme.primary.withAlpha(20),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.edit_rounded,
-              color: colorScheme.primary,
-              size: 18,
             ),
           ),
         ],
