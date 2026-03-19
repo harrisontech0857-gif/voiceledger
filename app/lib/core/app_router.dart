@@ -8,7 +8,6 @@ import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/consent_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/voice_entry/voice_entry_screen.dart';
-import '../features/ai_secretary/chat_screen.dart';
 import '../features/daily_journal/journal_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/couples/pairing_screen.dart';
@@ -61,10 +60,6 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const DashboardScreen(),
           ),
           GoRoute(
-            path: '/ai-secretary',
-            builder: (context, state) => const ChatScreen(),
-          ),
-          GoRoute(
             path: '/journal',
             builder: (context, state) => const JournalScreen(),
           ),
@@ -111,12 +106,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  static const _routes = [
-    '/dashboard',
-    '/ai-secretary',
-    '/journal',
-    '/settings',
-  ];
+  static const _routes = ['/dashboard', '/journal', '/settings'];
 
   @override
   Widget build(BuildContext context) {
@@ -159,27 +149,20 @@ class _MainShellState extends State<MainShell> {
                     onTap: () => _goTo(0),
                     color: cs,
                   ),
-                  _NavItem(
-                    icon: Icons.smart_toy_rounded,
-                    label: 'AI 秘書',
-                    isSelected: _currentIndex == 1,
-                    onTap: () => _goTo(1),
-                    color: cs,
-                  ),
                   // 中間留空給語音按鈕
                   const SizedBox(width: 56),
                   _NavItem(
                     icon: Icons.auto_stories_rounded,
                     label: '日記',
-                    isSelected: _currentIndex == 2,
-                    onTap: () => _goTo(2),
+                    isSelected: _currentIndex == 1,
+                    onTap: () => _goTo(1),
                     color: cs,
                   ),
                   _NavItem(
                     icon: Icons.settings_rounded,
                     label: '設定',
-                    isSelected: _currentIndex == 3,
-                    onTap: () => _goTo(3),
+                    isSelected: _currentIndex == 2,
+                    onTap: () => _goTo(2),
                     color: cs,
                   ),
                 ],

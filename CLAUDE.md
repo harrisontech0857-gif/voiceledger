@@ -1,63 +1,69 @@
-# CLAUDE.md — AI 開發輔助指引
+# VoiceLedger (語記) — 開發標準
 
-## 專案概要
-
-VoiceLedger (語記) 是一個 AI 驅動的口說記帳 App，使用 Flutter 跨平台開發，後端為 Supabase，AI 引擎整合 Whisper + Claude/GPT。
-
-## 開發流程
-
-本專案採用 OMC 五層生命週期 + 三重審查機制：
-- L1 需求策略層 → L2 架構設計層 → L3 開發實作層 → L4 交付部署層 → L5 營運監控層
-- 每層通過 R1(AI審查) + R2(人工確認) + R3(自動化驗證) 後才進入下一層
+## 產品定位
+情侶語音日記 × 寵物養成。兩人各自說出自己的一天，AI 寫成日記，輪流餵養一隻共同寵物。
 
 ## 技術棧
+- Flutter 3.29.2 + Dart 3.7.x + Riverpod
+- Supabase (PostgreSQL + Auth + Edge Functions + RLS)
+- AI: Groq API (Llama 3.1) → Claude → Gemini → 規則式 fallback
+- CI: GitHub Actions (6 jobs)
 
-- **前端**: Flutter 3.x + Dart 3.x + Riverpod
-- **後端**: Supabase (PostgreSQL + Auth + Storage + Edge Functions)
-- **AI**: OpenAI Whisper API + Claude/GPT API
-- **自動化**: n8n + GitHub Actions
-- **付費**: RevenueCat
-- **監控**: Sentry + Mixpanel
+## 開發流程（每次變更必須遵循）
 
-## 專案結構
+### 1. Plan — 想清楚再動手
+- 明確要改什麼、為什麼改
+- 列出所有受影響的檔案
+- 如果是大變更，先寫規格
 
-- `docs/` — 規劃文件、架構設計、API 文件
-- `app/` — Flutter 主專案
-- `backend/` — Supabase 設定與 Edge Functions
-- `ai/` — AI Prompt 模板與評估
-- `.github/` — CI/CD 與 Issue 模板
+### 2. Build — 實作
+- 遵循既有架構模式
+- 新 service 放 `lib/services/`，新頁面放 `lib/features/<name>/`
+- 環境變數用 `String.fromEnvironment`，不要硬編碼
 
-## 開發規範
+### 3. Review — 自我審查（推送前必做）
+- 確認所有 import 正確（不引用已刪除的模組）
+- 確認沒有殘留的舊功能程式碼
+- 跑 `grep -rn 'TransactionCategory\|transactionServiceProvider\|petProvider' lib/features/` 確認舊交易/舊寵物引用已清除
+- 確認新增的 Provider 有在正確位置註冊
 
-1. Commit message 使用 conventional commits 格式 (feat:, fix:, docs:, chore:)
-2. 分支策略: main (穩定) + develop (開發) + feature/* (功能分支)
-3. 所有 PR 必須通過 CI 且至少一次 Code Review
-4. 檔案命名使用 zh-TW（文件類）或 snake_case（程式碼）
-5. AI 生成的程式碼必須附帶單元測試
+### 4. Test — 本地驗證（推送前必做）
+- `dart format lib/ test/`（用 Dart 3.7.x）
+- 搜尋未定義的 getter/method：`grep -rn "isn't defined\|not found" 2>/dev/null`
+- 確認 CI 會過：analyze + format + test + build
 
-## 關鍵決策記錄
+### 5. Ship — 推送
+- git add → commit → push
+- 等 CI 跑完確認 6/6 全綠
+- CI 失敗就自己修，不問使用者
+- 只有 CI 全綠才通知使用者
 
-| 決策 | 選擇 | 原因 |
-|------|------|------|
-| 跨平台框架 | Flutter | 效能優、語音整合成熟、一套代碼 |
-| 後端 | Supabase | 免費額度充足、PostgreSQL、即時訂閱 |
-| 收費模式 | Freemium 訂閱 | 語音次數為自然付費牆 |
-| 狀態管理 | Riverpod | 類型安全、測試友善、Provider 進化版 |
+### 6. Reflect — 回顧
+- 記錄做了什麼、為什麼
+- 更新相關文件
 
-## 常用指令
+## Git 設定
+- user.name: "Harrison Wu"
+- user.email: "harrison.tech.0857@gmail.com"
+- remote 已含 PAT，直接 push 即可
+- commit 格式：`type(scope): 繁體中文描述`
+- 結尾加 `Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>`
 
-```bash
-# 開發
-flutter run
-flutter test
-flutter analyze
+## Supabase 設定
+- Project Ref: `dpqgrwoqalwfodblctqm`
+- Access Token: `sbp_93714b787d7d33917556992ef54aec5596974f8f`
+- voice-diary 部署加 `--no-verify-jwt`
+- 從 `backend/supabase/` 目錄執行 CLI，需先 `supabase link`
 
-# 建構
-flutter build apk --release
-flutter build ios --release
+## 重要 DB 表
+- `couples` — 配對、共同寵物狀態、輪流餵食
+- `life_diaries` — 語音日記（RLS 允許伴侶讀取）
+- `user_profiles` — 使用者資料 + couple_id
+- `transactions` — 舊版記帳（付費功能，目前不使用）
 
-# Supabase
-supabase start
-supabase db push
-supabase functions serve
-```
+## 禁止事項
+- 不推送有 compile error 的程式碼
+- 不保留引用已刪除模組的 import
+- 不讓使用者幫忙測試或除錯
+- 不問「要我繼續嗎」— 直接做完
+- 不重複問已經回答過的問題
