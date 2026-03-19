@@ -57,15 +57,31 @@ class VoiceDiaryService implements VoiceDiaryServiceBase {
         body: {'transcript': transcript},
       );
 
-      final body = jsonDecode(response.data as String) as Map<String, dynamic>;
+      // response.data 可能是 String 或已解析的 Map
+      Map<String, dynamic> body;
+      if (response.data is String) {
+        body = jsonDecode(response.data as String) as Map<String, dynamic>;
+      } else if (response.data is Map) {
+        body = response.data as Map<String, dynamic>;
+      } else {
+        debugPrint('⚠️ voice-diary 回傳格式異常: ${response.data.runtimeType}');
+        return _fallback(transcript);
+      }
+
       if (body['success'] == true && body['data'] != null) {
         return VoiceDiaryAnalysis.fromJson(
           body['data'] as Map<String, dynamic>,
           transcript,
         );
       }
+
+      // 有 error 時記錄
+      if (body['error'] != null) {
+        debugPrint('⚠️ voice-diary Edge Function 錯誤: ${body['error']}');
+      }
       return _fallback(transcript);
     } catch (e) {
+      debugPrint('⚠️ voice-diary 呼叫失敗: $e');
       return _fallback(transcript);
     }
   }
