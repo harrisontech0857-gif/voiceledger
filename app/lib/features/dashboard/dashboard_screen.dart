@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import '../../core/theme.dart';
 import '../../services/ai_service.dart';
 import '../../services/couple_service.dart';
+import '../../services/quote_service.dart';
 import '../../widgets/pet_companion_widget.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -38,6 +39,19 @@ class DashboardScreen extends ConsumerWidget {
 
                   // 寵物主視覺
                   const PetCompanionWidget(),
+                  const SizedBox(height: AppSpacing.md),
+
+                  // 寵物成長統計
+                  coupleAsync.when(
+                    data: (couple) {
+                      if (couple == null || !couple.isActive) {
+                        return const SizedBox.shrink();
+                      }
+                      return _PetGrowthStatsCard(couple: couple);
+                    },
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
                   const SizedBox(height: AppSpacing.md),
 
                   // 配對狀態 + 餵食提示
@@ -234,61 +248,245 @@ class _FeedStatusCard extends StatelessWidget {
   }
 }
 
+/// 寵物成長統計卡
+class _PetGrowthStatsCard extends StatelessWidget {
+  final CoupleInfo couple;
+
+  const _PetGrowthStatsCard({required this.couple});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final level = couple.petExp ~/ 100 + 1;
+    final expInLevel = couple.petExp % 100;
+    final expProgress = expInLevel / 100;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '寵物成長',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Text(
+                'Lv.$level',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: cs.primary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: expProgress,
+                        minHeight: 8,
+                        backgroundColor: cs.outlineVariant,
+                        valueColor: AlwaysStoppedAnimation(cs.primary),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$expInLevel/100 EXP',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// 每日金句卡片
-class _DailyQuoteCard extends StatelessWidget {
+class _DailyQuoteCard extends ConsumerStatefulWidget {
   final AsyncValue<String> dailyQuote;
 
   const _DailyQuoteCard({required this.dailyQuote});
 
   @override
+  ConsumerState<_DailyQuoteCard> createState() => _DailyQuoteCardState();
+}
+
+class _DailyQuoteCardState extends ConsumerState<_DailyQuoteCard> {
+  bool _isSaved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfSaved();
+  }
+
+  void _checkIfSaved() async {
+    final quote = widget.dailyQuote.maybeWhen(data: (q) => q, orElse: () => '');
+    if (quote.isNotEmpty) {
+      final quoteService = ref.read(quoteServiceProvider);
+      final saved = await quoteService.isQuoteSaved(quote);
+      if (mounted) setState(() => _isSaved = saved);
+    }
+  }
+
+  void _toggleSaveQuote() async {
+    final quote = widget.dailyQuote.maybeWhen(data: (q) => q, orElse: () => '');
+    if (quote.isEmpty) return;
+
+    final quoteService = ref.read(quoteServiceProvider);
+    if (_isSaved) {
+      await quoteService.removeQuote(quote);
+    } else {
+      await quoteService.saveQuote(quote);
+    }
+    setState(() => _isSaved = !_isSaved);
+  }
+
+  void _showSavedQuotes() async {
+    final quoteService = ref.read(quoteServiceProvider);
+    final savedQuotes = await quoteService.getSavedQuotes();
+
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          final cs = Theme.of(context).colorScheme;
+          return AlertDialog(
+            title: const Text('查看收藏'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: savedQuotes.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: cs.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                      ),
+                      child: Text(
+                        savedQuotes[index],
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('關閉'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        color: cs.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withAlpha(25),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.lightbulb_rounded,
-              color: Theme.of(context).colorScheme.primary,
-              size: 20,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: cs.primary.withAlpha(25),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.lightbulb_rounded,
+                  color: cs.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: widget.dailyQuote.when(
+                  data:
+                      (quote) => Text(
+                        quote.isEmpty ? '每日一句，激勵人心。' : quote,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                  loading:
+                      () => Container(
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: cs.outlineVariant,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                  error:
+                      (e, st) => Text(
+                        '無法加載金句',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              IconButton(
+                icon: Icon(
+                  _isSaved ? Icons.favorite_rounded : Icons.favorite_outline,
+                  color: _isSaved ? Colors.red : cs.onSurfaceVariant,
+                  size: 20,
+                ),
+                onPressed: _toggleSaveQuote,
+                constraints: const BoxConstraints.tightFor(
+                  width: 40,
+                  height: 40,
+                ),
+                padding: EdgeInsets.zero,
+              ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: dailyQuote.when(
-              data:
-                  (quote) => Text(
-                    quote.isEmpty ? '每日一句，激勵人心。' : quote,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontStyle: FontStyle.italic,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-              loading:
-                  () => Container(
-                    height: 16,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.outlineVariant,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-              error:
-                  (e, st) => Text(
-                    '無法加載金句',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
+          const SizedBox(height: AppSpacing.sm),
+          GestureDetector(
+            onTap: _showSavedQuotes,
+            child: Text(
+              '查看收藏',
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
