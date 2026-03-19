@@ -10,6 +10,7 @@ import '../../services/ai_service.dart';
 import '../../services/pet_service.dart';
 import '../../services/currency_service.dart';
 import '../../services/transaction_service.dart';
+import '../../services/usage_service.dart';
 
 class VoiceEntryScreen extends ConsumerStatefulWidget {
   const VoiceEntryScreen({super.key});
@@ -60,11 +61,18 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     }
   }
 
-  /// 開始錄音
+  /// 開始錄音（檢查免費額度）
   Future<void> _startListening() async {
     if (_isListening) {
-      // 已在錄音 → 停止
       await _stopListening();
+      return;
+    }
+
+    // 檢查免費額度
+    final usageService = ref.read(usageServiceProvider);
+    final canUse = await usageService.canUseVoice();
+    if (!canUse && mounted) {
+      _showQuotaExhaustedDialog();
       return;
     }
 
@@ -511,6 +519,12 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       // 本地暫存失敗不阻擋 UX
     }
 
+    // 記錄語音使用次數
+    try {
+      final usageService = ref.read(usageServiceProvider);
+      await usageService.recordVoiceUsage();
+    } catch (_) {}
+
     // 餵食寵物 🐱
     final petFeedback = ref
         .read(petProvider.notifier)
@@ -528,6 +542,32 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
         if (mounted) context.go('/dashboard');
       });
     }
+  }
+
+  void _showQuotaExhaustedDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('本月免費額度已用完'),
+            content: const Text(
+              '免費版每月可語音記帳 30 次。\n升級 Pro 即可無限使用語音記帳和 AI 秘書功能！',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('下次再說'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  context.push('/paywall');
+                },
+                child: const Text('查看方案'),
+              ),
+            ],
+          ),
+    );
   }
 
   TransactionCategory _parseCategory(String categoryStr) {
