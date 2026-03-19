@@ -9,7 +9,6 @@ import '../features/onboarding/consent_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/voice_entry/voice_entry_screen.dart';
 import '../features/ai_secretary/chat_screen.dart';
-import '../features/statistics/statistics_screen.dart';
 import '../features/daily_journal/journal_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/couples/pairing_screen.dart';
