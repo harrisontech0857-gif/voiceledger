@@ -169,8 +169,11 @@ void main() {
             PetStage.master => 1000,
           };
           final p = pet.copyWith(exp: exp);
-          expect(p.stageEmoji.isNotEmpty, true,
-              reason: '${stage.name} 應有 emoji');
+          expect(
+            p.stageEmoji.isNotEmpty,
+            true,
+            reason: '${stage.name} 應有 emoji',
+          );
         }
       });
     });

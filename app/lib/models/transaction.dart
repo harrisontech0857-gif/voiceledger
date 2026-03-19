@@ -166,17 +166,20 @@ class Transaction {
       currency:
           json['currency'] as String? ?? json['currency'] as String? ?? 'TWD',
       notes: json['notes'] as String?,
-      voiceTranscript: json['voice_transcript'] as String? ??
+      voiceTranscript:
+          json['voice_transcript'] as String? ??
           json['voiceTranscript'] as String?,
       photoUrl: json['photo_url'] as String? ?? json['photoUrl'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       locationName:
           json['location_name'] as String? ?? json['locationName'] as String?,
-      isRecurring: json['is_recurring'] as bool? ??
+      isRecurring:
+          json['is_recurring'] as bool? ??
           json['isRecurring'] as bool? ??
           false,
-      recurringFrequency: json['recurring_frequency'] as String? ??
+      recurringFrequency:
+          json['recurring_frequency'] as String? ??
           json['recurringFrequency'] as String?,
       isSynced:
           json['is_synced'] as bool? ?? json['isSynced'] as bool? ?? false,
@@ -201,6 +204,7 @@ class Transaction {
       'location_name': locationName,
       'is_recurring': isRecurring,
       'recurring_frequency': recurringFrequency,
+      'is_synced': isSynced,
     };
   }
 

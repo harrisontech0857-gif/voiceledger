@@ -9,16 +9,16 @@ class GeminiAiService implements AiServiceBase {
   ChatSession? _chatSession;
 
   GeminiAiService({required String apiKey})
-      : _model = GenerativeModel(
-          model: 'gemini-2.0-flash',
-          apiKey: apiKey,
-          systemInstruction: Content.text(
-            '你是「語記」App 的 AI 財務秘書，專門協助使用者記帳和理財。'
-            '請用繁體中文回答，語氣友善親切，回覆簡潔不超過 100 字。'
-            '你的功能：分析交易、提供理財建議、每日金句、記帳輔助。'
-            '幣別預設為新台幣（NT\$）。',
-          ),
-        );
+    : _model = GenerativeModel(
+        model: 'gemini-2.0-flash',
+        apiKey: apiKey,
+        systemInstruction: Content.text(
+          '你是「語記」App 的 AI 財務秘書，專門協助使用者記帳和理財。'
+          '請用繁體中文回答，語氣友善親切，回覆簡潔不超過 100 字。'
+          '你的功能：分析交易、提供理財建議、每日金句、記帳輔助。'
+          '幣別預設為新台幣（NT\$）。',
+        ),
+      );
 
   @override
   Future<String> analyzeTransaction(String description) async {
@@ -77,16 +77,13 @@ class GeminiAiService implements AiServiceBase {
       // 建立或重用 chat session
       _chatSession ??= _model.startChat(
         history: conversationHistory.map((msg) {
-          return Content(
-            msg.isUser ? 'user' : 'model',
-            [TextPart(msg.content)],
-          );
+          return Content(msg.isUser ? 'user' : 'model', [
+            TextPart(msg.content),
+          ]);
         }).toList(),
       );
 
-      final response = await _chatSession!.sendMessage(
-        Content.text(content),
-      );
+      final response = await _chatSession!.sendMessage(Content.text(content));
 
       final text = response.text ?? '抱歉，我暫時無法回應。';
 
@@ -147,9 +144,7 @@ class GeminiAiService implements AiServiceBase {
   ) async {
     try {
       final response = await _model.generateContent([
-        Content.text(
-          '根據以下今日交易記錄，寫一段 50 字以內的日記摘要：$dailyTransactions',
-        ),
+        Content.text('根據以下今日交易記錄，寫一段 50 字以內的日記摘要：$dailyTransactions'),
       ]);
       return response.text ?? '今天的記帳已完成。';
     } catch (e) {
@@ -175,18 +170,23 @@ class GeminiAiService implements AiServiceBase {
       // 嘗試解析 JSON
       try {
         // 移除可能的 markdown 包裹
-        final jsonStr =
-            text.replaceAll('```json', '').replaceAll('```', '').trim();
+        final jsonStr = text
+            .replaceAll('```json', '')
+            .replaceAll('```', '')
+            .trim();
         final decoded = Uri.decodeFull(jsonStr);
         // 用簡單的方式解析
         if (decoded.contains('"amount"')) {
           // 提取數字
-          final amountMatch =
-              RegExp(r'"amount"\s*:\s*(\d+)').firstMatch(decoded);
-          final categoryMatch =
-              RegExp(r'"category"\s*:\s*"([^"]+)"').firstMatch(decoded);
-          final descMatch =
-              RegExp(r'"description"\s*:\s*"([^"]+)"').firstMatch(decoded);
+          final amountMatch = RegExp(
+            r'"amount"\s*:\s*(\d+)',
+          ).firstMatch(decoded);
+          final categoryMatch = RegExp(
+            r'"category"\s*:\s*"([^"]+)"',
+          ).firstMatch(decoded);
+          final descMatch = RegExp(
+            r'"description"\s*:\s*"([^"]+)"',
+          ).firstMatch(decoded);
 
           return {
             'amount': int.tryParse(amountMatch?.group(1) ?? '0') ?? 0,

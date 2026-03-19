@@ -15,10 +15,7 @@ class SupabaseGeminiService implements AiServiceBase {
     Map<String, dynamic> body,
   ) async {
     try {
-      final response = await _client.functions.invoke(
-        'gemini-ai',
-        body: body,
-      );
+      final response = await _client.functions.invoke('gemini-ai', body: body);
 
       if (response.status != 200) {
         _logger.e('Edge Function error: ${response.status}');
@@ -111,10 +108,7 @@ class SupabaseGeminiService implements AiServiceBase {
   ) async {
     try {
       final history = conversationHistory.map((msg) {
-        return {
-          'role': msg.isUser ? 'user' : 'model',
-          'content': msg.content,
-        };
+        return {'role': msg.isUser ? 'user' : 'model', 'content': msg.content};
       }).toList();
 
       final result = await _callEdgeFunction({
@@ -144,11 +138,7 @@ class SupabaseGeminiService implements AiServiceBase {
   Future<Map<String, dynamic>> analyzeSpendingPatterns(
     List<Map<String, dynamic>> transactions,
   ) async {
-    return {
-      'top_category': '餐飲',
-      'trend': 'stable',
-      'suggestion': '持續記帳是好習慣',
-    };
+    return {'top_category': '餐飲', 'trend': 'stable', 'suggestion': '持續記帳是好習慣'};
   }
 
   @override

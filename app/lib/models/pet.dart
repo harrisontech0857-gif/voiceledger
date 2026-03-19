@@ -154,16 +154,23 @@ class PetModel {
 
   /// 寵物根據狀態說的話
   String get dialogue {
+    String raw;
     switch (mood) {
       case PetMood.happy:
-        return _happyDialogues[totalEntries % _happyDialogues.length];
+        raw = _happyDialogues[totalEntries % _happyDialogues.length];
       case PetMood.neutral:
-        return _neutralDialogues[totalEntries % _neutralDialogues.length];
+        raw = _neutralDialogues[totalEntries % _neutralDialogues.length];
       case PetMood.hungry:
-        return _hungryDialogues[streak % _hungryDialogues.length];
+        raw = _hungryDialogues[streak % _hungryDialogues.length];
       case PetMood.sleepy:
-        return _sleepyDialogues[streak % _sleepyDialogues.length];
+        raw = _sleepyDialogues[streak % _sleepyDialogues.length];
     }
+    // 插值模板變數
+    return raw
+        .replaceAll('{streak}', '$streak')
+        .replaceAll('{name}', name)
+        .replaceAll('{level}', '$level')
+        .replaceAll('{exp}', '$exp');
   }
 
   /// 記帳時的反饋語
@@ -202,45 +209,45 @@ class PetModel {
 
   /// JSON 序列化（給 SharedPreferences / Supabase）
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'species': species.name,
-        'exp': exp,
-        'streak': streak,
-        'mood': mood.name,
-        'lastFedAt': lastFedAt?.toIso8601String(),
-        'createdAt': createdAt.toIso8601String(),
-        'totalEntries': totalEntries,
-        'level': level,
-      };
+    'id': id,
+    'name': name,
+    'species': species.name,
+    'exp': exp,
+    'streak': streak,
+    'mood': mood.name,
+    'lastFedAt': lastFedAt?.toIso8601String(),
+    'createdAt': createdAt.toIso8601String(),
+    'totalEntries': totalEntries,
+    'level': level,
+  };
 
   factory PetModel.fromJson(Map<String, dynamic> json) => PetModel(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        species: PetSpecies.values.firstWhere(
-          (e) => e.name == json['species'],
-          orElse: () => PetSpecies.moneycat,
-        ),
-        exp: json['exp'] as int? ?? 0,
-        streak: json['streak'] as int? ?? 0,
-        mood: PetMood.values.firstWhere(
-          (e) => e.name == json['mood'],
-          orElse: () => PetMood.neutral,
-        ),
-        lastFedAt: json['lastFedAt'] != null
-            ? DateTime.tryParse(json['lastFedAt'] as String)
-            : null,
-        createdAt: DateTime.parse(json['createdAt'] as String),
-        totalEntries: json['totalEntries'] as int? ?? 0,
-        level: json['level'] as int? ?? 1,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    species: PetSpecies.values.firstWhere(
+      (e) => e.name == json['species'],
+      orElse: () => PetSpecies.moneycat,
+    ),
+    exp: json['exp'] as int? ?? 0,
+    streak: json['streak'] as int? ?? 0,
+    mood: PetMood.values.firstWhere(
+      (e) => e.name == json['mood'],
+      orElse: () => PetMood.neutral,
+    ),
+    lastFedAt: json['lastFedAt'] != null
+        ? DateTime.tryParse(json['lastFedAt'] as String)
+        : null,
+    createdAt: DateTime.parse(json['createdAt'] as String),
+    totalEntries: json['totalEntries'] as int? ?? 0,
+    level: json['level'] as int? ?? 1,
+  );
 
   /// 建立新寵物
   factory PetModel.create({String name = '小財'}) => PetModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: name,
-        createdAt: DateTime.now(),
-      );
+    id: DateTime.now().millisecondsSinceEpoch.toString(),
+    name: name,
+    createdAt: DateTime.now(),
+  );
 }
 
 // === 對話庫 ===

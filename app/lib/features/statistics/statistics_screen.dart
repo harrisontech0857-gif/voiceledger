@@ -111,10 +111,9 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                   boxShadow: selected
                       ? [
                           BoxShadow(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withAlpha(40),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withAlpha(40),
                             blurRadius: 8,
                           ),
                         ]
@@ -124,11 +123,11 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
                 child: Text(
                   labels[i],
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: selected
-                            ? Colors.white
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: selected
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -148,9 +147,9 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 }
@@ -269,8 +268,8 @@ class _StatCard extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               Container(
                 padding: const EdgeInsets.all(6),
@@ -289,16 +288,16 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             amount,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: subtitleColor,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: subtitleColor),
           ),
         ],
       ),
@@ -340,13 +339,10 @@ class _CategoryPieChart extends StatelessWidget {
     };
 
     final categories = categorySummary.entries.map((e) {
-      final percentage =
-          totalExpense > 0 ? (e.value / totalExpense * 100).toDouble() : 0.0;
-      return (
-        e.key,
-        percentage,
-        colorMap[e.key] ?? const Color(0xFFFF6B6B),
-      );
+      final percentage = totalExpense > 0
+          ? (e.value / totalExpense * 100).toDouble()
+          : 0.0;
+      return (e.key, percentage, colorMap[e.key] ?? const Color(0xFFFF6B6B));
     }).toList();
 
     return Container(
@@ -451,15 +447,15 @@ class _CategoryBreakdownList extends StatelessWidget {
     };
 
     // 按金額排序
-    final sortedCategories = categorySummary.entries
-        .map((e) => (e.key, e.value))
-        .toList()
-      ..sort((a, b) => b.$2.compareTo(a.$2));
+    final sortedCategories =
+        categorySummary.entries.map((e) => (e.key, e.value)).toList()
+          ..sort((a, b) => b.$2.compareTo(a.$2));
 
     return Column(
       children: sortedCategories.map((c) {
-        final percentage =
-            totalExpense > 0 ? (c.$2 / totalExpense).toDouble() : 0.0;
+        final percentage = totalExpense > 0
+            ? (c.$2 / totalExpense).toDouble()
+            : 0.0;
         final category = TransactionCategory.values.firstWhere(
           (cat) => cat.displayName == c.$1,
           orElse: () => TransactionCategory.other,
@@ -484,10 +480,8 @@ class _CategoryBreakdownList extends StatelessWidget {
                         ),
                         Text(
                           'NT\$ ${NumberFormat('#,###').format(c.$2.toInt())}',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -497,10 +491,9 @@ class _CategoryBreakdownList extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: percentage,
                         minHeight: 6,
-                        backgroundColor: Theme.of(context)
-                            .colorScheme
-                            .outlineVariant
-                            .withAlpha(100),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.outlineVariant.withAlpha(100),
                         valueColor: AlwaysStoppedAnimation<Color>(
                           colorMap[c.$1] ?? const Color(0xFFFF6B6B),
                         ),
@@ -630,19 +623,15 @@ class _TopTransactions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 排序取前 3 筆最大支出
-    final topExpenses = transactions
-        .where((tx) => tx.type == TransactionType.expense)
-        .toList()
-      ..sort((a, b) => b.amount.compareTo(a.amount));
+    final topExpenses =
+        transactions.where((tx) => tx.type == TransactionType.expense).toList()
+          ..sort((a, b) => b.amount.compareTo(a.amount));
 
     final topThree = topExpenses.take(3).toList();
 
     if (topThree.isEmpty) {
       return Center(
-        child: Text(
-          '無支出記錄',
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        child: Text('無支出記錄', style: Theme.of(context).textTheme.bodyMedium),
       );
     }
 
@@ -686,10 +675,8 @@ class _TopTransactions extends StatelessWidget {
                       Text(
                         dateStr,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
@@ -697,9 +684,9 @@ class _TopTransactions extends StatelessWidget {
                 Text(
                   'NT\$ ${NumberFormat('#,###').format(tx.amount.toInt())}',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    color: Theme.of(context).colorScheme.error,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),

@@ -48,20 +48,14 @@ void main() {
 
     group('sendMessage', () {
       test('回傳 ChatMessage 物件', () async {
-        final response = await service.sendMessage(
-          '我這個月花太多了',
-          [],
-        );
+        final response = await service.sendMessage('我這個月花太多了', []);
         expect(response, isA<ChatMessage>());
         expect(response.content.isNotEmpty, true);
         expect(response.isUser, false);
       });
 
       test('帳單問題觸發回應', () async {
-        final response = await service.sendMessage(
-          '花了多少',
-          [],
-        );
+        final response = await service.sendMessage('花了多少', []);
         expect(response.content, contains('NT\$'));
       });
     });

@@ -41,7 +41,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     final recordDays = <DateTime>{};
     for (final tx in transactions) {
       recordDays.add(
-          DateTime(tx.createdAt.year, tx.createdAt.month, tx.createdAt.day));
+        DateTime(tx.createdAt.year, tx.createdAt.month, tx.createdAt.day),
+      );
     }
 
     if (mounted) {
@@ -81,8 +82,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                   ? Icons.view_week_rounded
                   : Icons.calendar_month_rounded,
             ),
-            tooltip:
-                _calendarFormat == CalendarFormat.month ? '切換週視圖' : '切換月視圖',
+            tooltip: _calendarFormat == CalendarFormat.month
+                ? '切換週視圖'
+                : '切換月視圖',
             onPressed: () {
               setState(() {
                 _calendarFormat = _calendarFormat == CalendarFormat.month
@@ -122,12 +124,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                           ),
                           child: Text(
                             '交易明細',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         ),
 
@@ -215,8 +213,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             color: cs.onSurface,
           ),
           leftChevronIcon: Icon(Icons.chevron_left, color: cs.onSurfaceVariant),
-          rightChevronIcon:
-              Icon(Icons.chevron_right, color: cs.onSurfaceVariant),
+          rightChevronIcon: Icon(
+            Icons.chevron_right,
+            color: cs.onSurfaceVariant,
+          ),
           headerPadding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         ),
         daysOfWeekStyle: DaysOfWeekStyle(
@@ -234,9 +234,11 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         // 標記有記帳的日期
         eventLoader: (day) {
           return _recordDays.any(
-            (d) =>
-                d.year == day.year && d.month == day.month && d.day == day.day,
-          )
+                (d) =>
+                    d.year == day.year &&
+                    d.month == day.month &&
+                    d.day == day.day,
+              )
               ? ['record']
               : [];
         },
@@ -287,18 +289,18 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               children: [
                 Text(
                   isToday ? '今天 · $dateStr' : dateStr,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   transactions.isEmpty
                       ? '尚無記錄'
                       : '${transactions.length} 筆交易 · 支出 NT\$ ${NumberFormat('#,###').format(totalExpense)}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                 ),
               ],
             ),
@@ -316,9 +318,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               child: Text(
                 '-NT\$ ${NumberFormat('#,###').format(totalExpense)}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: cs.onErrorContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: cs.onErrorContainer,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
         ],
@@ -340,16 +342,16 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
           const SizedBox(height: AppSpacing.md),
           Text(
             '這天還沒有記錄',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             '用語音說說你的花費吧',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant.withAlpha(140),
-                ),
+              color: cs.onSurfaceVariant.withAlpha(140),
+            ),
           ),
         ],
       ),
@@ -367,9 +369,12 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     final dateStr = DateFormat('M月d日', 'zh_TW').format(_selectedDay);
 
     // 根據交易內容動態生成摘要文字
-    final categories =
-        transactions.map((tx) => tx.category.displayName).toSet().join('、');
-    final summary = '今日共 ${transactions.length} 筆消費，'
+    final categories = transactions
+        .map((tx) => tx.category.displayName)
+        .toSet()
+        .join('、');
+    final summary =
+        '今日共 ${transactions.length} 筆消費，'
         '總計 NT\$ ${NumberFormat('#,###').format(totalExpense.toInt())}。'
         '主要類別為$categories。';
 
@@ -401,36 +406,30 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         decoration: BoxDecoration(
           color: cs.surfaceContainerLow,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: cs.primary.withAlpha(50),
-          ),
+          border: Border.all(color: cs.primary.withAlpha(50)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.auto_awesome_rounded,
-                  color: cs.primary,
-                  size: 18,
-                ),
+                Icon(Icons.auto_awesome_rounded, color: cs.primary, size: 18),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   'AI 日記 · $dateStr',
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: cs.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: cs.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               summary,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    height: 1.5,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(height: 1.5),
             ),
             const SizedBox(height: AppSpacing.sm),
             // 寵物評語
@@ -447,9 +446,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               child: Text(
                 petComment,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: cs.onTertiaryContainer,
-                      height: 1.4,
-                    ),
+                  color: cs.onTertiaryContainer,
+                  height: 1.4,
+                ),
               ),
             ),
             if (expenseAmount > 500) ...[
@@ -465,9 +464,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                 ),
                 child: Text(
                   '💡 今日花費偏高，注意控制支出',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: cs.error,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: cs.error),
                 ),
               ),
             ],
@@ -524,8 +523,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                   Text(
                     '${tx.category.displayName} · $timeStr',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -533,11 +532,11 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             Text(
               '${isIncome ? '+' : '-'}NT\$ ${NumberFormat('#,###').format(tx.amount.toInt())}',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: isIncome
-                        ? Colors.green
-                        : Theme.of(context).colorScheme.error,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: isIncome
+                    ? Colors.green
+                    : Theme.of(context).colorScheme.error,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),

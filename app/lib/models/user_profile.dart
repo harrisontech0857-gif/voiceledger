@@ -106,7 +106,8 @@ class UserProfile {
     return UserProfile(
       id: json['id'] as String,
       email: json['email'] as String,
-      displayName: json['display_name'] as String? ??
+      displayName:
+          json['display_name'] as String? ??
           json['displayName'] as String? ??
           '',
       avatarUrl: json['avatar_url'] as String? ?? json['avatarUrl'] as String?,
@@ -119,12 +120,14 @@ class UserProfile {
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : json['updatedAt'] != null
-              ? DateTime.parse(json['updatedAt'] as String)
-              : null,
-      totalIncome: (json['total_income'] as num?)?.toDouble() ??
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
+      totalIncome:
+          (json['total_income'] as num?)?.toDouble() ??
           (json['totalIncome'] as num?)?.toDouble() ??
           0,
-      totalExpense: (json['total_expense'] as num?)?.toDouble() ??
+      totalExpense:
+          (json['total_expense'] as num?)?.toDouble() ??
           (json['totalExpense'] as num?)?.toDouble() ??
           0,
       isPremium:
@@ -135,19 +138,24 @@ class UserProfile {
       premiumProvider: json['premium_provider'] as String?,
       premiumProductId: json['premium_product_id'] as String?,
       locale: json['locale'] as String? ?? 'zh_TW',
-      themeMode: json['theme_mode'] as String? ??
+      themeMode:
+          json['theme_mode'] as String? ??
           json['themeMode'] as String? ??
           'light',
-      notificationsEnabled: json['notifications_enabled'] as bool? ??
+      notificationsEnabled:
+          json['notifications_enabled'] as bool? ??
           json['notificationsEnabled'] as bool? ??
           true,
-      locationTrackingEnabled: json['location_tracking_enabled'] as bool? ??
+      locationTrackingEnabled:
+          json['location_tracking_enabled'] as bool? ??
           json['locationTrackingEnabled'] as bool? ??
           true,
-      voiceInputEnabled: json['voice_input_enabled'] as bool? ??
+      voiceInputEnabled:
+          json['voice_input_enabled'] as bool? ??
           json['voiceInputEnabled'] as bool? ??
           true,
-      dailyBudget: (json['daily_budget'] as num?)?.toDouble() ??
+      dailyBudget:
+          (json['daily_budget'] as num?)?.toDouble() ??
           (json['dailyBudget'] as num?)?.toDouble() ??
           5,
       monthlyBudget:

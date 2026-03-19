@@ -404,7 +404,7 @@ class MockAiService implements AiServiceBase {
         'pizza',
         '甜點',
         '蛋糕',
-        '茶'
+        '茶',
       ],
       '交通': [
         '車',
@@ -420,7 +420,7 @@ class MockAiService implements AiServiceBase {
         '機票',
         '火車',
         'youbike',
-        '騎'
+        '騎',
       ],
       '購物': [
         '買',
@@ -436,7 +436,7 @@ class MockAiService implements AiServiceBase {
         '手機',
         '電腦',
         '3C',
-        '禮物'
+        '禮物',
       ],
       '娛樂': [
         '電影',
@@ -449,7 +449,7 @@ class MockAiService implements AiServiceBase {
         'spotify',
         '演唱會',
         '展覽',
-        '玩'
+        '玩',
       ],
       '日用': [
         '超市',
@@ -464,7 +464,7 @@ class MockAiService implements AiServiceBase {
         '管理費',
         '日用品',
         '全聯',
-        '家樂福'
+        '家樂福',
       ],
       '健康': ['醫', '藥', '看診', '掛號', '健身', '牙', '診所', '醫院', '保健', '維他命'],
       '教育': ['書', '課', '學費', '補習', '培訓', '文具', '考試', '教材'],

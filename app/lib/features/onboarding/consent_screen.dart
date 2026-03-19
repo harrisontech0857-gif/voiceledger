@@ -29,8 +29,9 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   Future<void> _submitConsent() async {
     try {
       final privacyService = PrivacyService();
-      await privacyService
-          .setLocationTrackingConsent(_agreedToLocationTracking);
+      await privacyService.setLocationTrackingConsent(
+        _agreedToLocationTracking,
+      );
       await privacyService.setPhotoAnalysisConsent(_agreedToPhotoAnalysis);
 
       if (mounted) {

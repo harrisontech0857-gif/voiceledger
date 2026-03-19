@@ -74,8 +74,9 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                 var filtered = transactions;
 
                 if (_selectedType != null) {
-                  filtered =
-                      filtered.where((tx) => tx.type == _selectedType).toList();
+                  filtered = filtered
+                      .where((tx) => tx.type == _selectedType)
+                      .toList();
                 }
 
                 if (_selectedCategory != null) {
@@ -186,11 +187,11 @@ class _TransactionTile extends ConsumerWidget {
               Text(
                 '${isIncome ? '+' : '-'}NT\$ ${transaction.amount.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: isIncome
-                          ? Theme.of(context).colorScheme.tertiaryContainer
-                          : Theme.of(context).colorScheme.error,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: isIncome
+                      ? Theme.of(context).colorScheme.tertiaryContainer
+                      : Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 timeFormat.format(transaction.createdAt),
@@ -207,7 +208,10 @@ class _TransactionTile extends ConsumerWidget {
   }
 
   void _showTransactionDetails(
-      BuildContext context, WidgetRef ref, Transaction transaction) {
+    BuildContext context,
+    WidgetRef ref,
+    Transaction transaction,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (context) => Padding(
@@ -264,7 +268,10 @@ class _TransactionTile extends ConsumerWidget {
   }
 
   void _deleteTransaction(
-      BuildContext context, WidgetRef ref, Transaction transaction) {
+    BuildContext context,
+    WidgetRef ref,
+    Transaction transaction,
+  ) {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
@@ -282,15 +289,15 @@ class _TransactionTile extends ConsumerWidget {
                 final txService = ref.read(transactionServiceProvider);
                 await txService.deleteTransaction(transaction.id);
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('交易已刪除')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('交易已刪除')));
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('刪除失敗: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('刪除失敗: $e')));
                 }
               }
             },

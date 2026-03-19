@@ -31,14 +31,14 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _bounceAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.12), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 1.12, end: 0.95), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 0.95, end: 1.0), weight: 40),
-    ]).animate(CurvedAnimation(
-      parent: _bounceController,
-      curve: Curves.easeInOut,
-    ));
+    _bounceAnim =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.12), weight: 30),
+          TweenSequenceItem(tween: Tween(begin: 1.12, end: 0.95), weight: 30),
+          TweenSequenceItem(tween: Tween(begin: 0.95, end: 1.0), weight: 40),
+        ]).animate(
+          CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+        );
 
     _floatController = AnimationController(
       duration: const Duration(milliseconds: 2500),
@@ -131,9 +131,7 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
           ),
           child: Text(
             pet.dialogue.replaceAll('{streak}', '${pet.streak}'),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  height: 1.3,
-                ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.3),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -147,9 +145,9 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
           children: [
             Text(
               pet.name,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(width: AppSpacing.sm),
             Container(
@@ -161,9 +159,9 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
               child: Text(
                 pet.stageName,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: _stageColor(pet.stage),
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: _stageColor(pet.stage),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -212,16 +210,16 @@ class _ExpProgressBar extends StatelessWidget {
           children: [
             Text(
               isMaxed ? '已達最高階段' : '下一階段',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.onSurfaceVariant,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
             ),
             Text(
               isMaxed ? 'EXP ${pet.exp}' : '還需 ${pet.expToNextStage} EXP',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: cs.primary,
-                    fontWeight: FontWeight.w600,
-                  ),
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

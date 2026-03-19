@@ -53,8 +53,10 @@ class _PetDebugPanelState extends ConsumerState<PetDebugPanel> {
                   const Spacer(),
                   // 當前狀態小標
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: cs.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(20),
@@ -232,9 +234,7 @@ class _PetDebugPanelState extends ConsumerState<PetDebugPanel> {
         style: OutlinedButton.styleFrom(
           side: BorderSide(color: cs.primary.withAlpha(80)),
           padding: const EdgeInsets.symmetric(vertical: 8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
     );
@@ -248,18 +248,18 @@ class _PetDebugPanelState extends ConsumerState<PetDebugPanel> {
     // 定義所有組合：蛋只有 1 張，其餘各 4 張
     final combos = <(PetStage, PetMood?, String)>[
       (PetStage.egg, null, 'egg.png'),
-      ...PetMood.values.expand((mood) => [
-            (PetStage.baby, mood, 'baby_${mood.name}.png'),
-          ]),
-      ...PetMood.values.expand((mood) => [
-            (PetStage.teen, mood, 'teen_${mood.name}.png'),
-          ]),
-      ...PetMood.values.expand((mood) => [
-            (PetStage.adult, mood, 'adult_${mood.name}.png'),
-          ]),
-      ...PetMood.values.expand((mood) => [
-            (PetStage.master, mood, 'master_${mood.name}.png'),
-          ]),
+      ...PetMood.values.expand(
+        (mood) => [(PetStage.baby, mood, 'baby_${mood.name}.png')],
+      ),
+      ...PetMood.values.expand(
+        (mood) => [(PetStage.teen, mood, 'teen_${mood.name}.png')],
+      ),
+      ...PetMood.values.expand(
+        (mood) => [(PetStage.adult, mood, 'adult_${mood.name}.png')],
+      ),
+      ...PetMood.values.expand(
+        (mood) => [(PetStage.master, mood, 'master_${mood.name}.png')],
+      ),
     ];
 
     messenger.showSnackBar(
@@ -280,9 +280,7 @@ class _PetDebugPanelState extends ConsumerState<PetDebugPanel> {
 
       messenger.showSnackBar(
         SnackBar(
-          content: Text(
-            '[${i + 1}/${combos.length}] $filename',
-          ),
+          content: Text('[${i + 1}/${combos.length}] $filename'),
           duration: const Duration(milliseconds: 1400),
           behavior: SnackBarBehavior.floating,
         ),

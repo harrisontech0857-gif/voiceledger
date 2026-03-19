@@ -5,17 +5,14 @@ import 'package:voiceledger/features/auth/auth_screen.dart';
 
 // Helper function to build app with proper providers
 Widget buildTestApp() {
-  return const ProviderScope(
-    child: MaterialApp(
-      home: AuthScreen(),
-    ),
-  );
+  return const ProviderScope(child: MaterialApp(home: AuthScreen()));
 }
 
 void main() {
   group('AuthScreen Widget Tests', () {
-    testWidgets('should render AuthScreen with all required widgets',
-        (WidgetTester tester) async {
+    testWidgets('should render AuthScreen with all required widgets', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Verify title
@@ -34,29 +31,37 @@ void main() {
       expect(find.text('用 Google 帳戶登入'), findsOneWidget);
     });
 
-    testWidgets('should display email and password TextFields',
-        (WidgetTester tester) async {
+    testWidgets('should display email and password TextFields', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Verify email input exists
-      expect(find.byWidgetPredicate((widget) {
-        if (widget is TextField) {
-          return widget.decoration?.labelText == '郵箱';
-        }
-        return false;
-      }), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((widget) {
+          if (widget is TextField) {
+            return widget.decoration?.labelText == '郵箱';
+          }
+          return false;
+        }),
+        findsOneWidget,
+      );
 
       // Verify password input exists
-      expect(find.byWidgetPredicate((widget) {
-        if (widget is TextField) {
-          return widget.decoration?.labelText == '密碼';
-        }
-        return false;
-      }), findsOneWidget);
+      expect(
+        find.byWidgetPredicate((widget) {
+          if (widget is TextField) {
+            return widget.decoration?.labelText == '密碼';
+          }
+          return false;
+        }),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('should display login tab as active by default',
-        (WidgetTester tester) async {
+    testWidgets('should display login tab as active by default', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Find the login button (first tab)
@@ -72,8 +77,9 @@ void main() {
       expect(loginTab, findsWidgets);
     });
 
-    testWidgets('should switch between login and signup tabs',
-        (WidgetTester tester) async {
+    testWidgets('should switch between login and signup tabs', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Find signup tab text and tap it
@@ -98,8 +104,9 @@ void main() {
       expect(find.text('建立帳戶'), findsOneWidget);
     });
 
-    testWidgets('should show error message when email or password is empty',
-        (WidgetTester tester) async {
+    testWidgets('should show error message when email or password is empty', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Find and tap the submit button without entering anything
@@ -111,8 +118,9 @@ void main() {
       expect(find.text('請輸入郵箱和密碼'), findsOneWidget);
     });
 
-    testWidgets('should enable submit button when not loading',
-        (WidgetTester tester) async {
+    testWidgets('should enable submit button when not loading', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       final button = find.byType(ElevatedButton);
@@ -122,8 +130,9 @@ void main() {
       expect(buttonWidget.onPressed, isNotNull);
     });
 
-    testWidgets('should display password field as obscured',
-        (WidgetTester tester) async {
+    testWidgets('should display password field as obscured', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Find the password TextField
@@ -137,8 +146,9 @@ void main() {
       expect(passwordField, findsOneWidget);
     });
 
-    testWidgets('should display email field with email keyboard type',
-        (WidgetTester tester) async {
+    testWidgets('should display email field with email keyboard type', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Find the email TextField
@@ -153,8 +163,9 @@ void main() {
       expect(emailField, findsOneWidget);
     });
 
-    testWidgets('should accept text input in email field',
-        (WidgetTester tester) async {
+    testWidgets('should accept text input in email field', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Find email field and enter text
@@ -169,8 +180,9 @@ void main() {
       expect(find.text('test@example.com'), findsOneWidget);
     });
 
-    testWidgets('should accept text input in password field',
-        (WidgetTester tester) async {
+    testWidgets('should accept text input in password field', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Find password field and enter text
@@ -189,8 +201,9 @@ void main() {
       expect(find.byType(TextField), findsWidgets);
     });
 
-    testWidgets('should display signup mode when signup tab is selected',
-        (WidgetTester tester) async {
+    testWidgets('should display signup mode when signup tab is selected', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Initially in login mode
@@ -206,16 +219,18 @@ void main() {
       expect(find.text('建立帳戶'), findsOneWidget);
     });
 
-    testWidgets('should display forgot password link in login mode',
-        (WidgetTester tester) async {
+    testWidgets('should display forgot password link in login mode', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Forgot password should be visible in login mode
       expect(find.text('忘記密碼？'), findsOneWidget);
     });
 
-    testWidgets('should not display forgot password link in signup mode',
-        (WidgetTester tester) async {
+    testWidgets('should not display forgot password link in signup mode', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Switch to signup
@@ -227,8 +242,9 @@ void main() {
       expect(find.text('忘記密碼？'), findsNothing);
     });
 
-    testWidgets('should display all UI elements in correct order',
-        (WidgetTester tester) async {
+    testWidgets('should display all UI elements in correct order', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Verify the presence of key elements
@@ -240,16 +256,18 @@ void main() {
       expect(find.text('用 Google 帳戶登入'), findsOneWidget);
     });
 
-    testWidgets('should have proper SingleChildScrollView for responsiveness',
-        (WidgetTester tester) async {
+    testWidgets('should have proper SingleChildScrollView for responsiveness', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Verify that SingleChildScrollView exists
       expect(find.byType(SingleChildScrollView), findsOneWidget);
     });
 
-    testWidgets('should maintain UI state when switching tabs',
-        (WidgetTester tester) async {
+    testWidgets('should maintain UI state when switching tabs', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Enter email
@@ -274,16 +292,18 @@ void main() {
       expect(find.text('test@example.com'), findsOneWidget);
     });
 
-    testWidgets('should display divider with "或" text',
-        (WidgetTester tester) async {
+    testWidgets('should display divider with "或" text', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       expect(find.text('或'), findsOneWidget);
       expect(find.byType(Divider), findsWidgets);
     });
 
-    testWidgets('should have properly themed widgets',
-        (WidgetTester tester) async {
+    testWidgets('should have properly themed widgets', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Verify Scaffold exists (basic structure)
@@ -296,8 +316,9 @@ void main() {
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('should render without throwing errors',
-        (WidgetTester tester) async {
+    testWidgets('should render without throwing errors', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(buildTestApp());
 
       // Widget should render successfully

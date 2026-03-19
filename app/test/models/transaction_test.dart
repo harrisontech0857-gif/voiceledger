@@ -130,22 +130,24 @@ void main() {
         expect(transaction.type, equals(TransactionType.expense));
       });
 
-      test('should default to TransactionCategory.other for unknown category',
-          () {
-        final json = {
-          'id': 'tx_005',
-          'user_id': 'user_005',
-          'amount': 100.0,
-          'type': 'expense',
-          'category': 'unknown_category',
-          'created_at': '2024-03-18T15:00:00Z',
-          'description': 'test',
-        };
+      test(
+        'should default to TransactionCategory.other for unknown category',
+        () {
+          final json = {
+            'id': 'tx_005',
+            'user_id': 'user_005',
+            'amount': 100.0,
+            'type': 'expense',
+            'category': 'unknown_category',
+            'created_at': '2024-03-18T15:00:00Z',
+            'description': 'test',
+          };
 
-        final transaction = Transaction.fromJson(json);
+          final transaction = Transaction.fromJson(json);
 
-        expect(transaction.category, equals(TransactionCategory.other));
-      });
+          expect(transaction.category, equals(TransactionCategory.other));
+        },
+      );
     });
 
     group('toJson', () {
@@ -239,19 +241,21 @@ void main() {
         notes: '美味',
       );
 
-      test('should copy all fields unchanged when called with no arguments',
-          () {
-        final copied = baseTransaction.copyWith();
+      test(
+        'should copy all fields unchanged when called with no arguments',
+        () {
+          final copied = baseTransaction.copyWith();
 
-        expect(copied.id, equals(baseTransaction.id));
-        expect(copied.userId, equals(baseTransaction.userId));
-        expect(copied.amount, equals(baseTransaction.amount));
-        expect(copied.type, equals(baseTransaction.type));
-        expect(copied.category, equals(baseTransaction.category));
-        expect(copied.createdAt, equals(baseTransaction.createdAt));
-        expect(copied.description, equals(baseTransaction.description));
-        expect(copied.notes, equals(baseTransaction.notes));
-      });
+          expect(copied.id, equals(baseTransaction.id));
+          expect(copied.userId, equals(baseTransaction.userId));
+          expect(copied.amount, equals(baseTransaction.amount));
+          expect(copied.type, equals(baseTransaction.type));
+          expect(copied.category, equals(baseTransaction.category));
+          expect(copied.createdAt, equals(baseTransaction.createdAt));
+          expect(copied.description, equals(baseTransaction.description));
+          expect(copied.notes, equals(baseTransaction.notes));
+        },
+      );
 
       test('should update amount field', () {
         final copied = baseTransaction.copyWith(amount: 150.0);
@@ -272,9 +276,7 @@ void main() {
       });
 
       test('should update type field', () {
-        final copied = baseTransaction.copyWith(
-          type: TransactionType.income,
-        );
+        final copied = baseTransaction.copyWith(type: TransactionType.income);
 
         expect(copied.type, equals(TransactionType.income));
         expect(copied.category, equals(baseTransaction.category));

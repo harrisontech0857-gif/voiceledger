@@ -101,9 +101,9 @@ class VoiceLedgerApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         // 統一文字大小
-        final mq = MediaQuery.of(context).copyWith(
-          textScaler: const TextScaler.linear(1.0),
-        );
+        final mq = MediaQuery.of(
+          context,
+        ).copyWith(textScaler: const TextScaler.linear(1.0));
         return MediaQuery(
           data: mq,
           // Web 桌面端：限制最大寬度，模擬手機體驗

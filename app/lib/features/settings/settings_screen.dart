@@ -80,8 +80,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: _isDarkMode,
                     onChanged: (value) {
                       setState(() => _isDarkMode = value);
-                      ref.read(themeModeProvider.notifier).state =
-                          value ? ThemeMode.dark : ThemeMode.light;
+                      ref.read(themeModeProvider.notifier).state = value
+                          ? ThemeMode.dark
+                          : ThemeMode.light;
                     },
                   ),
                 ),
@@ -261,8 +262,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             Text(
               '免費取得：aistudio.google.com/apikey',
               style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(ctx).colorScheme.primary,
-                  ),
+                color: Theme.of(ctx).colorScheme.primary,
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
             TextField(
@@ -356,9 +357,9 @@ class _ProfileCard extends StatelessWidget {
             child: Text(
               '語',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -369,15 +370,15 @@ class _ProfileCard extends StatelessWidget {
                 Text(
                   '語記用戶',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   kMockMode ? 'mock-user@demo.app' : 'user@example.com',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -429,24 +430,27 @@ class _PremiumCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.workspace_premium_rounded,
-                  color: Colors.white, size: 24),
+              const Icon(
+                Icons.workspace_premium_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'VoiceLedger Premium',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             '解鎖無限制 AI 分析、進階報告和優先支援',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white.withAlpha(200),
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: Colors.white.withAlpha(200)),
           ),
           const SizedBox(height: AppSpacing.md),
           SizedBox(
@@ -483,9 +487,9 @@ class _SettingsGroup extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Container(
@@ -503,10 +507,9 @@ class _SettingsGroup extends StatelessWidget {
                       child: Divider(
                         height: 0.5,
                         thickness: 0.5,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .outlineVariant
-                            .withAlpha(100),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outlineVariant.withAlpha(100),
                       ),
                     ),
                 ],
@@ -565,17 +568,13 @@ class _SettingsTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  Text(title, style: Theme.of(context).textTheme.bodyMedium),
                   if (subtitle != null)
                     Text(
                       subtitle!,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                     ),
                 ],
               ),

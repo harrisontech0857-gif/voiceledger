@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/pet.dart';
@@ -43,8 +44,9 @@ class PetNotifier extends StateNotifier<PetModel> {
       return;
     }
 
-    final hoursSinceLastFed =
-        DateTime.now().difference(state.lastFedAt!).inHours;
+    final hoursSinceLastFed = DateTime.now()
+        .difference(state.lastFedAt!)
+        .inHours;
 
     PetMood newMood;
     if (hoursSinceLastFed > 48) {
@@ -127,22 +129,28 @@ class PetNotifier extends StateNotifier<PetModel> {
   /// 手動刷新心情（App 回到前台時呼叫）
   void refreshMood() => _updateMood();
 
-  // ── Debug 專用（開發測試，正式版移除）──────────────
+  // ── Debug 專用（僅在 debug 模式下可用）──────────────
 
-  /// 直接設定經驗值來切換階段
+  /// 直接設定經驗值來切換階段（僅 debug 模式）
   void debugSetExp(int exp) {
+    assert(kDebugMode, 'debugSetExp 僅可在 debug 模式使用');
+    if (!kDebugMode) return;
     state = state.copyWith(exp: exp);
     _save();
   }
 
-  /// 直接設定心情
+  /// 直接設定心情（僅 debug 模式）
   void debugSetMood(PetMood mood) {
+    assert(kDebugMode, 'debugSetMood 僅可在 debug 模式使用');
+    if (!kDebugMode) return;
     state = state.copyWith(mood: mood);
     _save();
   }
 
-  /// 快速切換到指定階段（設定對應最低經驗值）
+  /// 快速切換到指定階段（僅 debug 模式）
   void debugSetStage(PetStage stage) {
+    assert(kDebugMode, 'debugSetStage 僅可在 debug 模式使用');
+    if (!kDebugMode) return;
     final exp = switch (stage) {
       PetStage.egg => 0,
       PetStage.baby => 50,

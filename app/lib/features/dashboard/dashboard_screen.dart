@@ -75,8 +75,8 @@ class _TopGreetingBar extends StatelessWidget {
     final greeting = hour < 12
         ? '早安'
         : hour < 18
-            ? '午安'
-            : '晚安';
+        ? '午安'
+        : '晚安';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -86,16 +86,16 @@ class _TopGreetingBar extends StatelessWidget {
           children: [
             Text(
               '$greeting 👋',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 2),
             Text(
               DateFormat('M月d日 EEEE', 'zh_TW').format(DateTime.now()),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -197,16 +197,16 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 2),
           Text(
             label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: cs.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -219,10 +219,7 @@ class _ActionCardRow extends StatelessWidget {
   final VoidCallback onVoiceTap;
   final VoidCallback onChatTap;
 
-  const _ActionCardRow({
-    required this.onVoiceTap,
-    required this.onChatTap,
-  });
+  const _ActionCardRow({required this.onVoiceTap, required this.onChatTap});
 
   @override
   Widget build(BuildContext context) {
@@ -304,18 +301,18 @@ class _ActionCard extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: isPrimary ? cs.onPrimaryContainer : cs.onSurface,
-                  ),
+                fontWeight: FontWeight.bold,
+                color: isPrimary ? cs.onPrimaryContainer : cs.onSurface,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
               subtitle,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: isPrimary
-                        ? cs.onPrimaryContainer.withAlpha(180)
-                        : cs.onSurfaceVariant,
-                  ),
+                color: isPrimary
+                    ? cs.onPrimaryContainer.withAlpha(180)
+                    : cs.onSurfaceVariant,
+              ),
             ),
           ],
         ),
@@ -357,9 +354,9 @@ class _DailyQuoteCard extends StatelessWidget {
             child: dailyQuote.when(
               data: (quote) => Text(
                 quote.isEmpty ? '每日一句，激勵人心。' : quote,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontStyle: FontStyle.italic,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -373,8 +370,8 @@ class _DailyQuoteCard extends StatelessWidget {
               error: (e, st) => Text(
                 '無法加載金句',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),

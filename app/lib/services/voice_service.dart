@@ -105,8 +105,8 @@ class VoiceService {
         // 回呼時顯示累積文字 + 當前片段
         final displayText = manualStopMode
             ? (_accumulatedText.isNotEmpty && !isFinal
-                ? '$_accumulatedText，$text'
-                : (isFinal ? _accumulatedText : text))
+                  ? '$_accumulatedText，$text'
+                  : (isFinal ? _accumulatedText : text))
             : text;
         onResult?.call(displayText, isFinal);
       },
@@ -197,8 +197,12 @@ class VoiceService {
 
   void dispose() {
     try {
-      _speechToText.stop();
-    } catch (_) {}
+      if (_isInitialized) {
+        _speechToText.stop();
+      }
+    } catch (e) {
+      _logger.w('語音服務釋放時發生錯誤: $e');
+    }
   }
 
   Future<void> _initializeIfNeeded() async {

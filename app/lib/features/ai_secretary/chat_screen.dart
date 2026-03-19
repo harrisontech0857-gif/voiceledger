@@ -157,11 +157,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               _messages.last.suggestion != null &&
               !_isSending)
             _QuickReplies(
-              suggestions: [
-                _messages.last.suggestion ?? '',
-                '顯示支出報告',
-                '設定預算',
-              ],
+              suggestions: [_messages.last.suggestion ?? '', '顯示支出報告', '設定預算'],
               onTap: _sendMessage,
             ),
 
@@ -195,8 +191,8 @@ class _EmptyState extends StatelessWidget {
           Text(
             '開始對話',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -263,9 +259,10 @@ class _DotState extends State<_Dot> with SingleTickerProviderStateMixin {
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _animation = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     Future.delayed(Duration(milliseconds: widget.delay), () {
       if (mounted) _controller.repeat(reverse: true);
     });
@@ -325,8 +322,9 @@ class _QuickReplies extends StatelessWidget {
                 suggestions[index],
                 style: Theme.of(context).textTheme.labelSmall,
               ),
-              backgroundColor:
-                  Theme.of(context).colorScheme.primaryContainer.withAlpha(100),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.primaryContainer.withAlpha(100),
               side: BorderSide(
                 color: Theme.of(context).colorScheme.primary.withAlpha(60),
               ),
@@ -372,8 +370,9 @@ class _ChatBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isUser) ...[
@@ -390,8 +389,9 @@ class _ChatBubble extends StatelessWidget {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment:
-                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isUser
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 Container(
                   constraints: BoxConstraints(
@@ -408,18 +408,18 @@ class _ChatBubble extends StatelessWidget {
                   child: Text(
                     message.content,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: isUser ? Colors.white : null,
-                          height: 1.4,
-                        ),
+                      color: isUser ? Colors.white : null,
+                      height: 1.4,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   timeFormat.format(message.timestamp),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        fontSize: 10,
-                        color: cs.onSurfaceVariant,
-                      ),
+                    fontSize: 10,
+                    color: cs.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -451,9 +451,7 @@ class _InputBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(
-          top: BorderSide(color: cs.outlineVariant.withAlpha(80)),
-        ),
+        border: Border(top: BorderSide(color: cs.outlineVariant.withAlpha(80))),
       ),
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.md,
@@ -473,9 +471,9 @@ class _InputBar extends StatelessWidget {
                 minLines: 1,
                 decoration: InputDecoration(
                   hintText: '輸入訊息...',
-                  hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: cs.onSurfaceVariant,
-                      ),
+                  hintStyle: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.full),
                     borderSide: BorderSide.none,
@@ -493,9 +491,7 @@ class _InputBar extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Container(
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [cs.primary, cs.tertiary],
-                ),
+                gradient: LinearGradient(colors: [cs.primary, cs.tertiary]),
                 shape: BoxShape.circle,
               ),
               child: Material(
