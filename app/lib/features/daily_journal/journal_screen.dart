@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../core/theme.dart';
 import '../../models/transaction.dart';
+import '../../services/diary_service.dart';
 import '../../services/pet_service.dart';
 import '../../services/transaction_service.dart';
 
@@ -20,11 +21,14 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   DateTime _selectedDay = DateTime.now();
   List<Transaction> _transactions = [];
   Set<DateTime> _recordDays = {};
+  DiaryEntry? _diaryEntry;
+  bool _isDiaryLoading = false;
 
   @override
   void initState() {
     super.initState();
     _loadTransactions();
+    _loadDiary(_selectedDay);
   }
 
   Future<void> _loadTransactions() async {
@@ -49,6 +53,29 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
       setState(() {
         _transactions = transactions;
         _recordDays = recordDays;
+      });
+    }
+  }
+
+  Future<void> _loadDiary(DateTime date) async {
+    setState(() => _isDiaryLoading = true);
+    final diaryService = ref.read(diaryServiceProvider);
+
+    // 先嘗試取得已存在的日記
+    var diary = await diaryService.getDiary(date);
+
+    // 如果沒有，且當天有交易，則生成
+    if (diary == null) {
+      final dayTx = _getTransactionsForDay(date);
+      if (dayTx.isNotEmpty) {
+        diary = await diaryService.generateDiary(date);
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _diaryEntry = diary;
+        _isDiaryLoading = false;
       });
     }
   }
@@ -164,7 +191,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
           setState(() {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
+            _diaryEntry = null;
           });
+          _loadDiary(selectedDay);
         },
         onFormatChanged: (format) {
           setState(() => _calendarFormat = format);
@@ -369,15 +398,22 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
     final pet = ref.watch(petProvider);
     final dateStr = DateFormat('M月d日', 'zh_TW').format(_selectedDay);
 
-    // 根據交易內容動態生成摘要文字
-    final categories = transactions
-        .map((tx) => tx.category.displayName)
-        .toSet()
-        .join('、');
-    final summary =
-        '今日共 ${transactions.length} 筆消費，'
-        '總計 NT\$ ${NumberFormat('#,###').format(totalExpense.toInt())}。'
-        '主要類別為$categories。';
+    // 優先使用 Edge Function 生成的日記，否則 fallback 到 client-side
+    String summary;
+    if (_diaryEntry != null && _diaryEntry!.content.isNotEmpty) {
+      summary = _diaryEntry!.content;
+    } else if (_isDiaryLoading) {
+      summary = '正在生成日記⋯⋯';
+    } else {
+      final categories = transactions
+          .map((tx) => tx.category.displayName)
+          .toSet()
+          .join('、');
+      summary =
+          '今日共 ${transactions.length} 筆消費，'
+          '總計 NT\$ ${NumberFormat('#,###').format(totalExpense.toInt())}。'
+          '主要類別為$categories。';
+    }
 
     // 寵物對今日消費的評語
     String petComment;
