@@ -64,8 +64,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const DashboardScreen(),
           ),
           GoRoute(
-            path: '/statistics',
-            builder: (context, state) => const StatisticsScreen(),
+            path: '/ai-secretary',
+            builder: (context, state) => const ChatScreen(),
           ),
           GoRoute(
             path: '/journal',
@@ -81,9 +81,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/voice-entry',
         builder: (context, state) => const VoiceEntryScreen(),
       ),
+      // 付費功能路由（保留但需通過 paywall）
       GoRoute(
-        path: '/ai-secretary',
-        builder: (context, state) => const ChatScreen(),
+        path: '/statistics',
+        builder: (context, state) => const StatisticsScreen(),
       ),
       GoRoute(
         path: '/add-transaction',
@@ -126,7 +127,12 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
 
-  static const _routes = ['/dashboard', '/statistics', '/journal', '/settings'];
+  static const _routes = [
+    '/dashboard',
+    '/ai-secretary',
+    '/journal',
+    '/settings',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -170,8 +176,8 @@ class _MainShellState extends State<MainShell> {
                     color: cs,
                   ),
                   _NavItem(
-                    icon: Icons.bar_chart_rounded,
-                    label: '統計',
+                    icon: Icons.smart_toy_rounded,
+                    label: 'AI 秘書',
                     isSelected: _currentIndex == 1,
                     onTap: () => _goTo(1),
                     color: cs,
@@ -179,7 +185,7 @@ class _MainShellState extends State<MainShell> {
                   // 中間留空給語音按鈕
                   const SizedBox(width: 56),
                   _NavItem(
-                    icon: Icons.book_rounded,
+                    icon: Icons.auto_stories_rounded,
                     label: '日記',
                     isSelected: _currentIndex == 2,
                     onTap: () => _goTo(2),

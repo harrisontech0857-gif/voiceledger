@@ -11,6 +11,7 @@ import '../../services/pet_service.dart';
 import '../../services/currency_service.dart';
 import '../../services/transaction_service.dart';
 import '../../services/usage_service.dart';
+import '../../services/voice_diary_service.dart';
 
 class VoiceEntryScreen extends ConsumerStatefulWidget {
   const VoiceEntryScreen({super.key});
@@ -171,47 +172,192 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
     _processInput(text);
   }
 
-  /// AI 處理輸入 — 支援一句話多筆交易
+  /// AI 處理輸入 — 語音日記模式（MVP 核心流程）
+  ///
+  /// 語音 → AI 分析情緒 + 主題標籤 → 生成日記 → 存到 life_diaries
   Future<void> _processInput(String transcript) async {
     setState(() => _isProcessing = true);
 
     try {
-      final aiService = ref.read(aiServiceProvider);
-      final details = await aiService.extractTransactionDetails(transcript);
-
-      // 取得 AI 回饋（如果有 feedback 欄位就用，否則另外呼叫）
-      String feedback = '';
-      if (details.containsKey('feedback') &&
-          (details['feedback'] as String).isNotEmpty) {
-        feedback = details['feedback'] as String;
-      } else {
-        feedback = await aiService.analyzeTransaction(transcript);
-      }
-
-      // 檢查是否有多筆交易
-      final allTx = details['all_transactions'] as List<dynamic>?;
+      final voiceDiaryService = ref.read(voiceDiaryServiceProvider);
+      final analysis = await voiceDiaryService.analyze(transcript);
 
       if (mounted) {
         setState(() {
-          _aiResponse = feedback;
+          _aiResponse =
+              '${analysis.moodEmoji} ${analysis.diary}\n\n'
+              '標籤：${analysis.tags.map((t) => '#$t').join(' ')}';
           _isProcessing = false;
         });
 
-        if (allTx != null && allTx.length > 1) {
-          // 多筆交易 → 顯示列表確認
-          _showMultiTransactionDialog(allTx, feedback);
-        } else {
-          // 單筆交易
-          _showConfirmationDialog(details);
-        }
+        _showDiaryConfirmDialog(analysis);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('處理失敗: $e')));
+        ).showSnackBar(SnackBar(content: Text('AI 分析失敗: $e')));
       }
+    }
+  }
+
+  /// 日記確認對話框
+  void _showDiaryConfirmDialog(VoiceDiaryAnalysis analysis) {
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 標題列
+                  Row(
+                    children: [
+                      Text(
+                        analysis.moodEmoji,
+                        style: const TextStyle(fontSize: 28),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          'AI 日記',
+                          style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(ctx),
+                        child: const Icon(Icons.close_rounded),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+
+                  // 標籤列
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children:
+                        analysis.tags.map((tag) {
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: cs.primaryContainer,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
+                            ),
+                            child: Text(
+                              '#$tag',
+                              style: Theme.of(
+                                ctx,
+                              ).textTheme.labelSmall?.copyWith(
+                                color: cs.onPrimaryContainer,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+
+                  // 日記內容
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Text(
+                      analysis.diary,
+                      style: Theme.of(
+                        ctx,
+                      ).textTheme.bodyMedium?.copyWith(height: 1.6),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // 原始語音
+                  Text(
+                    '原始語音：「${analysis.originalTranscript}」',
+                    style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // 按鈕
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          child: const Text('取消'),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        flex: 2,
+                        child: FilledButton.icon(
+                          icon: const Icon(Icons.save_rounded, size: 18),
+                          label: const Text('存入日記'),
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _saveDiaryEntry(analysis);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 儲存日記
+  Future<void> _saveDiaryEntry(VoiceDiaryAnalysis analysis) async {
+    final voiceDiaryService = ref.read(voiceDiaryServiceProvider);
+    await voiceDiaryService.saveDiaryEntry(analysis);
+
+    // 記錄語音使用次數
+    try {
+      final usageService = ref.read(usageServiceProvider);
+      await usageService.recordVoiceUsage();
+    } catch (_) {}
+
+    // 餵食寵物
+    ref.read(petProvider.notifier).feed(amount: 0);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${analysis.moodEmoji} 日記已保存！'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) context.go('/dashboard');
+      });
     }
   }
 
