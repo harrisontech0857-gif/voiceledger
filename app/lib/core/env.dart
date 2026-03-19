@@ -14,7 +14,8 @@ class Env {
   /// Supabase 匿名公鑰
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: '',
+    defaultValue:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwcWdyd29xYWx3Zm9kYmxjdHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3ODY5MDEsImV4cCI6MjA4OTM2MjkwMX0.LmHYN5taxI-IXZDF-zjU-RHeuPQmJm1ksmwByglaf8k',
   );
 
   /// RevenueCat API 金鑰（可選）
