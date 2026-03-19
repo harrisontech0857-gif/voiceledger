@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -32,6 +33,11 @@ void main() async {
       await Supabase.initialize(
         url: Env.supabaseUrl,
         anonKey: Env.supabaseAnonKey,
+        authOptions: FlutterAuthClientOptions(
+          authFlowType: kIsWeb ? AuthFlowType.pkce : AuthFlowType.pkce,
+          // Web: 自動從 URL 攔截 OAuth callback
+          // Mobile: 通過 deep link scheme 處理
+        ),
       );
     } catch (e) {
       kMockMode = true;

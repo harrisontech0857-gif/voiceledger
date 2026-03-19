@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 
@@ -24,6 +24,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     super.initState();
     _emailController = TextEditingController();
     _passwordController = TextEditingController();
+
+    // 監聽 OAuth 回調 — 登入成功後自動導航
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final event = data.event;
+      if (event == AuthChangeEvent.signedIn && mounted) {
+        context.go('/dashboard');
+      }
+    });
   }
 
   @override
@@ -102,13 +110,28 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     try {
       final client = Supabase.instance.client;
-      await client.auth.signInWithOAuth(
-        OAuthProvider.google,
-        redirectTo: kIsWeb ? null : 'io.supabase.voiceledger://login-callback/',
-      );
-      // OAuth 會導向瀏覽器，成功後自動回到 app
+
+      if (kIsWeb) {
+        // Web 端：使用 PKCE flow，redirectTo 用目前頁面的 origin
+        // 確保 OAuth callback 回到同一個 origin，避免 state mismatch
+        await client.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: Uri.base.origin,
+        );
+      } else {
+        // Mobile 端：使用 deep link callback
+        await client.auth.signInWithOAuth(
+          OAuthProvider.google,
+          redirectTo: 'io.supabase.voiceledger://login-callback/',
+        );
+      }
+      // OAuth 會導向瀏覽器，成功後 onAuthStateChange 會觸發導航
     } on AuthException catch (e) {
-      setState(() => _errorMessage = _translateAuthError(e.message));
+      if (e.message.contains('oauth_state') || e.message.contains('state')) {
+        setState(() => _errorMessage = 'OAuth 狀態過期，請重新點擊登入');
+      } else {
+        setState(() => _errorMessage = _translateAuthError(e.message));
+      }
     } catch (e) {
       setState(() => _errorMessage = 'Google 登入失敗: $e');
     } finally {
