@@ -76,11 +76,12 @@ class GeminiAiService implements AiServiceBase {
     try {
       // 建立或重用 chat session
       _chatSession ??= _model.startChat(
-        history: conversationHistory.map((msg) {
-          return Content(msg.isUser ? 'user' : 'model', [
-            TextPart(msg.content),
-          ]);
-        }).toList(),
+        history:
+            conversationHistory.map((msg) {
+              return Content(msg.isUser ? 'user' : 'model', [
+                TextPart(msg.content),
+              ]);
+            }).toList(),
       );
 
       final response = await _chatSession!.sendMessage(Content.text(content));
@@ -170,10 +171,8 @@ class GeminiAiService implements AiServiceBase {
       // 嘗試解析 JSON
       try {
         // 移除可能的 markdown 包裹
-        final jsonStr = text
-            .replaceAll('```json', '')
-            .replaceAll('```', '')
-            .trim();
+        final jsonStr =
+            text.replaceAll('```json', '').replaceAll('```', '').trim();
         final decoded = Uri.decodeFull(jsonStr);
         // 用簡單的方式解析
         if (decoded.contains('"amount"')) {

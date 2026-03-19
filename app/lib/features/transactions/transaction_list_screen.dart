@@ -74,15 +74,15 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                 var filtered = transactions;
 
                 if (_selectedType != null) {
-                  filtered = filtered
-                      .where((tx) => tx.type == _selectedType)
-                      .toList();
+                  filtered =
+                      filtered.where((tx) => tx.type == _selectedType).toList();
                 }
 
                 if (_selectedCategory != null) {
-                  filtered = filtered
-                      .where((tx) => tx.category == _selectedCategory)
-                      .toList();
+                  filtered =
+                      filtered
+                          .where((tx) => tx.category == _selectedCategory)
+                          .toList();
                 }
 
                 // 按日期分組
@@ -96,8 +96,8 @@ class _TransactionListScreenState extends ConsumerState<TransactionListScreen> {
                   grouped.putIfAbsent(date, () => []).add(tx);
                 }
 
-                final sortedDates = grouped.keys.toList()
-                  ..sort((a, b) => b.compareTo(a));
+                final sortedDates =
+                    grouped.keys.toList()..sort((a, b) => b.compareTo(a));
 
                 if (sortedDates.isEmpty) {
                   return Center(
@@ -187,9 +187,10 @@ class _TransactionTile extends ConsumerWidget {
               Text(
                 '${isIncome ? '+' : '-'}NT\$ ${transaction.amount.toStringAsFixed(2)}',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  color: isIncome
-                      ? Theme.of(context).colorScheme.tertiaryContainer
-                      : Theme.of(context).colorScheme.error,
+                  color:
+                      isIncome
+                          ? Theme.of(context).colorScheme.tertiaryContainer
+                          : Theme.of(context).colorScheme.error,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -214,56 +215,64 @@ class _TransactionTile extends ConsumerWidget {
   ) {
     showModalBottomSheet(
       context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 標題
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder:
+          (context) => Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('交易詳情', style: Theme.of(context).textTheme.headlineSmall),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.close_rounded),
+                // 標題
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '交易詳情',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // 詳情
+                _DetailRow(
+                  label: '金額',
+                  value: 'NT\$ ${transaction.amount.toStringAsFixed(2)}',
+                ),
+                _DetailRow(
+                  label: '類別',
+                  value: transaction.category.displayName,
+                ),
+                _DetailRow(label: '描述', value: transaction.description),
+                if (transaction.notes != null)
+                  _DetailRow(label: '備註', value: transaction.notes!),
+                if (transaction.voiceTranscript != null)
+                  _DetailRow(label: '語音', value: transaction.voiceTranscript!),
+                const SizedBox(height: AppSpacing.lg),
+
+                // 刪除按鈕
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _deleteTransaction(context, ref, transaction);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.errorContainer,
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                    child: const Text('刪除交易'),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // 詳情
-            _DetailRow(
-              label: '金額',
-              value: 'NT\$ ${transaction.amount.toStringAsFixed(2)}',
-            ),
-            _DetailRow(label: '類別', value: transaction.category.displayName),
-            _DetailRow(label: '描述', value: transaction.description),
-            if (transaction.notes != null)
-              _DetailRow(label: '備註', value: transaction.notes!),
-            if (transaction.voiceTranscript != null)
-              _DetailRow(label: '語音', value: transaction.voiceTranscript!),
-            const SizedBox(height: AppSpacing.lg),
-
-            // 刪除按鈕
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _deleteTransaction(context, ref, transaction);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
-                  foregroundColor: Theme.of(context).colorScheme.error,
-                ),
-                child: const Text('刪除交易'),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -274,37 +283,38 @@ class _TransactionTile extends ConsumerWidget {
   ) {
     showDialog(
       context: context,
-      builder: (dialogCtx) => AlertDialog(
-        title: const Text('確認刪除'),
-        content: const Text('確定要刪除此交易嗎？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('取消'),
+      builder:
+          (dialogCtx) => AlertDialog(
+            title: const Text('確認刪除'),
+            content: const Text('確定要刪除此交易嗎？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogCtx),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(dialogCtx);
+                  try {
+                    final txService = ref.read(transactionServiceProvider);
+                    await txService.deleteTransaction(transaction.id);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('交易已刪除')));
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('刪除失敗: $e')));
+                    }
+                  }
+                },
+                child: const Text('刪除'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogCtx);
-              try {
-                final txService = ref.read(transactionServiceProvider);
-                await txService.deleteTransaction(transaction.id);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('交易已刪除')));
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('刪除失敗: $e')));
-                }
-              }
-            },
-            child: const Text('刪除'),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -72,11 +72,12 @@ class _TopGreetingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hour = DateTime.now().hour;
-    final greeting = hour < 12
-        ? '早安'
-        : hour < 18
-        ? '午安'
-        : '晚安';
+    final greeting =
+        hour < 12
+            ? '早安'
+            : hour < 18
+            ? '午安'
+            : '晚安';
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -276,9 +277,10 @@ class _ActionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: isPrimary ? cs.primaryContainer : cs.surfaceContainerLow,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: isPrimary
-              ? null
-              : Border.all(color: cs.outlineVariant.withAlpha(60)),
+          border:
+              isPrimary
+                  ? null
+                  : Border.all(color: cs.outlineVariant.withAlpha(60)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,9 +288,10 @@ class _ActionCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: isPrimary
-                    ? cs.primary.withAlpha(30)
-                    : cs.tertiary.withAlpha(25),
+                color:
+                    isPrimary
+                        ? cs.primary.withAlpha(30)
+                        : cs.tertiary.withAlpha(25),
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: Icon(
@@ -309,9 +312,10 @@ class _ActionCard extends StatelessWidget {
             Text(
               subtitle,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: isPrimary
-                    ? cs.onPrimaryContainer.withAlpha(180)
-                    : cs.onSurfaceVariant,
+                color:
+                    isPrimary
+                        ? cs.onPrimaryContainer.withAlpha(180)
+                        : cs.onSurfaceVariant,
               ),
             ),
           ],
@@ -352,27 +356,30 @@ class _DailyQuoteCard extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: dailyQuote.when(
-              data: (quote) => Text(
-                quote.isEmpty ? '每日一句，激勵人心。' : quote,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              loading: () => Container(
-                height: 16,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-              error: (e, st) => Text(
-                '無法加載金句',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
+              data:
+                  (quote) => Text(
+                    quote.isEmpty ? '每日一句，激勵人心。' : quote,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontStyle: FontStyle.italic,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              loading:
+                  () => Container(
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.outlineVariant,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+              error:
+                  (e, st) => Text(
+                    '無法加載金句',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
             ),
           ),
         ],

@@ -44,9 +44,8 @@ class PetNotifier extends StateNotifier<PetModel> {
       return;
     }
 
-    final hoursSinceLastFed = DateTime.now()
-        .difference(state.lastFedAt!)
-        .inHours;
+    final hoursSinceLastFed =
+        DateTime.now().difference(state.lastFedAt!).inHours;
 
     PetMood newMood;
     if (hoursSinceLastFed > 48) {

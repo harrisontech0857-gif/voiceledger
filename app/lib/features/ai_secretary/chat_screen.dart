@@ -128,27 +128,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           // 訊息列表
           Expanded(
-            child: _messages.isEmpty
-                ? _EmptyState()
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.sm,
+            child:
+                _messages.isEmpty
+                    ? _EmptyState()
+                    : ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.sm,
+                      ),
+                      itemCount: _messages.length + (_isSending ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        // 打字指示器
+                        if (_isSending && index == _messages.length) {
+                          return const _TypingIndicator();
+                        }
+                        final message = _messages[index];
+                        return _ChatBubble(
+                          message: message,
+                          isUser: message.isUser,
+                        );
+                      },
                     ),
-                    itemCount: _messages.length + (_isSending ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      // 打字指示器
-                      if (_isSending && index == _messages.length) {
-                        return const _TypingIndicator();
-                      }
-                      final message = _messages[index];
-                      return _ChatBubble(
-                        message: message,
-                        isUser: message.isUser,
-                      );
-                    },
-                  ),
           ),
 
           // 快速回覆
@@ -353,26 +354,26 @@ class _ChatBubble extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     // 不同的圓角：自己的訊息右下較小，AI 的訊息左下較小
-    final borderRadius = isUser
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(AppRadius.lg),
-            topRight: Radius.circular(AppRadius.lg),
-            bottomLeft: Radius.circular(AppRadius.lg),
-            bottomRight: Radius.circular(4),
-          )
-        : const BorderRadius.only(
-            topLeft: Radius.circular(AppRadius.lg),
-            topRight: Radius.circular(AppRadius.lg),
-            bottomRight: Radius.circular(AppRadius.lg),
-            bottomLeft: Radius.circular(4),
-          );
+    final borderRadius =
+        isUser
+            ? const BorderRadius.only(
+              topLeft: Radius.circular(AppRadius.lg),
+              topRight: Radius.circular(AppRadius.lg),
+              bottomLeft: Radius.circular(AppRadius.lg),
+              bottomRight: Radius.circular(4),
+            )
+            : const BorderRadius.only(
+              topLeft: Radius.circular(AppRadius.lg),
+              topRight: Radius.circular(AppRadius.lg),
+              bottomRight: Radius.circular(AppRadius.lg),
+              bottomLeft: Radius.circular(4),
+            );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
-        mainAxisAlignment: isUser
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+        mainAxisAlignment:
+            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isUser) ...[
@@ -389,9 +390,8 @@ class _ChatBubble extends StatelessWidget {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment: isUser
-                  ? CrossAxisAlignment.end
-                  : CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
                 Container(
                   constraints: BoxConstraints(
@@ -501,22 +501,23 @@ class _InputBar extends StatelessWidget {
                   customBorder: const CircleBorder(),
                   child: Padding(
                     padding: const EdgeInsets.all(10),
-                    child: isSending
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                    child:
+                        isSending
+                            ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                                strokeWidth: 2,
                               ),
-                              strokeWidth: 2,
+                            )
+                            : const Icon(
+                              Icons.send_rounded,
+                              color: Colors.white,
+                              size: 22,
                             ),
-                          )
-                        : const Icon(
-                            Icons.send_rounded,
-                            color: Colors.white,
-                            size: 22,
-                          ),
                   ),
                 ),
               ),

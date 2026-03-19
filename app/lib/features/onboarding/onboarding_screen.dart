@@ -123,9 +123,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           margin: const EdgeInsets.symmetric(horizontal: 4),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: _currentPage == index
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey.withAlpha((255 * 0.3).round()),
+                            color:
+                                _currentPage == index
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.grey.withAlpha(
+                                      (255 * 0.3).round(),
+                                    ),
                           ),
                         ),
                       ),

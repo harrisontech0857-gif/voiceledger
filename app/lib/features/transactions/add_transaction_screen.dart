@@ -166,14 +166,15 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
                   setState(() => _category = value);
                 }
               },
-              dropdownMenuEntries: TransactionCategory.values
-                  .map(
-                    (cat) => DropdownMenuEntry(
-                      value: cat,
-                      label: '${cat.icon} ${cat.displayName}',
-                    ),
-                  )
-                  .toList(),
+              dropdownMenuEntries:
+                  TransactionCategory.values
+                      .map(
+                        (cat) => DropdownMenuEntry(
+                          value: cat,
+                          label: '${cat.icon} ${cat.displayName}',
+                        ),
+                      )
+                      .toList(),
             ),
             const SizedBox(height: AppSpacing.lg),
 
@@ -244,13 +245,14 @@ class _AddTransactionScreenState extends ConsumerState<AddTransactionScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _isLoading ? null : _saveTransaction,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('保存交易'),
+                child:
+                    _isLoading
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                        : const Text('保存交易'),
               ),
             ),
           ],

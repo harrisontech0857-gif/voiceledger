@@ -31,14 +31,13 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _bounceAnim =
-        TweenSequence<double>([
-          TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.12), weight: 30),
-          TweenSequenceItem(tween: Tween(begin: 1.12, end: 0.95), weight: 30),
-          TweenSequenceItem(tween: Tween(begin: 0.95, end: 1.0), weight: 40),
-        ]).animate(
-          CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
-        );
+    _bounceAnim = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.12), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 1.12, end: 0.95), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 0.95, end: 1.0), weight: 40),
+    ]).animate(
+      CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+    );
 
     _floatController = AnimationController(
       duration: const Duration(milliseconds: 2500),
@@ -107,10 +106,11 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
                     width: 225,
                     height: 225,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Text(
-                      pet.stageEmoji,
-                      style: const TextStyle(fontSize: 120),
-                    ),
+                    errorBuilder:
+                        (_, __, ___) => Text(
+                          pet.stageEmoji,
+                          style: const TextStyle(fontSize: 120),
+                        ),
                   ),
                 ),
               ],

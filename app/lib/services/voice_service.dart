@@ -103,11 +103,12 @@ class VoiceService {
           debugPrint('🎙️ [累積] $_accumulatedText');
         }
         // 回呼時顯示累積文字 + 當前片段
-        final displayText = manualStopMode
-            ? (_accumulatedText.isNotEmpty && !isFinal
-                  ? '$_accumulatedText，$text'
-                  : (isFinal ? _accumulatedText : text))
-            : text;
+        final displayText =
+            manualStopMode
+                ? (_accumulatedText.isNotEmpty && !isFinal
+                    ? '$_accumulatedText，$text'
+                    : (isFinal ? _accumulatedText : text))
+                : text;
         onResult?.call(displayText, isFinal);
       },
       localeId: localeId,
@@ -142,9 +143,10 @@ class VoiceService {
     try {
       await _speechToText.stop();
       // 手動停止模式：回傳累積文字（比 lastRecognizedWords 更完整）
-      final result = manualStopMode && _accumulatedText.isNotEmpty
-          ? _accumulatedText
-          : _speechToText.lastRecognizedWords;
+      final result =
+          manualStopMode && _accumulatedText.isNotEmpty
+              ? _accumulatedText
+              : _speechToText.lastRecognizedWords;
       _accumulatedText = '';
       return result;
     } catch (e) {

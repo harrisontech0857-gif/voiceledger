@@ -107,9 +107,13 @@ class SupabaseGeminiService implements AiServiceBase {
     List<ChatMessage> conversationHistory,
   ) async {
     try {
-      final history = conversationHistory.map((msg) {
-        return {'role': msg.isUser ? 'user' : 'model', 'content': msg.content};
-      }).toList();
+      final history =
+          conversationHistory.map((msg) {
+            return {
+              'role': msg.isUser ? 'user' : 'model',
+              'content': msg.content,
+            };
+          }).toList();
 
       final result = await _callEdgeFunction({
         'action': 'chat',

@@ -47,43 +47,44 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('財務統計'), centerTitle: true),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 期間選擇器
-                  _buildSegmentedControl(),
-                  const SizedBox(height: AppSpacing.lg),
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 期間選擇器
+                    _buildSegmentedControl(),
+                    const SizedBox(height: AppSpacing.lg),
 
-                  // 摘要卡片
-                  _SummaryRow(transactions: _transactions),
-                  const SizedBox(height: AppSpacing.lg),
+                    // 摘要卡片
+                    _SummaryRow(transactions: _transactions),
+                    const SizedBox(height: AppSpacing.lg),
 
-                  // 支出趨勢圖
-                  _SectionHeader(title: '支出趨勢'),
-                  const SizedBox(height: AppSpacing.md),
-                  _TrendChart(transactions: _transactions),
-                  const SizedBox(height: AppSpacing.lg),
+                    // 支出趨勢圖
+                    _SectionHeader(title: '支出趨勢'),
+                    const SizedBox(height: AppSpacing.md),
+                    _TrendChart(transactions: _transactions),
+                    const SizedBox(height: AppSpacing.lg),
 
-                  // 分類支出
-                  _SectionHeader(title: '分類支出'),
-                  const SizedBox(height: AppSpacing.md),
-                  _CategoryPieChart(transactions: _transactions),
-                  const SizedBox(height: AppSpacing.md),
-                  _CategoryBreakdownList(transactions: _transactions),
-                  const SizedBox(height: AppSpacing.lg),
+                    // 分類支出
+                    _SectionHeader(title: '分類支出'),
+                    const SizedBox(height: AppSpacing.md),
+                    _CategoryPieChart(transactions: _transactions),
+                    const SizedBox(height: AppSpacing.md),
+                    _CategoryBreakdownList(transactions: _transactions),
+                    const SizedBox(height: AppSpacing.lg),
 
-                  // 最大支出
-                  _SectionHeader(title: '最大支出'),
-                  const SizedBox(height: AppSpacing.md),
-                  _TopTransactions(transactions: _transactions),
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                    // 最大支出
+                    _SectionHeader(title: '最大支出'),
+                    const SizedBox(height: AppSpacing.md),
+                    _TopTransactions(transactions: _transactions),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
+                ),
               ),
-            ),
     );
   }
 
@@ -104,28 +105,31 @@ class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: selected
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.transparent,
+                  color:
+                      selected
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.sm),
-                  boxShadow: selected
-                      ? [
-                          BoxShadow(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withAlpha(40),
-                            blurRadius: 8,
-                          ),
-                        ]
-                      : null,
+                  boxShadow:
+                      selected
+                          ? [
+                            BoxShadow(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withAlpha(40),
+                              blurRadius: 8,
+                            ),
+                          ]
+                          : null,
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text(
                   labels[i],
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: selected
-                        ? Colors.white
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    color:
+                        selected
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),
                   textAlign: TextAlign.center,
@@ -173,9 +177,10 @@ class _SummaryRow extends StatelessWidget {
     }
 
     final balance = totalIncome - totalExpense;
-    final savingsRate = totalIncome > 0
-        ? (balance / totalIncome * 100).toStringAsFixed(0)
-        : '0';
+    final savingsRate =
+        totalIncome > 0
+            ? (balance / totalIncome * 100).toStringAsFixed(0)
+            : '0';
     final dayCount = DateTime.now().day;
     final dailyAverage = totalExpense / dayCount;
 
@@ -338,12 +343,18 @@ class _CategoryPieChart extends StatelessWidget {
       '其他': const Color(0xFFFF6B6B),
     };
 
-    final categories = categorySummary.entries.map((e) {
-      final percentage = totalExpense > 0
-          ? (e.value / totalExpense * 100).toDouble()
-          : 0.0;
-      return (e.key, percentage, colorMap[e.key] ?? const Color(0xFFFF6B6B));
-    }).toList();
+    final categories =
+        categorySummary.entries.map((e) {
+          final percentage =
+              totalExpense > 0
+                  ? (e.value / totalExpense * 100).toDouble()
+                  : 0.0;
+          return (
+            e.key,
+            percentage,
+            colorMap[e.key] ?? const Color(0xFFFF6B6B),
+          );
+        }).toList();
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -355,57 +366,60 @@ class _CategoryPieChart extends StatelessWidget {
         children: [
           SizedBox(
             height: 200,
-            child: categories.isEmpty
-                ? Center(
-                    child: Text(
-                      '無分類資料',
-                      style: Theme.of(context).textTheme.bodyMedium,
+            child:
+                categories.isEmpty
+                    ? Center(
+                      child: Text(
+                        '無分類資料',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    )
+                    : PieChart(
+                      PieChartData(
+                        sections:
+                            categories.map((c) {
+                              return PieChartSectionData(
+                                value: c.$2,
+                                color: c.$3,
+                                title: '${c.$2.toStringAsFixed(0)}%',
+                                radius: 70,
+                                titleStyle: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
+                              );
+                            }).toList(),
+                        sectionsSpace: 2,
+                        centerSpaceRadius: 35,
+                      ),
                     ),
-                  )
-                : PieChart(
-                    PieChartData(
-                      sections: categories.map((c) {
-                        return PieChartSectionData(
-                          value: c.$2,
-                          color: c.$3,
-                          title: '${c.$2.toStringAsFixed(0)}%',
-                          radius: 70,
-                          titleStyle: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        );
-                      }).toList(),
-                      sectionsSpace: 2,
-                      centerSpaceRadius: 35,
-                    ),
-                  ),
           ),
           const SizedBox(height: AppSpacing.md),
           Wrap(
             spacing: AppSpacing.md,
             runSpacing: AppSpacing.sm,
-            children: categories.map((c) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 10,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: c.$3,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${c.$1} ${c.$2.toStringAsFixed(0)}%',
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-                ],
-              );
-            }).toList(),
+            children:
+                categories.map((c) {
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          color: c.$3,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${c.$1} ${c.$2.toStringAsFixed(0)}%',
+                        style: Theme.of(context).textTheme.labelSmall,
+                      ),
+                    ],
+                  );
+                }).toList(),
           ),
         ],
       ),
@@ -452,60 +466,60 @@ class _CategoryBreakdownList extends StatelessWidget {
           ..sort((a, b) => b.$2.compareTo(a.$2));
 
     return Column(
-      children: sortedCategories.map((c) {
-        final percentage = totalExpense > 0
-            ? (c.$2 / totalExpense).toDouble()
-            : 0.0;
-        final category = TransactionCategory.values.firstWhere(
-          (cat) => cat.displayName == c.$1,
-          orElse: () => TransactionCategory.other,
-        );
+      children:
+          sortedCategories.map((c) {
+            final percentage =
+                totalExpense > 0 ? (c.$2 / totalExpense).toDouble() : 0.0;
+            final category = TransactionCategory.values.firstWhere(
+              (cat) => cat.displayName == c.$1,
+              orElse: () => TransactionCategory.other,
+            );
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-          child: Row(
-            children: [
-              Text(category.icon, style: const TextStyle(fontSize: 22)),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: Row(
+                children: [
+                  Text(category.icon, style: const TextStyle(fontSize: 22)),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          c.$1,
-                          style: Theme.of(context).textTheme.titleSmall,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              c.$1,
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            Text(
+                              'NT\$ ${NumberFormat('#,###').format(c.$2.toInt())}',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
                         ),
-                        Text(
-                          'NT\$ ${NumberFormat('#,###').format(c.$2.toInt())}',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                        const SizedBox(height: 6),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: percentage,
+                            minHeight: 6,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.outlineVariant.withAlpha(100),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              colorMap[c.$1] ?? const Color(0xFFFF6B6B),
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: percentage,
-                        minHeight: 6,
-                        backgroundColor: Theme.of(
-                          context,
-                        ).colorScheme.outlineVariant.withAlpha(100),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          colorMap[c.$1] ?? const Color(0xFFFF6B6B),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 }
@@ -636,63 +650,71 @@ class _TopTransactions extends StatelessWidget {
     }
 
     return Column(
-      children: topThree.map((tx) {
-        final dateStr = DateFormat('MM/dd').format(tx.createdAt);
+      children:
+          topThree.map((tx) {
+            final dateStr = DateFormat('MM/dd').format(tx.createdAt);
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withAlpha(20),
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                  child: Center(
-                    child: Text(
-                      tx.category.icon,
-                      style: const TextStyle(fontSize: 22),
-                    ),
-                  ),
+            return Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        tx.description,
-                        style: Theme.of(context).textTheme.titleSmall,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha(20),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
-                      Text(
-                        dateStr,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      child: Center(
+                        child: Text(
+                          tx.category.icon,
+                          style: const TextStyle(fontSize: 22),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tx.description,
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          Text(
+                            dateStr,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.labelSmall?.copyWith(
+                              color:
+                                  Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      'NT\$ ${NumberFormat('#,###').format(tx.amount.toInt())}',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'NT\$ ${NumberFormat('#,###').format(tx.amount.toInt())}',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+              ),
+            );
+          }).toList(),
     );
   }
 }

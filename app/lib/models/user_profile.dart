@@ -117,11 +117,12 @@ class UserProfile {
             json['createdAt'] as String? ??
             DateTime.now().toIso8601String(),
       ),
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
-          : null,
+      updatedAt:
+          json['updated_at'] != null
+              ? DateTime.parse(json['updated_at'] as String)
+              : json['updatedAt'] != null
+              ? DateTime.parse(json['updatedAt'] as String)
+              : null,
       totalIncome:
           (json['total_income'] as num?)?.toDouble() ??
           (json['totalIncome'] as num?)?.toDouble() ??
@@ -132,9 +133,10 @@ class UserProfile {
           0,
       isPremium:
           json['is_premium'] as bool? ?? json['isPremium'] as bool? ?? false,
-      premiumExpiresAt: json['premium_expires_at'] != null
-          ? DateTime.parse(json['premium_expires_at'] as String)
-          : null,
+      premiumExpiresAt:
+          json['premium_expires_at'] != null
+              ? DateTime.parse(json['premium_expires_at'] as String)
+              : null,
       premiumProvider: json['premium_provider'] as String?,
       premiumProductId: json['premium_product_id'] as String?,
       locale: json['locale'] as String? ?? 'zh_TW',
@@ -162,9 +164,10 @@ class UserProfile {
           json['monthly_budget'] as String? ?? json['monthlyBudget'] as String?,
       voiceEntries:
           json['voice_entries'] as int? ?? json['voiceEntries'] as int? ?? 0,
-      lastVoiceEntryAt: json['last_voice_entry_at'] != null
-          ? DateTime.parse(json['last_voice_entry_at'] as String)
-          : null,
+      lastVoiceEntryAt:
+          json['last_voice_entry_at'] != null
+              ? DateTime.parse(json['last_voice_entry_at'] as String)
+              : null,
       metadata: json['metadata'] as Map<String, dynamic>? ?? {},
     );
   }

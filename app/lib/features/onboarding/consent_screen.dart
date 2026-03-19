@@ -169,9 +169,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
                 secondary: Icon(
                   Icons.location_on,
-                  color: _agreedToLocationTracking
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey,
+                  color:
+                      _agreedToLocationTracking
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
                 ),
               ),
 
@@ -188,9 +189,10 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                 controlAffinity: ListTileControlAffinity.leading,
                 secondary: Icon(
                   Icons.camera_alt,
-                  color: _agreedToPhotoAnalysis
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey,
+                  color:
+                      _agreedToPhotoAnalysis
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
                 ),
               ),
 
@@ -232,18 +234,19 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                   onPressed: () {
                     showDialog(
                       context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('無法使用應用'),
-                        content: const Text(
-                          '您必須同意所有必需的條款才能使用語記。如果您不同意，請卸載此應用。',
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('返回'),
+                      builder:
+                          (context) => AlertDialog(
+                            title: const Text('無法使用應用'),
+                            content: const Text(
+                              '您必須同意所有必需的條款才能使用語記。如果您不同意，請卸載此應用。',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text('返回'),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
                     );
                   },
                   child: const Text('拒絕'),
@@ -272,18 +275,19 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
   void _showLegalDocument(BuildContext context, String title, String content) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: SingleChildScrollView(
-          child: Text(content, style: const TextStyle(fontSize: 12)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('關閉'),
+      builder:
+          (context) => AlertDialog(
+            title: Text(title),
+            content: SingleChildScrollView(
+              child: Text(content, style: const TextStyle(fontSize: 12)),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('關閉'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }

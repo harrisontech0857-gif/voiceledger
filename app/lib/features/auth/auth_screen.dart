@@ -220,9 +220,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 // 標籤切換器
                 Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   padding: const EdgeInsets.all(AppSpacing.sm),
@@ -318,13 +317,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _authenticate,
-                      child: _isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(_isLogin ? '登入' : '建立帳戶'),
+                      child:
+                          _isLoading
+                              ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Text(_isLogin ? '登入' : '建立帳戶'),
                     ),
                   ),
                 ),
@@ -404,9 +406,10 @@ class _TabButton extends StatelessWidget {
         onTap: onTap,
         child: Container(
           decoration: BoxDecoration(
-            color: isActive
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent,
+            color:
+                isActive
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent,
             borderRadius: BorderRadius.circular(AppRadius.sm),
           ),
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),

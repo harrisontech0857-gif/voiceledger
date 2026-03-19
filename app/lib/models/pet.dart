@@ -234,9 +234,10 @@ class PetModel {
       (e) => e.name == json['mood'],
       orElse: () => PetMood.neutral,
     ),
-    lastFedAt: json['lastFedAt'] != null
-        ? DateTime.tryParse(json['lastFedAt'] as String)
-        : null,
+    lastFedAt:
+        json['lastFedAt'] != null
+            ? DateTime.tryParse(json['lastFedAt'] as String)
+            : null,
     createdAt: DateTime.parse(json['createdAt'] as String),
     totalEntries: json['totalEntries'] as int? ?? 0,
     level: json['level'] as int? ?? 1,

@@ -185,14 +185,15 @@ class _PetDebugPanelState extends ConsumerState<PetDebugPanel> {
     return Wrap(
       spacing: 6,
       runSpacing: 6,
-      children: stages.map((s) {
-        final isActive = pet.stage == s.$1;
-        return _DebugChipButton(
-          label: s.$2,
-          isActive: isActive,
-          onTap: () => ref.read(petProvider.notifier).debugSetStage(s.$1),
-        );
-      }).toList(),
+      children:
+          stages.map((s) {
+            final isActive = pet.stage == s.$1;
+            return _DebugChipButton(
+              label: s.$2,
+              isActive: isActive,
+              onTap: () => ref.read(petProvider.notifier).debugSetStage(s.$1),
+            );
+          }).toList(),
     );
   }
 
@@ -208,14 +209,15 @@ class _PetDebugPanelState extends ConsumerState<PetDebugPanel> {
     return Wrap(
       spacing: 6,
       runSpacing: 6,
-      children: moods.map((m) {
-        final isActive = pet.mood == m.$1;
-        return _DebugChipButton(
-          label: m.$2,
-          isActive: isActive,
-          onTap: () => ref.read(petProvider.notifier).debugSetMood(m.$1),
-        );
-      }).toList(),
+      children:
+          moods.map((m) {
+            final isActive = pet.mood == m.$1;
+            return _DebugChipButton(
+              label: m.$2,
+              isActive: isActive,
+              onTap: () => ref.read(petProvider.notifier).debugSetMood(m.$1),
+            );
+          }).toList(),
     );
   }
 

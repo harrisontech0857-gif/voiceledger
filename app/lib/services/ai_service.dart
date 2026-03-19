@@ -172,14 +172,15 @@ class AiService implements AiServiceBase {
     List<ChatMessage> conversationHistory,
   ) async {
     try {
-      final messages = conversationHistory
-          .map(
-            (msg) => {
-              'role': msg.isUser ? 'user' : 'assistant',
-              'content': msg.content,
-            },
-          )
-          .toList();
+      final messages =
+          conversationHistory
+              .map(
+                (msg) => {
+                  'role': msg.isUser ? 'user' : 'assistant',
+                  'content': msg.content,
+                },
+              )
+              .toList();
       messages.add({'role': 'user', 'content': content});
 
       final response = await _supabaseClient.functions.invoke(
@@ -356,9 +357,10 @@ class MockAiService implements AiServiceBase {
 
     // 從文字中提取金額
     final amountMatch = RegExp(r'(\d+(?:\.\d+)?)').firstMatch(transcript);
-    final amount = amountMatch != null
-        ? double.tryParse(amountMatch.group(1)!) ?? 0.0
-        : 0.0;
+    final amount =
+        amountMatch != null
+            ? double.tryParse(amountMatch.group(1)!) ?? 0.0
+            : 0.0;
 
     // 根據關鍵字判斷分類
     final category = _detectCategory(transcript);

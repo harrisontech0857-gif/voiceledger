@@ -28,29 +28,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _logout() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('登出'),
-        content: const Text('確定要登出嗎？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('登出'),
+            content: const Text('確定要登出嗎？'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (!kMockMode) {
+                    await Supabase.instance.client.auth.signOut();
+                  }
+                  if (!mounted) return;
+                  context.go('/auth');
+                },
+                child: Text(
+                  '登出',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              if (!kMockMode) {
-                await Supabase.instance.client.auth.signOut();
-              }
-              if (!mounted) return;
-              context.go('/auth');
-            },
-            child: Text(
-              '登出',
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -80,9 +81,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: _isDarkMode,
                     onChanged: (value) {
                       setState(() => _isDarkMode = value);
-                      ref.read(themeModeProvider.notifier).state = value
-                          ? ThemeMode.dark
-                          : ThemeMode.light;
+                      ref.read(themeModeProvider.notifier).state =
+                          value ? ThemeMode.dark : ThemeMode.light;
                     },
                   ),
                 ),
@@ -118,8 +118,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   subtitle: '自動偵測消費地點',
                   trailing: Switch.adaptive(
                     value: _locationTrackingEnabled,
-                    onChanged: (v) =>
-                        setState(() => _locationTrackingEnabled = v),
+                    onChanged:
+                        (v) => setState(() => _locationTrackingEnabled = v),
                   ),
                 ),
               ],
@@ -158,9 +158,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: Icons.auto_awesome_rounded,
                   iconColor: Colors.amber,
                   title: 'Gemini API Key',
-                  subtitle: kGeminiApiKey.isEmpty
-                      ? '未設定（使用 Mock 模式）'
-                      : '已連接 Gemini 2.0 Flash',
+                  subtitle:
+                      kGeminiApiKey.isEmpty
+                          ? '未設定（使用 Mock 模式）'
+                          : '已連接 Gemini 2.0 Flash',
                   showArrow: true,
                   onTap: () => _showGeminiKeyDialog(context),
                 ),
@@ -253,84 +254,86 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final controller = TextEditingController(text: kGeminiApiKey);
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('設定 Gemini API Key'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '免費取得：aistudio.google.com/apikey',
-              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                color: Theme.of(ctx).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                labelText: 'API Key',
-                hintText: 'AIzaSy...',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () {
-              setState(() {
-                kGeminiApiKey = controller.text.trim();
-              });
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    kGeminiApiKey.isEmpty
-                        ? 'Gemini 已關閉，使用 Mock 模式'
-                        : 'Gemini AI 已啟用！重啟 App 生效。',
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('設定 Gemini API Key'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '免費取得：aistudio.google.com/apikey',
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(ctx).colorScheme.primary,
                   ),
                 ),
-              );
-            },
-            child: const Text('儲存'),
+                const SizedBox(height: AppSpacing.md),
+                TextField(
+                  controller: controller,
+                  decoration: const InputDecoration(
+                    labelText: 'API Key',
+                    hintText: 'AIzaSy...',
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  setState(() {
+                    kGeminiApiKey = controller.text.trim();
+                  });
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        kGeminiApiKey.isEmpty
+                            ? 'Gemini 已關閉，使用 Mock 模式'
+                            : 'Gemini AI 已啟用！重啟 App 生效。',
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('儲存'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showBudgetDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('設定預算'),
-        content: TextField(
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: '金額',
-            prefixText: 'NT\$ ',
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('設定預算'),
+            content: TextField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: '金額',
+                prefixText: 'NT\$ ',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('預算已更新')));
+                },
+                child: const Text('保存'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('預算已更新')));
-            },
-            child: const Text('保存'),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -214,145 +214,149 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
   ) {
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder:
+          (ctx) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '偵測到 ${transactions.length} 筆交易',
-                      style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(ctx),
-                      child: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                // 交易列表
-                ...transactions.map((tx) {
-                  final t = tx as Map<String, dynamic>;
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: Theme.of(ctx).colorScheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Row(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              ctx,
-                            ).colorScheme.primary.withAlpha(20),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            _categoryIcon(t['category']?.toString() ?? ''),
-                            color: Theme.of(ctx).colorScheme.primary,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                t['description']?.toString() ?? '',
-                                style: Theme.of(ctx).textTheme.bodyMedium,
-                              ),
-                              Text(
-                                t['category']?.toString() ?? '其他',
-                                style: Theme.of(ctx).textTheme.labelSmall,
-                              ),
-                            ],
-                          ),
-                        ),
                         Text(
-                          CurrencyService.formatAmount(
-                            (t['amount'] as num?)?.toDouble() ?? 0,
-                            t['currency']?.toString() ?? 'TWD',
-                          ),
-                          style: Theme.of(ctx).textTheme.titleSmall?.copyWith(
+                          '偵測到 ${transactions.length} 筆交易',
+                          style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(ctx).colorScheme.error,
                           ),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(ctx),
+                          child: const Icon(Icons.close_rounded),
                         ),
                       ],
                     ),
-                  );
-                }),
-                if (feedback.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: Theme.of(ctx).colorScheme.tertiaryContainer,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Row(
+                    const SizedBox(height: AppSpacing.md),
+                    // 交易列表
+                    ...transactions.map((tx) {
+                      final t = tx as Map<String, dynamic>;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: Theme.of(ctx).colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  ctx,
+                                ).colorScheme.primary.withAlpha(20),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                _categoryIcon(t['category']?.toString() ?? ''),
+                                color: Theme.of(ctx).colorScheme.primary,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    t['description']?.toString() ?? '',
+                                    style: Theme.of(ctx).textTheme.bodyMedium,
+                                  ),
+                                  Text(
+                                    t['category']?.toString() ?? '其他',
+                                    style: Theme.of(ctx).textTheme.labelSmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              CurrencyService.formatAmount(
+                                (t['amount'] as num?)?.toDouble() ?? 0,
+                                t['currency']?.toString() ?? 'TWD',
+                              ),
+                              style: Theme.of(
+                                ctx,
+                              ).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(ctx).colorScheme.error,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    if (feedback.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: Theme.of(ctx).colorScheme.tertiaryContainer,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.smart_toy_rounded,
+                              size: 16,
+                              color:
+                                  Theme.of(ctx).colorScheme.onTertiaryContainer,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Text(
+                                feedback,
+                                style: Theme.of(ctx).textTheme.bodySmall,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.lg),
+                    Row(
                       children: [
-                        Icon(
-                          Icons.smart_toy_rounded,
-                          size: 16,
-                          color: Theme.of(ctx).colorScheme.onTertiaryContainer,
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('取消'),
+                          ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
-                          child: Text(
-                            feedback,
-                            style: Theme.of(ctx).textTheme.bodySmall,
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              // 保存所有交易
+                              for (final tx in transactions) {
+                                _saveTransaction(tx as Map<String, dynamic>);
+                              }
+                            },
+                            child: Text('全部保存 (${transactions.length}筆)'),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('取消'),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          // 保存所有交易
-                          for (final tx in transactions) {
-                            _saveTransaction(tx as Map<String, dynamic>);
-                          }
-                        },
-                        child: Text('全部保存 (${transactions.length}筆)'),
-                      ),
-                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -374,108 +378,112 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
   void _showConfirmationDialog(Map<String, dynamic> details) {
     showDialog(
       context: context,
-      builder: (ctx) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder:
+          (ctx) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '確認交易',
-                      style: Theme.of(ctx).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(ctx),
-                      child: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                _DetailChip(
-                  label: '金額',
-                  value: 'NT\$ ${details['amount'] ?? 'N/A'}',
-                  icon: Icons.attach_money_rounded,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _DetailChip(
-                  label: '類別',
-                  value: details['category']?.toString() ?? 'N/A',
-                  icon: Icons.category_rounded,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _DetailChip(
-                  label: '描述',
-                  value: details['description']?.toString() ?? _finalText,
-                  icon: Icons.description_rounded,
-                ),
-                if (_aiResponse.isNotEmpty) ...[
-                  const SizedBox(height: AppSpacing.md),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                      color: Theme.of(ctx).colorScheme.tertiaryContainer,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(
-                          Icons.smart_toy_rounded,
-                          size: 18,
-                          color: Theme.of(ctx).colorScheme.onTertiaryContainer,
+                        Text(
+                          '確認交易',
+                          style: Theme.of(ctx).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(ctx),
+                          child: const Icon(Icons.close_rounded),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    _DetailChip(
+                      label: '金額',
+                      value: 'NT\$ ${details['amount'] ?? 'N/A'}',
+                      icon: Icons.attach_money_rounded,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _DetailChip(
+                      label: '類別',
+                      value: details['category']?.toString() ?? 'N/A',
+                      icon: Icons.category_rounded,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _DetailChip(
+                      label: '描述',
+                      value: details['description']?.toString() ?? _finalText,
+                      icon: Icons.description_rounded,
+                    ),
+                    if (_aiResponse.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: Theme.of(ctx).colorScheme.tertiaryContainer,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.smart_toy_rounded,
+                              size: 18,
+                              color:
+                                  Theme.of(ctx).colorScheme.onTertiaryContainer,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Text(
+                                _aiResponse,
+                                style: Theme.of(
+                                  ctx,
+                                ).textTheme.bodySmall?.copyWith(
+                                  color:
+                                      Theme.of(
+                                        ctx,
+                                      ).colorScheme.onTertiaryContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: AppSpacing.lg),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('取消'),
+                          ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Expanded(
-                          child: Text(
-                            _aiResponse,
-                            style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(
-                                ctx,
-                              ).colorScheme.onTertiaryContainer,
-                            ),
+                          child: FilledButton(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              _saveTransaction(details);
+                            },
+                            child: const Text('確認保存'),
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.lg),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: const Text('取消'),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: FilledButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          _saveTransaction(details);
-                        },
-                        child: const Text('確認保存'),
-                      ),
-                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
     );
   }
 
@@ -617,15 +625,17 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                                 gradient: LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
-                                  colors: _isListening
-                                      ? [Colors.red, Colors.red.shade700]
-                                      : [cs.primary, cs.tertiary],
+                                  colors:
+                                      _isListening
+                                          ? [Colors.red, Colors.red.shade700]
+                                          : [cs.primary, cs.tertiary],
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color:
-                                        (_isListening ? Colors.red : cs.primary)
-                                            .withAlpha(100),
+                                    color: (_isListening
+                                            ? Colors.red
+                                            : cs.primary)
+                                        .withAlpha(100),
                                     blurRadius: _isListening ? 30 : 15,
                                     spreadRadius: _isListening ? 5 : 0,
                                   ),
@@ -689,9 +699,10 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                           color: Colors.white.withAlpha(15),
                           borderRadius: BorderRadius.circular(AppRadius.lg),
                           border: Border.all(
-                            color: _isListening
-                                ? Colors.amber.withAlpha(80)
-                                : cs.primary.withAlpha(60),
+                            color:
+                                _isListening
+                                    ? Colors.amber.withAlpha(80)
+                                    : cs.primary.withAlpha(60),
                           ),
                         ),
                         child: Column(
@@ -703,20 +714,23 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                                   _isListening
                                       ? Icons.hearing_rounded
                                       : Icons.check_circle_rounded,
-                                  color: _isListening
-                                      ? Colors.amber
-                                      : Colors.green,
+                                  color:
+                                      _isListening
+                                          ? Colors.amber
+                                          : Colors.green,
                                   size: 16,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
                                   _isListening ? '辨識中...' : '辨識完成',
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        color: _isListening
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.labelSmall?.copyWith(
+                                    color:
+                                        _isListening
                                             ? Colors.amber
                                             : Colors.green,
-                                      ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -753,10 +767,11 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                             Expanded(
                               child: Text(
                                 _aiResponse,
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: Colors.white.withAlpha(200),
-                                    ),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white.withAlpha(200),
+                                ),
                               ),
                             ),
                           ],

@@ -82,14 +82,14 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                   ? Icons.view_week_rounded
                   : Icons.calendar_month_rounded,
             ),
-            tooltip: _calendarFormat == CalendarFormat.month
-                ? '切換週視圖'
-                : '切換月視圖',
+            tooltip:
+                _calendarFormat == CalendarFormat.month ? '切換週視圖' : '切換月視圖',
             onPressed: () {
               setState(() {
-                _calendarFormat = _calendarFormat == CalendarFormat.month
-                    ? CalendarFormat.twoWeeks
-                    : CalendarFormat.month;
+                _calendarFormat =
+                    _calendarFormat == CalendarFormat.month
+                        ? CalendarFormat.twoWeeks
+                        : CalendarFormat.month;
               });
             },
           ),
@@ -102,41 +102,42 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
 
           // 下方可滾動內容
           Expanded(
-            child: transactions.isEmpty
-                ? _buildEmptyState(context)
-                : SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 選中日期的摘要
-                        _buildDaySummary(context, transactions, totalExpense),
+            child:
+                transactions.isEmpty
+                    ? _buildEmptyState(context)
+                    : SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 選中日期的摘要
+                          _buildDaySummary(context, transactions, totalExpense),
 
-                        // AI 日記摘要
-                        _buildAiDiary(context, transactions, totalExpense),
+                          // AI 日記摘要
+                          _buildAiDiary(context, transactions, totalExpense),
 
-                        // 當日交易明細標題
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.md,
-                            AppSpacing.sm,
-                            AppSpacing.md,
-                            AppSpacing.sm,
+                          // 當日交易明細標題
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(
+                              AppSpacing.md,
+                              AppSpacing.sm,
+                              AppSpacing.md,
+                              AppSpacing.sm,
+                            ),
+                            child: Text(
+                              '交易明細',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
                           ),
-                          child: Text(
-                            '交易明細',
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                        ),
 
-                        // 當日交易列表
-                        ...transactions.map(
-                          (tx) => _buildTransactionTile(context, tx),
-                        ),
-                        const SizedBox(height: AppSpacing.xl),
-                      ],
+                          // 當日交易列表
+                          ...transactions.map(
+                            (tx) => _buildTransactionTile(context, tx),
+                          ),
+                          const SizedBox(height: AppSpacing.xl),
+                        ],
+                      ),
                     ),
-                  ),
           ),
         ],
       ),
@@ -532,9 +533,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             Text(
               '${isIncome ? '+' : '-'}NT\$ ${NumberFormat('#,###').format(tx.amount.toInt())}',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                color: isIncome
-                    ? Colors.green
-                    : Theme.of(context).colorScheme.error,
+                color:
+                    isIncome
+                        ? Colors.green
+                        : Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.bold,
               ),
             ),
