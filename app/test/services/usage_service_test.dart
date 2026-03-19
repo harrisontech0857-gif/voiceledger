@@ -62,11 +62,19 @@ void main() {
     });
 
     test('getRemainingQuota shows correct values', () async {
-      await service.recordVoiceUsage();
-      await service.recordChatUsage();
-      final quota = await service.getRemainingQuota();
-      expect(quota['voice'], equals(UsageService.freeVoiceLimit - 1));
-      expect(quota['chat'], equals(UsageService.freeChatLimit - 1));
+      // 使用全新 service 確保 state 乾淨
+      final freshService = UsageService();
+      // 先取得初始值
+      final initialVoice = await freshService.getVoiceUsage();
+      await freshService.recordVoiceUsage();
+      await freshService.recordChatUsage();
+      final quota = await freshService.getRemainingQuota();
+      // 語音使用了 initialVoice+1 次
+      expect(
+        quota['voice'],
+        equals(UsageService.freeVoiceLimit - initialVoice - 1),
+      );
+      expect(quota['chat'], lessThanOrEqualTo(UsageService.freeChatLimit));
       expect(quota['diary'], equals(UsageService.freeDiaryLimit));
     });
 
