@@ -340,7 +340,8 @@ class _CategoryPieChart extends StatelessWidget {
     };
 
     final categories = categorySummary.entries.map((e) {
-      final percentage = totalExpense > 0 ? (e.value / totalExpense * 100) : 0;
+      final percentage =
+          totalExpense > 0 ? (e.value / totalExpense * 100).toDouble() : 0.0;
       return (
         e.key,
         percentage,
@@ -457,7 +458,8 @@ class _CategoryBreakdownList extends StatelessWidget {
 
     return Column(
       children: sortedCategories.map((c) {
-        final percentage = totalExpense > 0 ? (c.$2 / totalExpense) : 0;
+        final percentage =
+            totalExpense > 0 ? (c.$2 / totalExpense).toDouble() : 0.0;
         final category = TransactionCategory.values.firstWhere(
           (cat) => cat.displayName == c.$1,
           orElse: () => TransactionCategory.other,
