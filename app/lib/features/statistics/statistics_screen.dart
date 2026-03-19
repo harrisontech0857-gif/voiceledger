@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '../../core/theme.dart';
+import '../../models/transaction.dart';
+import '../../services/transaction_service.dart';
 
 class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
@@ -12,46 +15,75 @@ class StatisticsScreen extends ConsumerStatefulWidget {
 
 class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
   int _selectedPeriodIndex = 1; // 0=周, 1=月, 2=年
+  List<Transaction> _transactions = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final service = ref.read(transactionServiceProvider);
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, 1);
+    final endDate = DateTime(now.year, now.month + 1, 0);
+
+    final transactions = await service.getTransactions(
+      startDate: startDate,
+      endDate: endDate,
+    );
+
+    if (mounted) {
+      setState(() {
+        _transactions = transactions;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('財務統計'), centerTitle: true),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 期間選擇器
-            _buildSegmentedControl(),
-            const SizedBox(height: AppSpacing.lg),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 期間選擇器
+                  _buildSegmentedControl(),
+                  const SizedBox(height: AppSpacing.lg),
 
-            // 摘要卡片
-            const _SummaryRow(),
-            const SizedBox(height: AppSpacing.lg),
+                  // 摘要卡片
+                  _SummaryRow(transactions: _transactions),
+                  const SizedBox(height: AppSpacing.lg),
 
-            // 支出趨勢圖
-            _SectionHeader(title: '支出趨勢'),
-            const SizedBox(height: AppSpacing.md),
-            const _TrendChart(),
-            const SizedBox(height: AppSpacing.lg),
+                  // 支出趨勢圖
+                  _SectionHeader(title: '支出趨勢'),
+                  const SizedBox(height: AppSpacing.md),
+                  _TrendChart(transactions: _transactions),
+                  const SizedBox(height: AppSpacing.lg),
 
-            // 分類支出
-            _SectionHeader(title: '分類支出'),
-            const SizedBox(height: AppSpacing.md),
-            const _CategoryPieChart(),
-            const SizedBox(height: AppSpacing.md),
-            const _CategoryBreakdownList(),
-            const SizedBox(height: AppSpacing.lg),
+                  // 分類支出
+                  _SectionHeader(title: '分類支出'),
+                  const SizedBox(height: AppSpacing.md),
+                  _CategoryPieChart(transactions: _transactions),
+                  const SizedBox(height: AppSpacing.md),
+                  _CategoryBreakdownList(transactions: _transactions),
+                  const SizedBox(height: AppSpacing.lg),
 
-            // 最大支出
-            _SectionHeader(title: '最大支出'),
-            const SizedBox(height: AppSpacing.md),
-            const _TopTransactions(),
-            const SizedBox(height: AppSpacing.xl),
-          ],
-        ),
-      ),
+                  // 最大支出
+                  _SectionHeader(title: '最大支出'),
+                  const SizedBox(height: AppSpacing.md),
+                  _TopTransactions(transactions: _transactions),
+                  const SizedBox(height: AppSpacing.xl),
+                ],
+              ),
+            ),
     );
   }
 
@@ -125,28 +157,49 @@ class _SectionHeader extends StatelessWidget {
 
 /// 摘要列（兩行各兩張卡片）
 class _SummaryRow extends StatelessWidget {
-  const _SummaryRow();
+  final List<Transaction> transactions;
+
+  const _SummaryRow({required this.transactions});
 
   @override
   Widget build(BuildContext context) {
+    double totalExpense = 0;
+    double totalIncome = 0;
+    for (final tx in transactions) {
+      if (tx.type == TransactionType.expense) {
+        totalExpense += tx.amount;
+      } else {
+        totalIncome += tx.amount;
+      }
+    }
+
+    final balance = totalIncome - totalExpense;
+    final savingsRate = totalIncome > 0
+        ? (balance / totalIncome * 100).toStringAsFixed(0)
+        : '0';
+    final dayCount = DateTime.now().day;
+    final dailyAverage = totalExpense / dayCount;
+
     return Column(
       children: [
         Row(
-          children: const [
+          children: [
             Expanded(
               child: _StatCard(
                 title: '總支出',
-                amount: 'NT\$ 8,450',
+                amount:
+                    'NT\$ ${NumberFormat('#,###').format(totalExpense.toInt())}',
                 subtitle: '-12% vs 上月',
                 subtitleColor: Colors.green,
                 icon: Icons.trending_down_rounded,
               ),
             ),
-            SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _StatCard(
                 title: '總收入',
-                amount: 'NT\$ 25,000',
+                amount:
+                    'NT\$ ${NumberFormat('#,###').format(totalIncome.toInt())}',
                 subtitle: '+5% vs 上月',
                 subtitleColor: Colors.green,
                 icon: Icons.trending_up_rounded,
@@ -156,23 +209,24 @@ class _SummaryRow extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(
-          children: const [
+          children: [
             Expanded(
               child: _StatCard(
                 title: '淨結餘',
-                amount: 'NT\$ 16,550',
-                subtitle: '66% 儲蓄率',
+                amount: 'NT\$ ${NumberFormat('#,###').format(balance.toInt())}',
+                subtitle: '$savingsRate% 儲蓄率',
                 subtitleColor: Colors.green,
                 icon: Icons.savings_rounded,
               ),
             ),
-            SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: _StatCard(
                 title: '日均支出',
-                amount: 'NT\$ 281',
+                amount:
+                    'NT\$ ${NumberFormat('#,###').format(dailyAverage.toInt())}',
                 subtitle: 'vs 預算 NT\$300',
-                subtitleColor: Colors.green,
+                subtitleColor: dailyAverage <= 300 ? Colors.green : Colors.red,
                 icon: Icons.calendar_today_rounded,
               ),
             ),
@@ -254,17 +308,45 @@ class _StatCard extends StatelessWidget {
 
 /// 圓餅圖
 class _CategoryPieChart extends StatelessWidget {
-  const _CategoryPieChart();
+  final List<Transaction> transactions;
+
+  const _CategoryPieChart({required this.transactions});
 
   @override
   Widget build(BuildContext context) {
-    final categories = [
-      ('餐飲', 25.0, const Color(0xFFFF9500)),
-      ('交通', 21.0, const Color(0xFF2196F3)),
-      ('購物', 18.0, const Color(0xFF4CAF50)),
-      ('娛樂', 14.0, const Color(0xFFFFC107)),
-      ('其他', 22.0, const Color(0xFFFF6B6B)),
-    ];
+    // 計算分類支出
+    final categorySummary = <String, double>{};
+    double totalExpense = 0;
+
+    for (final tx in transactions) {
+      if (tx.type == TransactionType.expense) {
+        final key = tx.category.displayName;
+        categorySummary[key] = (categorySummary[key] ?? 0) + tx.amount;
+        totalExpense += tx.amount;
+      }
+    }
+
+    // 顏色對應
+    final colorMap = <String, Color>{
+      '餐飲': const Color(0xFFFF9500),
+      '交通': const Color(0xFF2196F3),
+      '購物': const Color(0xFF4CAF50),
+      '娛樂': const Color(0xFFFFC107),
+      '日用': const Color(0xFF9C27B0),
+      '健康': const Color(0xFFE91E63),
+      '教育': const Color(0xFF00BCD4),
+      '投資': const Color(0xFF8BC34A),
+      '其他': const Color(0xFFFF6B6B),
+    };
+
+    final categories = categorySummary.entries.map((e) {
+      final percentage = totalExpense > 0 ? (e.value / totalExpense * 100) : 0;
+      return (
+        e.key,
+        percentage,
+        colorMap[e.key] ?? const Color(0xFFFF6B6B),
+      );
+    }).toList();
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -276,25 +358,32 @@ class _CategoryPieChart extends StatelessWidget {
         children: [
           SizedBox(
             height: 200,
-            child: PieChart(
-              PieChartData(
-                sections: categories.map((c) {
-                  return PieChartSectionData(
-                    value: c.$2,
-                    color: c.$3,
-                    title: '${c.$2.toStringAsFixed(0)}%',
-                    radius: 70,
-                    titleStyle: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+            child: categories.isEmpty
+                ? Center(
+                    child: Text(
+                      '無分類資料',
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                  );
-                }).toList(),
-                sectionsSpace: 2,
-                centerSpaceRadius: 35,
-              ),
-            ),
+                  )
+                : PieChart(
+                    PieChartData(
+                      sections: categories.map((c) {
+                        return PieChartSectionData(
+                          value: c.$2,
+                          color: c.$3,
+                          title: '${c.$2.toStringAsFixed(0)}%',
+                          radius: 70,
+                          titleStyle: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        );
+                      }).toList(),
+                      sectionsSpace: 2,
+                      centerSpaceRadius: 35,
+                    ),
+                  ),
           ),
           const SizedBox(height: AppSpacing.md),
           Wrap(
@@ -329,25 +418,56 @@ class _CategoryPieChart extends StatelessWidget {
 
 /// 分類明細列表
 class _CategoryBreakdownList extends StatelessWidget {
-  const _CategoryBreakdownList();
+  final List<Transaction> transactions;
+
+  const _CategoryBreakdownList({required this.transactions});
 
   @override
   Widget build(BuildContext context) {
-    final categories = [
-      ('餐飲', 'NT\$ 2,100', 0.25, '🍜', const Color(0xFFFF9500)),
-      ('交通', 'NT\$ 1,800', 0.21, '🚗', const Color(0xFF2196F3)),
-      ('購物', 'NT\$ 1,550', 0.18, '🛍️', const Color(0xFF4CAF50)),
-      ('娛樂', 'NT\$ 1,200', 0.14, '🎮', const Color(0xFFFFC107)),
-      ('其他', 'NT\$ 1,800', 0.22, '📝', const Color(0xFFFF6B6B)),
-    ];
+    // 計算分類支出
+    final categorySummary = <String, double>{};
+    double totalExpense = 0;
+
+    for (final tx in transactions) {
+      if (tx.type == TransactionType.expense) {
+        final key = tx.category.displayName;
+        categorySummary[key] = (categorySummary[key] ?? 0) + tx.amount;
+        totalExpense += tx.amount;
+      }
+    }
+
+    // 顏色和圖標對應
+    final colorMap = <String, Color>{
+      '餐飲': const Color(0xFFFF9500),
+      '交通': const Color(0xFF2196F3),
+      '購物': const Color(0xFF4CAF50),
+      '娛樂': const Color(0xFFFFC107),
+      '日用': const Color(0xFF9C27B0),
+      '健康': const Color(0xFFE91E63),
+      '教育': const Color(0xFF00BCD4),
+      '投資': const Color(0xFF8BC34A),
+      '其他': const Color(0xFFFF6B6B),
+    };
+
+    // 按金額排序
+    final sortedCategories = categorySummary.entries
+        .map((e) => (e.key, e.value))
+        .toList()
+      ..sort((a, b) => b.$2.compareTo(a.$2));
 
     return Column(
-      children: categories.map((c) {
+      children: sortedCategories.map((c) {
+        final percentage = totalExpense > 0 ? (c.$2 / totalExpense) : 0;
+        final category = TransactionCategory.values.firstWhere(
+          (cat) => cat.displayName == c.$1,
+          orElse: () => TransactionCategory.other,
+        );
+
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
           child: Row(
             children: [
-              Text(c.$4, style: const TextStyle(fontSize: 22)),
+              Text(category.icon, style: const TextStyle(fontSize: 22)),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -361,7 +481,7 @@ class _CategoryBreakdownList extends StatelessWidget {
                           style: Theme.of(context).textTheme.titleSmall,
                         ),
                         Text(
-                          c.$2,
+                          'NT\$ ${NumberFormat('#,###').format(c.$2.toInt())}',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -373,13 +493,15 @@ class _CategoryBreakdownList extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
-                        value: c.$3,
+                        value: percentage,
                         minHeight: 6,
                         backgroundColor: Theme.of(context)
                             .colorScheme
                             .outlineVariant
                             .withAlpha(100),
-                        valueColor: AlwaysStoppedAnimation<Color>(c.$5),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          colorMap[c.$1] ?? const Color(0xFFFF6B6B),
+                        ),
                       ),
                     ),
                   ],
@@ -395,13 +517,39 @@ class _CategoryBreakdownList extends StatelessWidget {
 
 /// 支出趨勢圖（長條圖）
 class _TrendChart extends StatelessWidget {
-  const _TrendChart();
+  final List<Transaction> transactions;
+
+  const _TrendChart({required this.transactions});
 
   @override
   Widget build(BuildContext context) {
-    final days = ['一', '二', '三', '四', '五', '六', '日'];
-    final amounts = [250.0, 420.0, 180.0, 350.0, 200.0, 500.0, 350.0];
     final cs = Theme.of(context).colorScheme;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // 計算最近 7 天的每日支出
+    final dailyExpense = <double>[];
+    double maxAmount = 0;
+
+    for (int i = 6; i >= 0; i--) {
+      final date = today.subtract(Duration(days: i));
+      double dayTotal = 0;
+
+      for (final tx in transactions) {
+        if (tx.type == TransactionType.expense &&
+            tx.createdAt.year == date.year &&
+            tx.createdAt.month == date.month &&
+            tx.createdAt.day == date.day) {
+          dayTotal += tx.amount;
+        }
+      }
+
+      dailyExpense.add(dayTotal);
+      if (dayTotal > maxAmount) maxAmount = dayTotal;
+    }
+
+    final days = ['一', '二', '三', '四', '五', '六', '日'];
+    final chartMaxY = (maxAmount * 1.2).ceilToDouble();
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -414,7 +562,7 @@ class _TrendChart extends StatelessWidget {
         child: BarChart(
           BarChartData(
             alignment: BarChartAlignment.spaceAround,
-            maxY: 600,
+            maxY: chartMaxY > 0 ? chartMaxY : 100,
             barTouchData: BarTouchData(enabled: true),
             titlesData: FlTitlesData(
               show: true,
@@ -449,12 +597,12 @@ class _TrendChart extends StatelessWidget {
             ),
             gridData: const FlGridData(show: false),
             borderData: FlBorderData(show: false),
-            barGroups: List.generate(days.length, (i) {
+            barGroups: List.generate(dailyExpense.length, (i) {
               return BarChartGroupData(
                 x: i,
                 barRods: [
                   BarChartRodData(
-                    toY: amounts[i],
+                    toY: dailyExpense[i],
                     color: cs.primary,
                     width: 20,
                     borderRadius: const BorderRadius.vertical(
@@ -473,18 +621,33 @@ class _TrendChart extends StatelessWidget {
 
 /// 最大支出列表
 class _TopTransactions extends StatelessWidget {
-  const _TopTransactions();
+  final List<Transaction> transactions;
+
+  const _TopTransactions({required this.transactions});
 
   @override
   Widget build(BuildContext context) {
-    final transactions = [
-      ('超市購物', 'NT\$ 850', '03/15', '🛍️'),
-      ('餐廳聚餐', 'NT\$ 620', '03/14', '🍽️'),
-      ('計程車費用', 'NT\$ 450', '03/13', '🚕'),
-    ];
+    // 排序取前 3 筆最大支出
+    final topExpenses = transactions
+        .where((tx) => tx.type == TransactionType.expense)
+        .toList()
+      ..sort((a, b) => b.amount.compareTo(a.amount));
+
+    final topThree = topExpenses.take(3).toList();
+
+    if (topThree.isEmpty) {
+      return Center(
+        child: Text(
+          '無支出記錄',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
 
     return Column(
-      children: transactions.map((tx) {
+      children: topThree.map((tx) {
+        final dateStr = DateFormat('MM/dd').format(tx.createdAt);
+
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.sm),
           child: Container(
@@ -504,7 +667,7 @@ class _TopTransactions extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      tx.$4,
+                      tx.category.icon,
                       style: const TextStyle(fontSize: 22),
                     ),
                   ),
@@ -515,11 +678,11 @@ class _TopTransactions extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        tx.$1,
+                        tx.description,
                         style: Theme.of(context).textTheme.titleSmall,
                       ),
                       Text(
-                        tx.$3,
+                        dateStr,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
@@ -530,7 +693,7 @@ class _TopTransactions extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  tx.$2,
+                  'NT\$ ${NumberFormat('#,###').format(tx.amount.toInt())}',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: Theme.of(context).colorScheme.error,
                         fontWeight: FontWeight.bold,

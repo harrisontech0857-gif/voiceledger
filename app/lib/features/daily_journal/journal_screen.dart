@@ -3,77 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../core/theme.dart';
+import '../../models/transaction.dart';
 import '../../services/pet_service.dart';
-
-/// Mock 資料：哪些日期有記帳記錄
-final _mockRecordDays = <DateTime>{
-  DateTime(2026, 3, 1),
-  DateTime(2026, 3, 3),
-  DateTime(2026, 3, 5),
-  DateTime(2026, 3, 7),
-  DateTime(2026, 3, 8),
-  DateTime(2026, 3, 10),
-  DateTime(2026, 3, 12),
-  DateTime(2026, 3, 13),
-  DateTime(2026, 3, 14),
-  DateTime(2026, 3, 15),
-  DateTime(2026, 3, 17),
-  DateTime(2026, 3, 18),
-  DateTime(2026, 2, 20),
-  DateTime(2026, 2, 22),
-  DateTime(2026, 2, 25),
-  DateTime(2026, 2, 28),
-};
-
-bool _hasRecord(DateTime day) {
-  return _mockRecordDays.any(
-    (d) => d.year == day.year && d.month == day.month && d.day == day.day,
-  );
-}
-
-/// Mock 交易資料
-List<Map<String, dynamic>> _getMockTransactions(DateTime day) {
-  if (!_hasRecord(day)) return [];
-  // 用 day.day 當 seed 產生不同資料
-  final seed = day.day;
-  final items = <Map<String, dynamic>>[];
-
-  if (seed % 3 == 0) {
-    items.add({
-      'icon': '🍜',
-      'category': '餐飲',
-      'description': '午餐便當',
-      'amount': -(85 + seed * 3),
-      'time': '12:30',
-    });
-  }
-  if (seed % 2 == 0) {
-    items.add({
-      'icon': '🚗',
-      'category': '交通',
-      'description': '捷運',
-      'amount': -(30 + seed),
-      'time': '08:15',
-    });
-  }
-  items.add({
-    'icon': '☕',
-    'category': '餐飲',
-    'description': '下午茶',
-    'amount': -(65 + seed * 2),
-    'time': '15:00',
-  });
-  if (seed % 5 == 0) {
-    items.add({
-      'icon': '🛍️',
-      'category': '購物',
-      'description': '便利商店',
-      'amount': -(120 + seed),
-      'time': '19:30',
-    });
-  }
-  return items;
-}
+import '../../services/transaction_service.dart';
 
 class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({super.key});
@@ -86,14 +18,55 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
   DateTime _selectedDay = DateTime.now();
+  List<Transaction> _transactions = [];
+  Set<DateTime> _recordDays = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  Future<void> _loadTransactions() async {
+    final service = ref.read(transactionServiceProvider);
+    final now = DateTime.now();
+    final startDate = DateTime(now.year, now.month, 1);
+    final endDate = DateTime(now.year, now.month + 1, 0);
+
+    final transactions = await service.getTransactions(
+      startDate: startDate,
+      endDate: endDate,
+    );
+
+    final recordDays = <DateTime>{};
+    for (final tx in transactions) {
+      recordDays.add(
+          DateTime(tx.createdAt.year, tx.createdAt.month, tx.createdAt.day));
+    }
+
+    if (mounted) {
+      setState(() {
+        _transactions = transactions;
+        _recordDays = recordDays;
+      });
+    }
+  }
+
+  List<Transaction> _getTransactionsForDay(DateTime day) {
+    return _transactions.where((tx) {
+      return tx.createdAt.year == day.year &&
+          tx.createdAt.month == day.month &&
+          tx.createdAt.day == day.day;
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final transactions = _getMockTransactions(_selectedDay);
-    final totalExpense = transactions.fold<int>(
+    final transactions = _getTransactionsForDay(_selectedDay);
+    final totalExpense = transactions.fold<double>(
       0,
-      (sum, tx) => sum + (tx['amount'] as int).abs(),
+      (sum, tx) => sum + tx.amount,
     );
 
     return Scaffold(
@@ -260,7 +233,12 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         ),
         // 標記有記帳的日期
         eventLoader: (day) {
-          return _hasRecord(day) ? ['record'] : [];
+          return _recordDays.any(
+            (d) =>
+                d.year == day.year && d.month == day.month && d.day == day.day,
+          )
+              ? ['record']
+              : [];
         },
         calendarBuilders: CalendarBuilders(
           // 自訂 marker：小圓點
@@ -287,8 +265,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
 
   Widget _buildDaySummary(
     BuildContext context,
-    List<Map<String, dynamic>> transactions,
-    int totalExpense,
+    List<Transaction> transactions,
+    double totalExpense,
   ) {
     final cs = Theme.of(context).colorScheme;
     final dateStr = DateFormat('M月d日 EEEE', 'zh_TW').format(_selectedDay);
@@ -381,8 +359,8 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   /// AI 生成的日記摘要 + 寵物評語
   Widget _buildAiDiary(
     BuildContext context,
-    List<Map<String, dynamic>> transactions,
-    int totalExpense,
+    List<Transaction> transactions,
+    double totalExpense,
   ) {
     final cs = Theme.of(context).colorScheme;
     final pet = ref.watch(petProvider);
@@ -390,18 +368,21 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
 
     // 根據交易內容動態生成摘要文字
     final categories =
-        transactions.map((tx) => tx['category'] as String).toSet().join('、');
+        transactions.map((tx) => tx.category.displayName).toSet().join('、');
     final summary = '今日共 ${transactions.length} 筆消費，'
-        '總計 NT\$ ${NumberFormat('#,###').format(totalExpense)}。'
+        '總計 NT\$ ${NumberFormat('#,###').format(totalExpense.toInt())}。'
         '主要類別為$categories。';
 
     // 寵物對今日消費的評語
     String petComment;
-    if (totalExpense > 1000) {
+    final expenseAmount = transactions
+        .where((tx) => tx.type == TransactionType.expense)
+        .fold<double>(0, (sum, tx) => sum + tx.amount);
+    if (expenseAmount > 1000) {
       petComment = '${pet.stageEmoji} ${pet.name}：「今天花好多⋯⋯我的肚子都在叫了！」';
-    } else if (totalExpense > 500) {
+    } else if (expenseAmount > 500) {
       petComment = '${pet.stageEmoji} ${pet.name}：「還行啦，但可以再省一點喔～」';
-    } else if (totalExpense > 0) {
+    } else if (expenseAmount > 0) {
       petComment = '${pet.stageEmoji} ${pet.name}：「很棒！今天花費控制得不錯 ✨」';
     } else {
       petComment = '${pet.stageEmoji} ${pet.name}：「零消費日！太厲害了吧！」';
@@ -471,7 +452,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                     ),
               ),
             ),
-            if (totalExpense > 500) ...[
+            if (expenseAmount > 500) ...[
               const SizedBox(height: AppSpacing.sm),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -497,9 +478,9 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   }
 
   /// 單筆交易 tile
-  Widget _buildTransactionTile(BuildContext context, Map<String, dynamic> tx) {
-    final amount = tx['amount'] as int;
-    final isIncome = amount > 0;
+  Widget _buildTransactionTile(BuildContext context, Transaction tx) {
+    final isIncome = tx.type == TransactionType.income;
+    final timeStr = DateFormat('HH:mm').format(tx.createdAt);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -525,7 +506,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               ),
               child: Center(
                 child: Text(
-                  tx['icon'] as String,
+                  tx.category.icon,
                   style: const TextStyle(fontSize: 22),
                 ),
               ),
@@ -536,12 +517,12 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tx['description'] as String,
+                    tx.description,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${tx['category']} · ${tx['time']}',
+                    '${tx.category.displayName} · $timeStr',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -550,7 +531,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               ),
             ),
             Text(
-              '${isIncome ? '+' : '-'}NT\$ ${NumberFormat('#,###').format(amount.abs())}',
+              '${isIncome ? '+' : '-'}NT\$ ${NumberFormat('#,###').format(tx.amount.toInt())}',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     color: isIncome
                         ? Colors.green
