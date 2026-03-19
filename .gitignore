@@ -31,3 +31,5 @@ doc/api/
 # Temp files
 gh_*/
 backend/supabase/.temp/
+app/dart-sdk.zip
+backend/supabase/supabase/.temp/
