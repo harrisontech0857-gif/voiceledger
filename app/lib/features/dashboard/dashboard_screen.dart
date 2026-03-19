@@ -43,13 +43,6 @@ class DashboardScreen extends ConsumerWidget {
                   _StatsCardRow(pet: pet),
                   const SizedBox(height: AppSpacing.md),
 
-                  // 功能入口字卡 — 語音日記 / 問秘書
-                  _ActionCardRow(
-                    onVoiceTap: () => context.push('/voice-entry'),
-                    onChatTap: () => context.push('/ai-secretary'),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-
                   // 每日金句
                   _DailyQuoteCard(dailyQuote: dailyQuote),
                   const SizedBox(height: 100), // 底部留白給導航列
