@@ -245,7 +245,7 @@ class _PrivacySettingsScreenState extends State<PrivacySettingsScreen> {
                       // 推播通知開關
                       SwitchListTile(
                         title: const Text('推播通知'),
-                        subtitle: const Text('接收預算警告和每日洞察推播通知'),
+                        subtitle: const Text('接收每日日記提醒和伴侶互動通知'),
                         value: _pushNotificationsEnabled,
                         onChanged: (value) {
                           setState(() => _pushNotificationsEnabled = value);

@@ -3,10 +3,10 @@
 /// 進化路線（v1 單一路線）：
 ///   蛋 (egg) → 幼體 (baby) → 少年 (teen) → 成體 (adult) → 大師 (master)
 ///
-/// 進化條件由「記帳經驗值 (exp)」驅動：
-///   - 每記一筆帳 +10 exp
-///   - 連續記帳天數 streak bonus: streak * 2
-///   - 省錢達標（日支出 < 預算）+5 exp
+/// 進化條件由「日記經驗值 (exp)」驅動：
+///   - 每寫一篇日記 +10 exp
+///   - 連續寫日記天數 streak bonus: streak * 2
+///   - 情侶互動 bonus（對方也寫了）+5 exp
 ///
 /// 未來擴充：
 ///   - 多寵物種族 (PetSpecies)
@@ -23,10 +23,10 @@ enum PetStage {
 }
 
 enum PetMood {
-  happy, // 今天有記帳 + 省錢
-  neutral, // 今天有記帳
-  hungry, // 超過 24hr 沒記帳
-  sleepy, // 超過 48hr 沒記帳
+  happy, // 今天有寫日記 + 對方也寫了
+  neutral, // 今天有寫日記
+  hungry, // 超過 24hr 沒寫日記
+  sleepy, // 超過 48hr 沒寫日記
 }
 
 enum PetSpecies {
@@ -173,12 +173,12 @@ class PetModel {
         .replaceAll('{exp}', '$exp');
   }
 
-  /// 記帳時的反饋語
+  /// 寫日記時的反饋語
   String feedbackOnEntry(int amount) {
-    if (amount > 1000) return '哇！這筆花得不少耶，要注意預算喔～';
-    if (amount > 500) return '記下來了！中等花費，繼續保持記錄的好習慣 👍';
-    if (amount > 0) return '很好！小額消費也不放過，你很棒！';
-    return '收入進帳了，繼續加油！💰';
+    if (amount > 1000) return '哇！寫了好長的日記，辛苦了～';
+    if (amount > 500) return '不錯喔，持續記錄是好習慣 👍';
+    if (amount > 0) return '很棒！每天記錄讓生活更有意義！';
+    return '新的一天，期待你的分享！💕';
   }
 
   PetModel copyWith({
@@ -256,16 +256,16 @@ class PetModel {
 const _happyDialogues = [
   '今天記錄很勤勞！我好開心～',
   '連續記錄 {streak} 天了，你是最棒的主人！',
-  '省錢達標！離下次進化又近了一步 ✨',
-  '每一筆帳都讓我更強壯～繼續加油！',
-  '你的財務管理越來越好了呢！',
+  '對方也寫了！離下次進化又近了一步 ✨',
+  '每篇日記都讓我更強壯～繼續加油！',
+  '你們的感情越來越好了呢！',
 ];
 
 const _neutralDialogues = [
   '嗨～今天過得怎麼樣？記得寫日記喔！',
   '我在這裡等你寫日記呢～',
-  '有什麼花費嗎？說給我聽吧！',
-  '今天也要好好管理財務喔～',
+  '今天發生什麼事？說給我聽吧！',
+  '今天也要好好記錄生活喔～',
 ];
 
 const _hungryDialogues = [

@@ -31,7 +31,7 @@ class TermsOfServiceScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             _buildSection(context, '1. 服務說明', '''
-語記是一款 AI 輔助的個人財務管理應用程式，提供語音記帳、智慧分類、財務分析等功能。'''),
+語記是一款 AI 輔助的情侶日記應用程式，提供語音日記、情緒分析、寵物養成等功能。'''),
             _buildSection(context, '2. 使用者責任', '''
 • 您需確保帳戶資訊的準確性
 • 您對帳戶的所有活動負責
@@ -40,10 +40,10 @@ class TermsOfServiceScreen extends StatelessWidget {
             _buildSection(context, '3. 智慧財產權', '''
 本應用程式及其內容受著作權法保護。您不得複製、修改、分發本應用程式的任何部分。'''),
             _buildSection(context, '4. 免責聲明', '''
-• 本應用程式提供的財務建議僅供參考，不構成專業財務顧問意見
-• 我們不保證 AI 分類的 100% 準確性
+• 本應用程式提供的分析僅供參考，不構成專業意見
+• 我們不保證 AI 分析的 100% 準確性
 • 語音辨識結果可能因環境因素而有所差異
-• 我們不對因使用本服務造成的財務損失負責'''),
+• 我們不對因使用本服務造成的資料損失負責'''),
             _buildSection(context, '5. 訂閱與付費', '''
 • 免費版提供基本功能
 • 付費版提供進階功能，依訂閱方案收費

@@ -121,7 +121,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                       context,
                       '隱私政策',
                       '隱私政策概述：\n\n'
-                          '• 我們收集：姓名、電郵、交易信息\n'
+                          '• 我們收集：姓名、電郵、日記內容\n'
                           '• 我們使用您的數據來改進服務\n'
                           '• 您有權訪問和刪除您的數據\n'
                           '• 我們不會出售您的數據\n\n'
@@ -140,7 +140,7 @@ class _ConsentScreenState extends ConsumerState<ConsentScreen> {
                   setState(() => _agreedToDataProcessing = value ?? false);
                 },
                 title: const Text('我同意數據處理'),
-                subtitle: const Text('允許應用處理您的財務數據以提供服務'),
+                subtitle: const Text('允許應用處理您的日記與情緒數據以提供服務'),
                 controlAffinity: ListTileControlAffinity.leading,
               ),
 

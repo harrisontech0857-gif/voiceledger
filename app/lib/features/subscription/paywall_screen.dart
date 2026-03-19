@@ -33,7 +33,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'description': '增強功能',
       'monthlyPrice': 99,
       'yearlyPrice': 999,
-      'features': ['無限語音日記', '無限 AI 秘書', '記帳功能', '統計圖表', '行事曆模式', 'GPS 定位記錄'],
+      'features': [
+        '無限語音日記',
+        '無限 AI 秘書',
+        'AI 情緒洞察',
+        '統計圖表',
+        '行事曆模式',
+        'GPS 定位記錄',
+      ],
       'recommended': true,
     },
     {
@@ -51,7 +58,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'description': '家庭版',
       'monthlyPrice': 299,
       'yearlyPrice': 2999,
-      'features': ['所有 Pro 功能', '家庭共享（最多 6 人）', '分離的預算', '協作管理', '優先支持'],
+      'features': ['所有 Pro 功能', '家庭共享（最多 6 人）', '分離的日記空間', '雙人情緒分析', '優先支持'],
       'recommended': false,
     },
   ];

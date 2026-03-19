@@ -210,7 +210,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   ),
                 ),
                 Text(
-                  'AI 財務秘書',
+                  'AI 日記秘書',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                   ),

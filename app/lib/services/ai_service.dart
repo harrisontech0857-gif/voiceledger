@@ -271,19 +271,18 @@ class MockAiService implements AiServiceBase {
   static final _random = Random();
 
   static const _quotes = [
-    '省錢不是捨不得花，而是花在值得的地方。',
-    '理財就像種樹，越早開始越好。',
-    '記帳是理財的第一步，你已經在路上了！',
-    '不要為了省小錢而忽略了賺大錢的機會。',
-    '每天存一點，一年就是一大筆。',
-    '投資自己，是最好的投資。',
+    '分享生活是感情的第一步，你已經在路上了！',
+    '理解彼此就像種樹，越早開始越好。',
+    '記錄生活是了解自己的第一步，你已經在路上了！',
+    '不要為了小事而忽略了大愛的機會。',
+    '每天分享一點，一年就更親近了。',
+    '投資感情，是最好的投資。',
   ];
 
   static const _mockResponses = {
-    '花了多少': '本月餐飲支出共 NT\$5,348，佔總支出 35%。相比上月增加了 12%。建議控制在 30% 以內。',
-    '預算': '已為你設定月度預算。目前已使用 NT\$10,280 (68.5%)，剩餘 NT\$4,720 可用。',
-    '建議':
-        '根據你的消費習慣，建議：\n1. 減少外食 2-3 次/週\n2. 設定每日消費上限 NT\$500\n3. 每月固定儲蓄 20% 薪資',
+    '日記': '這週你寫了 5 篇日記，心情以開心為主。和伴侶的互動很頻繁，繼續保持！',
+    '寵物': '本月已寫 12 篇日記，寵物成長到 Lv.3 了！繼續加油！',
+    '建議': '本週情緒偏正面',
   };
 
   @override
@@ -335,9 +334,9 @@ class MockAiService implements AiServiceBase {
   ) async {
     await Future.delayed(const Duration(milliseconds: 500));
     return {
-      'top_category': '餐飲',
-      'trend': 'increasing',
-      'suggestion': '餐飲支出有上升趨勢',
+      'top_category': '日常',
+      'trend': 'positive',
+      'suggestion': '本週情緒偏正面，互動頻繁',
     };
   }
 
@@ -346,7 +345,7 @@ class MockAiService implements AiServiceBase {
     List<Map<String, dynamic>> dailyTransactions,
   ) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    return '今天共消費 3 筆，合計 NT\$465。最大支出為牛肉麵 NT\$180。整體控制在預算內，做得不錯！';
+    return '今天寫了 2 篇日記，情緒偏向平靜。寵物很開心你有記錄！';
   }
 
   @override
@@ -488,7 +487,7 @@ class MockAiService implements AiServiceBase {
   /// 根據分類生成回饋語
   static String _generateFeedback(String category, double amount) {
     if (amount == 0) return '沒有偵測到金額，請確認後再保存';
-    if (amount > 1000) return '大筆支出要注意預算喔！';
+    if (amount > 1000) return '寫了好長的日記呢，辛苦了！';
     if (amount > 500) return '中等花費，記錄下來很棒！';
     return '小額消費也不放過，好習慣！';
   }

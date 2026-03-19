@@ -36,10 +36,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _messages = [
         ChatMessage(
           id: '0',
-          content: '你好！我是你的 AI 財務秘書 🤖\n有什麼我可以幫助的嗎？',
+          content: '你好！我是你的 AI 日記秘書 🤖\n有什麼我可以幫助的嗎？',
           isUser: false,
           timestamp: DateTime.now(),
-          suggestion: '幫我分析這個月的支出',
+          suggestion: '幫我回顧這週的心情',
         ),
       ];
     });
@@ -118,7 +118,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            const Text('AI 財務秘書'),
+            const Text('AI 秘書'),
           ],
         ),
         centerTitle: true,
@@ -158,7 +158,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               _messages.last.suggestion != null &&
               !_isSending)
             _QuickReplies(
-              suggestions: [_messages.last.suggestion ?? '', '顯示支出報告', '設定預算'],
+              suggestions: [
+                _messages.last.suggestion ?? '',
+                '回顧本週日記',
+                '給我一些鼓勵',
+              ],
               onTap: _sendMessage,
             ),
 
