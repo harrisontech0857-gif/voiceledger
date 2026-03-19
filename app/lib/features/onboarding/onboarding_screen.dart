@@ -39,21 +39,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _skipToHome() {
-    context.go('/dashboard');
+    context.go('/pairing');
   }
 
   Future<void> _requestPermissions() async {
-    // Request microphone permission
     await Permission.microphone.request();
 
-    // Request location permission
-    await Permission.location.request();
-
-    // Request photo library permission
-    await Permission.photos.request();
-
     if (mounted) {
-      context.go('/dashboard');
+      context.go('/pairing');
     }
   }
 
@@ -88,16 +81,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 color: Theme.of(context).colorScheme.tertiary,
               ),
               _OnboardingPage(
-                icon: Icons.auto_awesome_rounded,
-                title: '情緒洞察',
-                description: 'AI 自動分析你的情緒變化，用標籤回顧生活的每個片段',
+                icon: Icons.favorite_rounded,
+                title: '情侶配對',
+                description: '和伴侶配對後，互相看日記、一起養寵物，讓每天更有溫度',
                 color: Theme.of(context).colorScheme.error,
-              ),
-              _OnboardingPage(
-                icon: Icons.book_rounded,
-                title: '生活日記',
-                description: 'AI 生成的個人化日記，記錄您的消費故事和財務成長',
-                color: Theme.of(context).colorScheme.primary,
               ),
             ],
           ),

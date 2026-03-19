@@ -12,10 +12,8 @@ import '../features/ai_secretary/chat_screen.dart';
 import '../features/statistics/statistics_screen.dart';
 import '../features/daily_journal/journal_screen.dart';
 import '../features/settings/settings_screen.dart';
-import '../features/settings/privacy_settings_screen.dart';
+import '../features/couples/pairing_screen.dart';
 import '../features/subscription/paywall_screen.dart';
-import '../features/transactions/add_transaction_screen.dart';
-import '../features/transactions/transaction_list_screen.dart';
 import '../features/legal/privacy_policy_screen.dart';
 import '../features/legal/terms_of_service_screen.dart';
 
@@ -81,22 +79,9 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/voice-entry',
         builder: (context, state) => const VoiceEntryScreen(),
       ),
-      // 付費功能路由（保留但需通過 paywall）
       GoRoute(
-        path: '/statistics',
-        builder: (context, state) => const StatisticsScreen(),
-      ),
-      GoRoute(
-        path: '/add-transaction',
-        builder: (context, state) => const AddTransactionScreen(),
-      ),
-      GoRoute(
-        path: '/transactions',
-        builder: (context, state) => const TransactionListScreen(),
-      ),
-      GoRoute(
-        path: '/privacy-settings',
-        builder: (context, state) => const PrivacySettingsScreen(),
+        path: '/pairing',
+        builder: (context, state) => const PairingScreen(),
       ),
       GoRoute(
         path: '/paywall',

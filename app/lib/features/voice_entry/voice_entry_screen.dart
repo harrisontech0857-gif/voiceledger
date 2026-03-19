@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:uuid/uuid.dart';
 import '../../core/theme.dart';
-import '../../core/supabase_client.dart';
-import '../../models/transaction.dart';
 import '../../services/voice_service.dart';
-import '../../services/ai_service.dart';
-import '../../services/pet_service.dart';
-import '../../services/currency_service.dart';
-import '../../services/transaction_service.dart';
+import '../../services/couple_service.dart';
 import '../../services/usage_service.dart';
 import '../../services/voice_diary_service.dart';
 
@@ -344,15 +338,25 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       await usageService.recordVoiceUsage();
     } catch (_) {}
 
-    // 餵食寵物
-    ref.read(petProvider.notifier).feed(amount: 0);
+    // 餵食共同寵物
+    String feedMessage = '';
+    try {
+      final coupleService = ref.read(coupleServiceProvider);
+      if (coupleService != null) {
+        feedMessage = await coupleService.feedPet();
+      }
+    } catch (_) {}
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('${analysis.moodEmoji} 日記已保存！'),
+          content: Text(
+            feedMessage.isNotEmpty
+                ? '${analysis.moodEmoji} 日記已保存！$feedMessage'
+                : '${analysis.moodEmoji} 日記已保存！',
+          ),
           backgroundColor: Theme.of(context).colorScheme.primary,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 3),
         ),
       );
       Future.delayed(const Duration(seconds: 1), () {
