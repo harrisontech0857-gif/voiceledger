@@ -176,7 +176,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
           setState(() {
             _selectedDay = selectedDay;
             _focusedDay = focusedDay;
-            _diaryEntry = null;
+            _selectedDiary = null;
           });
           _loadDiary(selectedDay);
         },
