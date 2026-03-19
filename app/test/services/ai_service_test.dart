@@ -54,9 +54,9 @@ void main() {
         expect(response.isUser, false);
       });
 
-      test('帳單問題觸發回應', () async {
-        final response = await service.sendMessage('花了多少', []);
-        expect(response.content, contains('NT\$'));
+      test('日記問題觸發回應', () async {
+        final response = await service.sendMessage('這週寫了多少日記', []);
+        expect(response.content, contains('日記'));
       });
     });
 

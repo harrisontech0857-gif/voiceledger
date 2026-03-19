@@ -138,19 +138,24 @@ void main() {
     });
 
     group('feedbackOnEntry', () {
-      test('should warn on large amount', () {
+      test('should praise long diary entry', () {
         final pet = PetModel.create();
-        expect(pet.feedbackOnEntry(1500), contains('不少'));
+        expect(pet.feedbackOnEntry(1500), equals('哇！寫了好長的日記，辛苦了～'));
       });
 
-      test('should encourage on small amount', () {
+      test('should encourage on medium amount', () {
         final pet = PetModel.create();
-        expect(pet.feedbackOnEntry(50), contains('很棒'));
+        expect(pet.feedbackOnEntry(800), equals('不錯喔，持續記錄是好習慣 👍'));
       });
 
-      test('should celebrate income', () {
+      test('should praise daily recording', () {
         final pet = PetModel.create();
-        expect(pet.feedbackOnEntry(0), contains('收入'));
+        expect(pet.feedbackOnEntry(50), equals('很棒！每天記錄讓生活更有意義！'));
+      });
+
+      test('should greet with anticipation when empty', () {
+        final pet = PetModel.create();
+        expect(pet.feedbackOnEntry(0), equals('新的一天，期待你的分享！💕'));
       });
     });
 

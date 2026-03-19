@@ -55,7 +55,7 @@ void main() {
 
       // Verify title
       expect(find.text('語記'), findsOneWidget);
-      expect(find.text('AI 財務秘書'), findsOneWidget);
+      expect(find.text('AI 日記秘書'), findsOneWidget);
 
       // Verify tabs
       expect(find.text('登入'), findsWidgets);
@@ -172,7 +172,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('語記'), findsOneWidget);
-      expect(find.text('AI 財務秘書'), findsOneWidget);
+      expect(find.text('AI 日記秘書'), findsOneWidget);
       expect(find.byType(TextField), findsWidgets);
       expect(find.byType(ElevatedButton), findsOneWidget);
       expect(find.text('或'), findsOneWidget);

@@ -249,24 +249,24 @@ void main() {
     // ── feedbackOnEntry 測試 ──────────────────────
 
     group('feedbackOnEntry', () {
-      test('大額花費 (>1000) 給預算提醒', () {
+      test('大額花費 (>1000) 給讚美長日記', () {
         final feedback = pet.feedbackOnEntry(1500);
-        expect(feedback, contains('預算'));
+        expect(feedback, '哇！寫了好長的日記，辛苦了～');
       });
 
       test('中等花費 (>500) 給鼓勵', () {
         final feedback = pet.feedbackOnEntry(800);
-        expect(feedback, contains('記下來'));
+        expect(feedback, '不錯喔，持續記錄是好習慣 👍');
       });
 
       test('小額花費 (>0) 給讚美', () {
         final feedback = pet.feedbackOnEntry(50);
-        expect(feedback, contains('很好'));
+        expect(feedback, '很棒！每天記錄讓生活更有意義！');
       });
 
-      test('收入 (<=0) 給收入回饋', () {
+      test('無內容時 (<=0) 給期待回應', () {
         final feedback = pet.feedbackOnEntry(0);
-        expect(feedback, contains('收入'));
+        expect(feedback, '新的一天，期待你的分享！💕');
       });
     });
 
