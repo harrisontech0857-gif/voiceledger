@@ -71,26 +71,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             children: [
               _OnboardingPage(
                 icon: Icons.mic_rounded,
-                title: '語音記帳',
-                description: '用自然的語言記錄您的每筆消費，讓 AI 幫您分類和分析',
+                title: '語音日記',
+                description: '用自然的語言說說你的一天，AI 幫你分析情緒、標記主題、生成日記',
                 color: Theme.of(context).colorScheme.primary,
               ),
               _OnboardingPage(
                 icon: Icons.smart_toy_rounded,
-                title: 'AI 財務秘書',
-                description: '隨時詢問秘書，獲得個人化的財務建議和支出分析',
+                title: 'AI 秘書',
+                description: '隨時和 AI 秘書聊天，獲得個人化的生活洞察和溫暖鼓勵',
                 color: Theme.of(context).colorScheme.secondary,
               ),
               _OnboardingPage(
-                icon: Icons.location_on_rounded,
-                title: '被動記帳',
-                description: '地理圍欄自動提醒，照片分析購物詳情，讓記帳更輕鬆',
+                icon: Icons.pets_rounded,
+                title: '寵物養成',
+                description: '每天寫日記就能餵養你的招財貓，看牠一步步進化！',
                 color: Theme.of(context).colorScheme.tertiary,
               ),
               _OnboardingPage(
-                icon: Icons.trending_up_rounded,
-                title: '智慧統計',
-                description: '詳細的支出分析、趨勢圖表和月度報告，掌握財務全局',
+                icon: Icons.auto_awesome_rounded,
+                title: '情緒洞察',
+                description: 'AI 自動分析你的情緒變化，用標籤回顧生活的每個片段',
                 color: Theme.of(context).colorScheme.error,
               ),
               _OnboardingPage(

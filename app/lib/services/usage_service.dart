@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// 免費額度管理服務
 ///
 /// Free tier 限制：
-/// - 語音記帳：每月 30 次
+/// - 語音日記：每月 30 次
 /// - AI 秘書對話：每月 10 次
 /// - AI 日記生成：每月 5 次
 class UsageService {
@@ -32,7 +32,7 @@ class UsageService {
     }
   }
 
-  /// 取得本月語音記帳使用次數
+  /// 取得本月語音日記使用次數
   Future<int> getVoiceUsage() async {
     await _ensureMonthlyReset();
     final prefs = await SharedPreferences.getInstance();
@@ -53,7 +53,7 @@ class UsageService {
     return prefs.getInt(_keyDiaryCount) ?? 0;
   }
 
-  /// 語音記帳是否還有免費額度
+  /// 語音日記是否還有免費額度
   Future<bool> canUseVoice({bool isPremium = false}) async {
     if (isPremium) return true;
     final count = await getVoiceUsage();

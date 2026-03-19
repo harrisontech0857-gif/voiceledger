@@ -24,7 +24,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'description': '基礎功能',
       'monthlyPrice': 0,
       'yearlyPrice': 0,
-      'features': ['語音輸入（50 次/月）', '手動記帳', '基礎分析', '每月最多 100 筆交易'],
+      'features': ['語音日記（30 次/月）', 'AI 情緒分析', '寵物養成', 'AI 秘書（10 次/月）'],
       'recommended': false,
     },
     {
@@ -33,7 +33,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
       'description': '增強功能',
       'monthlyPrice': 99,
       'yearlyPrice': 999,
-      'features': ['無限語音輸入', '手動記帳', 'AI 分類', '高級分析', '被動追蹤', '每月最多 1000 筆交易'],
+      'features': ['無限語音日記', '無限 AI 秘書', '記帳功能', '統計圖表', '行事曆模式', 'GPS 定位記錄'],
       'recommended': true,
     },
     {

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import '../main.dart' show kMockMode;
@@ -71,21 +72,57 @@ class VoiceDiaryService implements VoiceDiaryServiceBase {
 
   @override
   Future<void> saveDiaryEntry(VoiceDiaryAnalysis analysis) async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) {
+      debugPrint('⚠️ 無法儲存日記：使用者未登入');
+      return;
+    }
+
     final now = DateTime.now();
     final dateStr =
         '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
     try {
-      await _client.from('life_diaries').upsert({
-        'user_id': _client.auth.currentUser?.id,
-        'diary_date': dateStr,
-        'content': analysis.diary,
-        'mood': analysis.mood,
-        'highlight': analysis.summary,
-        'personal_note': analysis.originalTranscript,
-      }, onConflict: 'user_id,diary_date');
-    } catch (_) {
-      // 儲存失敗不阻擋 UX
+      // 先嘗試查詢今天是否已有日記
+      final existing =
+          await _client
+              .from('life_diaries')
+              .select('id')
+              .eq('user_id', userId)
+              .eq('diary_date', dateStr)
+              .maybeSingle();
+
+      if (existing != null) {
+        // 已有 → 追加內容
+        final existingContent =
+            await _client
+                .from('life_diaries')
+                .select('content')
+                .eq('id', existing['id'])
+                .single();
+        final oldContent = existingContent['content'] as String? ?? '';
+        await _client
+            .from('life_diaries')
+            .update({
+              'content': '$oldContent\n\n${analysis.diary}',
+              'mood': analysis.mood,
+              'highlight': analysis.summary,
+              'personal_note': analysis.originalTranscript,
+            })
+            .eq('id', existing['id']);
+      } else {
+        // 沒有 → 新建
+        await _client.from('life_diaries').insert({
+          'user_id': userId,
+          'diary_date': dateStr,
+          'content': analysis.diary,
+          'mood': analysis.mood,
+          'highlight': analysis.summary,
+          'personal_note': analysis.originalTranscript,
+        });
+      }
+    } catch (e) {
+      debugPrint('⚠️ 儲存日記失敗: $e');
     }
   }
 

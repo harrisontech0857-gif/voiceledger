@@ -697,7 +697,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
           (ctx) => AlertDialog(
             title: const Text('本月免費額度已用完'),
             content: const Text(
-              '免費版每月可語音記帳 30 次。\n升級 Pro 即可無限使用語音記帳和 AI 秘書功能！',
+              '免費版每月可記錄 30 則語音日記。\n升級 Pro 即可無限使用語音日記和 AI 秘書功能！',
             ),
             actions: [
               TextButton(
@@ -759,7 +759,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
-        title: const Text('語音記帳'),
+        title: const Text('語音日記'),
         centerTitle: true,
         elevation: 0,
       ),
@@ -868,7 +868,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                       ),
                     if (!_isListening && !_isProcessing)
                       Text(
-                        '例如：「午餐便當 85 元」「搭計程車 250 塊」',
+                        '例如：「今天和朋友喝咖啡聊得很開心」「加班好累但完成了專案」',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.white.withAlpha(100),
                         ),
@@ -997,7 +997,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
                         controller: _textController,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          hintText: '或直接輸入：午餐 85 元',
+                          hintText: '或直接輸入今天發生的事...',
                           hintStyle: TextStyle(
                             color: Colors.white.withAlpha(80),
                           ),

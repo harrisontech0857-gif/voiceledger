@@ -378,7 +378,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            '用語音說說你的花費吧',
+            '用語音說說你的一天吧',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: cs.onSurfaceVariant.withAlpha(140),
             ),
