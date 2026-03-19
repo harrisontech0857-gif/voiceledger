@@ -10,79 +10,32 @@ const corsHeaders = {
 /**
  * Voice Diary Edge Function
  *
- * 接收語音轉文字的內容，用 Gemini AI 分析：
+ * 接收語音轉文字的內容，用 AI 分析：
  * 1. 情緒判斷（mood）
  * 2. 主題標籤（tags）
  * 3. 生成一段溫暖的日記文字（diary）
+ *
+ * AI 優先順序：Anthropic Claude → Gemini → 規則式 fallback
  */
 
 interface VoiceDiaryRequest {
-  transcript: string // 語音轉文字的原始文本
-  date?: string // 日期 (YYYY-MM-DD)
+  transcript: string
 }
 
 interface DiaryAnalysis {
-  mood: string // happy, calm, stressed, sad, excited, reflective
+  mood: string
   moodEmoji: string
-  tags: string[] // 主題標籤 e.g. ["工作", "咖啡", "朋友"]
-  diary: string // AI 生成的日記段落
-  summary: string // 一句話摘要
+  tags: string[]
+  diary: string
+  summary: string
 }
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders })
-  }
-
-  try {
-    const geminiKey = Deno.env.get("GEMINI_API_KEY")
-    if (!geminiKey) {
-      // Fallback: 無 Gemini key 時用規則式分析
-      const body = (await req.json()) as VoiceDiaryRequest
-      return jsonResponse({
-        success: true,
-        data: fallbackAnalysis(body.transcript),
-      })
-    }
-
-    const body = (await req.json()) as VoiceDiaryRequest
-    if (!body.transcript || body.transcript.trim().length === 0) {
-      return jsonResponse({ error: "請提供語音內容" }, 400)
-    }
-
-    const transcript = body.transcript.trim().slice(0, 2000)
-
-    // 呼叫 Gemini API
-    const analysis = await analyzeWithGemini(geminiKey, transcript)
-
-    return jsonResponse({ success: true, data: analysis })
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "未知錯誤"
-    console.error("voice-diary 錯誤:", message)
-
-    // Fallback
-    try {
-      const body = await req.json()
-      return jsonResponse({
-        success: true,
-        data: fallbackAnalysis(body.transcript || ""),
-      })
-    } catch {
-      return jsonResponse({ error: message }, 500)
-    }
-  }
-})
-
-async function analyzeWithGemini(
-  apiKey: string,
-  transcript: string
-): Promise<DiaryAnalysis> {
-  const prompt = `你是一位溫暖的 AI 日記助手。使用者用語音記錄了以下內容，請幫忙分析並生成日記。
+const PROMPT = (transcript: string) => `你是一位溫暖的 AI 日記助手。使用者用語音記錄了以下內容，請幫忙分析並生成日記。
 
 使用者說的話：
 「${transcript}」
 
-請用 JSON 格式回覆（不要加 markdown 標記）：
+請用 JSON 格式回覆（不要加 markdown 標記，只回覆純 JSON）：
 {
   "mood": "情緒（只能用以下其一：happy, calm, stressed, sad, excited, reflective）",
   "moodEmoji": "對應的 emoji（一個字元）",
@@ -91,35 +44,168 @@ async function analyzeWithGemini(
   "summary": "一句話摘要（10字以內）"
 }
 
-注意：
-- tags 最多 5 個，用繁體中文
-- diary 要保留使用者原意，但用更文學、溫暖的方式表達
-- 如果使用者提到金額或消費，也納入日記但不要變成記帳格式`
+注意：tags 最多 5 個，用繁體中文。diary 要保留使用者原意但更文學溫暖。`
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 500,
-        },
-      }),
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders })
+  }
+
+  try {
+    const body = (await req.json()) as VoiceDiaryRequest
+    if (!body.transcript || body.transcript.trim().length === 0) {
+      return jsonResponse({ error: "請提供語音內容" }, 400)
     }
-  )
+
+    const transcript = body.transcript.trim().slice(0, 2000)
+
+    // 優先使用 Groq（免費、快速、額度大）
+    const groqKey = Deno.env.get("GROQ_API_KEY")
+    if (groqKey) {
+      try {
+        const analysis = await analyzeWithGroq(groqKey, transcript)
+        return jsonResponse({ success: true, data: analysis, ai_used: "groq" })
+      } catch (e) {
+        console.error("Groq API 失敗:", e)
+      }
+    }
+
+    // Fallback 2: Anthropic Claude
+    const anthropicKey = Deno.env.get("ANTHROPIC_API_KEY")
+    if (anthropicKey) {
+      try {
+        const analysis = await analyzeWithClaude(anthropicKey, transcript)
+        return jsonResponse({ success: true, data: analysis, ai_used: "claude" })
+      } catch (e) {
+        console.error("Claude API 也失敗:", e)
+      }
+    }
+
+    // Fallback 3: Gemini
+    const geminiKey = Deno.env.get("GEMINI_API_KEY")
+    if (geminiKey) {
+      try {
+        const analysis = await analyzeWithGemini(geminiKey, transcript)
+        return jsonResponse({ success: true, data: analysis })
+      } catch (e) {
+        console.error("Gemini API 也失敗:", e)
+      }
+    }
+
+    // 最終 fallback: 規則式
+    console.warn("所有 AI API 都失敗，使用規則式 fallback")
+    const fb = fallbackAnalysis(transcript)
+    return jsonResponse({ success: true, data: fb, ai_used: "fallback" })
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "未知錯誤"
+    console.error("voice-diary 錯誤:", message)
+    return jsonResponse({ success: true, data: fallbackAnalysis("") })
+  }
+})
+
+// ─── Groq API（OpenAI 相容格式）─────────────────
+
+async function analyzeWithGroq(
+  apiKey: string,
+  transcript: string
+): Promise<DiaryAnalysis> {
+  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.1-8b-instant",
+      messages: [
+        { role: "user", content: PROMPT(transcript) },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    }),
+  })
 
   if (!response.ok) {
-    throw new Error(`Gemini API 錯誤: ${response.status}`)
+    const err = await response.text()
+    throw new Error(`Groq API ${response.status}: ${err.slice(0, 200)}`)
   }
 
   const result = await response.json()
-  const text =
-    result.candidates?.[0]?.content?.parts?.[0]?.text || ""
+  const text = result.choices?.[0]?.message?.content || ""
+  return parseJsonResponse(text, transcript)
+}
 
-  // 解析 JSON（移除可能的 markdown 包裝）
+// ─── Anthropic Claude API ────────────────────────
+
+async function analyzeWithClaude(
+  apiKey: string,
+  transcript: string
+): Promise<DiaryAnalysis> {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-3-5-haiku-20241022",
+      max_tokens: 500,
+      messages: [
+        { role: "user", content: PROMPT(transcript) },
+      ],
+    }),
+  })
+
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`Claude API ${response.status}: ${err.slice(0, 200)}`)
+  }
+
+  const result = await response.json()
+  const text = result.content?.[0]?.text || ""
+  return parseJsonResponse(text, transcript)
+}
+
+// ─── Gemini API ──────────────────────────────────
+
+async function analyzeWithGemini(
+  apiKey: string,
+  transcript: string
+): Promise<DiaryAnalysis> {
+  // 嘗試多個模型
+  const models = ["gemini-2.5-flash-lite", "gemini-2.0-flash-lite", "gemini-2.0-flash"]
+
+  for (const model of models) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: PROMPT(transcript) }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 500 },
+          }),
+        }
+      )
+
+      if (!response.ok) continue // 嘗試下一個模型
+
+      const result = await response.json()
+      const text = result.candidates?.[0]?.content?.parts?.[0]?.text || ""
+      return parseJsonResponse(text, transcript)
+    } catch {
+      continue
+    }
+  }
+
+  throw new Error("所有 Gemini 模型都無法使用")
+}
+
+// ─── 共用 JSON 解析 ──────────────────────────────
+
+function parseJsonResponse(text: string, transcript: string): DiaryAnalysis {
   const cleaned = text
     .replace(/```json\n?/g, "")
     .replace(/```\n?/g, "")
@@ -128,67 +214,34 @@ async function analyzeWithGemini(
   try {
     return JSON.parse(cleaned) as DiaryAnalysis
   } catch {
-    // JSON 解析失敗，fallback
     return fallbackAnalysis(transcript)
   }
 }
 
+// ─── 規則式 Fallback ─────────────────────────────
+
 function fallbackAnalysis(transcript: string): DiaryAnalysis {
-  // 簡單規則式情緒判斷
   const lower = transcript.toLowerCase()
   let mood = "calm"
   let moodEmoji = "😌"
 
-  if (
-    lower.includes("開心") ||
-    lower.includes("高興") ||
-    lower.includes("棒")
-  ) {
-    mood = "happy"
-    moodEmoji = "😊"
-  } else if (
-    lower.includes("累") ||
-    lower.includes("壓力") ||
-    lower.includes("煩")
-  ) {
-    mood = "stressed"
-    moodEmoji = "😮‍💨"
-  } else if (
-    lower.includes("難過") ||
-    lower.includes("傷心") ||
-    lower.includes("失望")
-  ) {
-    mood = "sad"
-    moodEmoji = "😢"
-  } else if (
-    lower.includes("興奮") ||
-    lower.includes("期待") ||
-    lower.includes("太好了")
-  ) {
-    mood = "excited"
-    moodEmoji = "🤩"
+  if (lower.includes("開心") || lower.includes("高興") || lower.includes("棒")) {
+    mood = "happy"; moodEmoji = "😊"
+  } else if (lower.includes("累") || lower.includes("壓力") || lower.includes("煩")) {
+    mood = "stressed"; moodEmoji = "😮‍💨"
+  } else if (lower.includes("難過") || lower.includes("傷心")) {
+    mood = "sad"; moodEmoji = "😢"
+  } else if (lower.includes("興奮") || lower.includes("期待")) {
+    mood = "excited"; moodEmoji = "🤩"
   }
 
-  // 簡單標籤提取
   const tags: string[] = []
   const tagMap: Record<string, string> = {
-    吃: "美食",
-    喝: "飲品",
-    咖啡: "咖啡",
-    工作: "工作",
-    會議: "工作",
-    朋友: "社交",
-    家人: "家庭",
-    運動: "運動",
-    看書: "閱讀",
-    電影: "娛樂",
-    買: "購物",
-    花: "消費",
+    吃: "美食", 咖啡: "咖啡", 工作: "工作", 朋友: "社交",
+    運動: "運動", 買: "購物", 家: "家庭",
   }
-  for (const [keyword, tag] of Object.entries(tagMap)) {
-    if (lower.includes(keyword) && !tags.includes(tag)) {
-      tags.push(tag)
-    }
+  for (const [kw, tag] of Object.entries(tagMap)) {
+    if (lower.includes(kw) && !tags.includes(tag)) tags.push(tag)
   }
   if (tags.length === 0) tags.push("日常")
 
@@ -197,10 +250,7 @@ function fallbackAnalysis(transcript: string): DiaryAnalysis {
     moodEmoji,
     tags: tags.slice(0, 5),
     diary: transcript.length > 0 ? `今天，${transcript}。` : "平靜的一天。",
-    summary:
-      transcript.length > 10
-        ? transcript.slice(0, 10) + "⋯"
-        : transcript || "日常記錄",
+    summary: transcript.length > 10 ? transcript.slice(0, 10) + "⋯" : transcript || "日常記錄",
   }
 }
 
