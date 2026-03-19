@@ -43,7 +43,7 @@ class DashboardScreen extends ConsumerWidget {
                   _StatsCardRow(pet: pet),
                   const SizedBox(height: AppSpacing.md),
 
-                  // 功能入口字卡 — 語音記帳 / 問秘書
+                  // 功能入口字卡 — 語音日記 / 問秘書
                   _ActionCardRow(
                     onVoiceTap: () => context.push('/voice-entry'),
                     onChatTap: () => context.push('/ai-secretary'),
@@ -215,7 +215,7 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-/// 功能入口字卡列 — 語音記帳 + 問秘書
+/// 功能入口字卡列 — 語音日記 + 問秘書
 class _ActionCardRow extends StatelessWidget {
   final VoidCallback onVoiceTap;
   final VoidCallback onChatTap;
@@ -229,7 +229,7 @@ class _ActionCardRow extends StatelessWidget {
         Expanded(
           child: _ActionCard(
             icon: Icons.mic_rounded,
-            label: '語音記帳',
+            label: '語音日記',
             subtitle: '說一句就記好',
             onTap: onVoiceTap,
             isPrimary: true,
