@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -38,6 +39,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       return;
     }
 
+    if (_passwordController.text.length < 6) {
+      setState(() => _errorMessage = '密碼至少需要 6 個字元');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -52,24 +58,80 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           password: _passwordController.text,
         );
       } else {
-        await client.auth.signUp(
+        final res = await client.auth.signUp(
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
+        // 如果需要驗證郵件
+        if (res.user != null && res.session == null) {
+          if (mounted) {
+            setState(() {
+              _errorMessage = null;
+              _isLoading = false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('註冊成功！請查看郵箱完成驗證'),
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
       }
 
       if (mounted) {
-        context.go('/onboarding');
+        context.go('/dashboard');
       }
     } on AuthException catch (e) {
-      setState(() => _errorMessage = e.message);
+      setState(() => _errorMessage = _translateAuthError(e.message));
     } catch (e) {
-      setState(() => _errorMessage = '發生錯誤: $e');
+      setState(() => _errorMessage = '連線錯誤，請檢查網路: $e');
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final client = Supabase.instance.client;
+      await client.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: kIsWeb ? null : 'io.supabase.voiceledger://login-callback/',
+      );
+      // OAuth 會導向瀏覽器，成功後自動回到 app
+    } on AuthException catch (e) {
+      setState(() => _errorMessage = _translateAuthError(e.message));
+    } catch (e) {
+      setState(() => _errorMessage = 'Google 登入失敗: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  String _translateAuthError(String message) {
+    if (message.contains('Invalid login credentials')) {
+      return '郵箱或密碼錯誤';
+    }
+    if (message.contains('Email not confirmed')) {
+      return '郵箱尚未驗證，請查看收件匣';
+    }
+    if (message.contains('User already registered')) {
+      return '此郵箱已註冊，請直接登入';
+    }
+    if (message.contains('Password should be at least')) {
+      return '密碼至少需要 6 個字元';
+    }
+    return message;
   }
 
   @override
@@ -244,13 +306,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   button: true,
                   enabled: !_isLoading,
                   label: '用 Google 帳戶登入',
-                  onTap: _isLoading ? null : () {},
+                  onTap: _isLoading ? null : _signInWithGoogle,
                   child: SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.login_rounded),
                       label: const Text('用 Google 帳戶登入'),
-                      onPressed: _isLoading ? null : () {},
+                      onPressed: _isLoading ? null : _signInWithGoogle,
                     ),
                   ),
                 ),
