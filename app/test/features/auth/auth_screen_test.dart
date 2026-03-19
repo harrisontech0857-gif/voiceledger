@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
@@ -10,18 +11,38 @@ Widget buildTestApp() {
 }
 
 void main() {
-  // 初始化 Supabase（測試用 — 使用 mock URL 即可）
   setUpAll(() async {
-    // 確保 Flutter binding 已初始化
     TestWidgetsFlutterBinding.ensureInitialized();
+
+    // Mock SharedPreferences plugin channel（Supabase 初始化需要）
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.flutter.io/shared_preferences'),
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'getAll') {
+              return <String, dynamic>{};
+            }
+            return null;
+          },
+        );
+
+    // Mock path_provider（某些平台需要）
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('plugins.flutter.io/path_provider'),
+          (MethodCall methodCall) async {
+            return '/tmp';
+          },
+        );
 
     try {
       await Supabase.initialize(
         url: 'https://test.supabase.co',
-        anonKey: 'eyJ0ZXN0IjoidGVzdCJ9.eyJ0ZXN0IjoidGVzdCJ9.test',
+        anonKey:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRlc3QiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoyMDAwMDAwMDAwfQ.test-signature',
       );
     } catch (_) {
-      // 可能已經初始化過
+      // 可能已初始化過或 URL 無效 — 測試環境可忽略
     }
   });
 
