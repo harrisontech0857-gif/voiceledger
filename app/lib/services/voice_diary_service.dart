@@ -55,6 +55,7 @@ class VoiceDiaryService implements VoiceDiaryServiceBase {
       final response = await _client.functions.invoke(
         'voice-diary',
         body: {'transcript': transcript},
+        headers: {'Authorization': 'Bearer ${_client.supabaseKey}'},
       );
 
       // response.data 可能是 String 或已解析的 Map
