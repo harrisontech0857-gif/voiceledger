@@ -55,6 +55,62 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  void _showChangePasswordDialog() {
+    final emailController = TextEditingController();
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('更改密碼'),
+            content: TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                labelText: '請輸入您的郵箱',
+                hintText: '將寄送密碼重設信到此郵箱',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  if (emailController.text.isEmpty) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('請輸入郵箱')));
+                    return;
+                  }
+                  Navigator.pop(ctx);
+                  try {
+                    await Supabase.instance.client.auth.resetPasswordForEmail(
+                      emailController.text.trim(),
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('密碼重設信已寄出，請查看收件匣'),
+                          duration: Duration(seconds: 3),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('發送失敗: $e')));
+                    }
+                  }
+                },
+                child: const Text('發送重設信'),
+              ),
+            ],
+          ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -86,14 +142,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     },
                   ),
                 ),
-                _SettingsTile(
-                  icon: Icons.language_rounded,
-                  iconColor: Colors.blue,
-                  title: '語言',
-                  subtitle: '繁體中文',
-                  showArrow: true,
-                  onTap: () {},
-                ),
               ],
             ),
             const SizedBox(height: AppSpacing.md),
@@ -121,7 +169,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             // 訂閱
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-              child: _PremiumCard(colorScheme: cs),
+              child: _PremiumCard(
+                colorScheme: cs,
+                onTap: () => context.push('/paywall'),
+              ),
             ),
             const SizedBox(height: AppSpacing.md),
 
@@ -134,21 +185,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   iconColor: Colors.red,
                   title: '更改密碼',
                   showArrow: true,
-                  onTap: () {},
+                  onTap: _showChangePasswordDialog,
                 ),
                 _SettingsTile(
                   icon: Icons.privacy_tip_rounded,
                   iconColor: Colors.blueGrey,
                   title: '隱私政策',
                   showArrow: true,
-                  onTap: () {},
+                  onTap: () => context.push('/privacy-policy'),
                 ),
                 _SettingsTile(
                   icon: Icons.description_rounded,
                   iconColor: Colors.brown,
                   title: '服務條款',
                   showArrow: true,
-                  onTap: () {},
+                  onTap: () => context.push('/terms'),
                 ),
               ],
             ),
@@ -169,7 +220,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   iconColor: Colors.deepOrange,
                   title: '回報問題',
                   showArrow: true,
-                  onTap: () {},
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('請聯絡: harrison.tech.0857@gmail.com'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -273,67 +331,72 @@ class _ProfileCard extends StatelessWidget {
 /// Premium 訂閱卡片
 class _PremiumCard extends StatelessWidget {
   final ColorScheme colorScheme;
-  const _PremiumCard({required this.colorScheme});
+  final VoidCallback? onTap;
+
+  const _PremiumCard({required this.colorScheme, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [colorScheme.primary, colorScheme.tertiary],
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withAlpha(40),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [colorScheme.primary, colorScheme.tertiary],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.workspace_premium_rounded,
-                color: Colors.white,
-                size: 24,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Text(
-                'VoiceLedger Premium',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            '解鎖無限制 AI 分析、進階報告和優先支援',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: Colors.white.withAlpha(200)),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: colorScheme.primary,
-              ),
-              onPressed: () {},
-              child: const Text('升級到 Premium'),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withAlpha(40),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.workspace_premium_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'VoiceLedger Premium',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              '解鎖無限制 AI 分析、進階報告和優先支援',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.white.withAlpha(200),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: colorScheme.primary,
+                ),
+                onPressed: onTap,
+                child: const Text('升級到 Premium'),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

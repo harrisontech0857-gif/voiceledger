@@ -39,14 +39,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _skipToHome() {
-    context.go('/pairing');
+    context.go('/dashboard');
   }
 
   Future<void> _requestPermissions() async {
     await Permission.microphone.request();
 
     if (mounted) {
-      context.go('/pairing');
+      context.go('/dashboard');
     }
   }
 

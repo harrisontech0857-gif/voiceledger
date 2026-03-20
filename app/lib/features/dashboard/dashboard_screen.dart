@@ -98,6 +98,12 @@ class _TopGreetingBar extends StatelessWidget {
             ? '午安'
             : '晚安';
 
+    final user = Supabase.instance.client.auth.currentUser;
+    final displayName =
+        user?.userMetadata?['full_name'] as String? ??
+        user?.userMetadata?['name'] as String? ??
+        '語記用戶';
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -105,7 +111,7 @@ class _TopGreetingBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '$greeting 👋',
+              '$greeting，$displayName 👋',
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),

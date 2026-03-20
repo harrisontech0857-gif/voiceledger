@@ -359,7 +359,7 @@ class _VoiceEntryScreenState extends ConsumerState<VoiceEntryScreen>
           duration: const Duration(seconds: 3),
         ),
       );
-      Future.delayed(const Duration(seconds: 1), () {
+      Future.delayed(const Duration(seconds: 2), () {
         if (mounted) context.go('/dashboard');
       });
     }
