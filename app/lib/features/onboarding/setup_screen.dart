@@ -132,6 +132,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen> {
       await prefs.setString('pet_personality', _selectedPersonality!);
       await prefs.setString('pet_custom_name', _petNameController.text.trim());
       await prefs.setBool('setup_complete', true);
+      // Also set welcome_complete in case user somehow skips welcome but goes through setup
+      await prefs.setBool('welcome_complete', true);
 
       if (mounted) {
         context.go('/dashboard');
