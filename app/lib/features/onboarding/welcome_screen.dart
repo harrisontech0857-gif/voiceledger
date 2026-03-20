@@ -120,7 +120,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
       if (mounted) {
         await prefs.setBool('welcome_complete', true);
         if (mounted) {
-          context.go('/setup');
+          context.go('/auth');
         }
       }
     } catch (e) {

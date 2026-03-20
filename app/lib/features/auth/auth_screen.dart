@@ -30,22 +30,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
       final event = data.event;
       if (event == AuthChangeEvent.signedIn && mounted) {
-        // Check if user has completed welcome
         final prefs = await SharedPreferences.getInstance();
-        final welcomeDone = prefs.getBool('welcome_complete') ?? false;
+        final setupDone = prefs.getBool('setup_complete') ?? false;
         if (mounted) {
-          if (!welcomeDone) {
-            context.go('/welcome');
-            return;
-          }
-          final setupDone = prefs.getBool('setup_complete') ?? false;
-          if (mounted) {
-            if (setupDone) {
-              context.go('/dashboard');
-            } else {
-              context.go('/setup');
-            }
-          }
+          context.go(setupDone ? '/dashboard' : '/setup');
         }
       }
     });
@@ -106,22 +94,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
 
       if (mounted) {
-        // Check if user has completed welcome
         final prefs = await SharedPreferences.getInstance();
-        final welcomeDone = prefs.getBool('welcome_complete') ?? false;
+        final setupDone = prefs.getBool('setup_complete') ?? false;
         if (mounted) {
-          if (!welcomeDone) {
-            context.go('/welcome');
-            return;
-          }
-          final setupDone = prefs.getBool('setup_complete') ?? false;
-          if (mounted) {
-            if (setupDone) {
-              context.go('/dashboard');
-            } else {
-              context.go('/setup');
-            }
-          }
+          context.go(setupDone ? '/dashboard' : '/setup');
         }
       }
     } on AuthException catch (e) {

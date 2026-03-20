@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart' show kMockMode;
 import '../features/auth/auth_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
@@ -26,20 +27,30 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/dashboard',
-    redirect: (context, state) {
-      // Mock 模式：跳過認證，直接進入 Dashboard
+    initialLocation: '/welcome',
+    redirect: (context, state) async {
       if (kMockMode) return null;
 
+      final loc = state.matchedLocation;
+
+      // 首次引導：還沒看過引導就去 /welcome
+      final prefs = await SharedPreferences.getInstance();
+      final welcomeDone = prefs.getBool('welcome_complete') ?? false;
+      if (!welcomeDone && loc != '/welcome') {
+        return '/welcome';
+      }
+
+      // 認證檢查
       final session = Supabase.instance.client.auth.currentSession;
       final isLoggedIn = session != null;
-      final isAuthRoute = state.matchedLocation == '/auth';
 
-      if (!isLoggedIn && !isAuthRoute) {
+      if (!isLoggedIn && loc != '/auth' && loc != '/welcome') {
         return '/auth';
       }
-      if (isLoggedIn && isAuthRoute) {
-        return '/dashboard';
+      if (isLoggedIn && loc == '/auth') {
+        // 登入後檢查是否完成設定
+        final setupDone = prefs.getBool('setup_complete') ?? false;
+        return setupDone ? '/dashboard' : '/setup';
       }
       return null;
     },

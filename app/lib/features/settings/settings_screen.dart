@@ -40,10 +40,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
               TextButton(
                 onPressed: () async {
+                  Navigator.pop(context); // 先關閉 dialog
                   if (!kMockMode) {
                     await Supabase.instance.client.auth.signOut();
                   }
                   if (!mounted) return;
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('已登出')));
                   context.go('/auth');
                 },
                 child: Text(
@@ -414,7 +418,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: 120), // 留空給底部導航列
           ],
         ),
       ),
