@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme.dart';
 import '../models/pet.dart';
 import '../services/pet_service.dart';
+import '../services/couple_service.dart';
 
 /// 寵物伴侶 Widget — 首頁主視覺
 ///
@@ -62,8 +63,19 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
 
   @override
   Widget build(BuildContext context) {
+    final coupleAsync = ref.watch(currentCoupleProvider);
     final pet = ref.watch(petProvider);
     final cs = Theme.of(context).colorScheme;
+
+    // Get display pet data from couple if available, otherwise use local pet
+    final displayPet = coupleAsync.maybeWhen(
+      data: (couple) {
+        if (couple == null || !couple.isActive) return pet;
+        // Create display model from couple data
+        return _buildDisplayPetFromCouple(couple, pet);
+      },
+      orElse: () => pet,
+    );
 
     return Column(
       children: [
@@ -102,13 +114,13 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
                     );
                   },
                   child: Image.asset(
-                    pet.imagePath,
+                    displayPet.imagePath,
                     width: 225,
                     height: 225,
                     fit: BoxFit.contain,
                     errorBuilder:
                         (_, __, ___) => Text(
-                          pet.stageEmoji,
+                          displayPet.stageEmoji,
                           style: const TextStyle(fontSize: 120),
                         ),
                   ),
@@ -130,7 +142,7 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           child: Text(
-            pet.dialogue.replaceAll('{streak}', '${pet.streak}'),
+            displayPet.dialogue.replaceAll('{streak}', '${displayPet.streak}'),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.3),
             textAlign: TextAlign.center,
             maxLines: 2,
@@ -144,7 +156,7 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              pet.name,
+              displayPet.name,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -153,13 +165,13 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: _stageColor(pet.stage).withAlpha(30),
+                color: _stageColor(displayPet.stage).withAlpha(30),
                 borderRadius: BorderRadius.circular(AppRadius.full),
               ),
               child: Text(
-                pet.stageName,
+                displayPet.stageName,
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: _stageColor(pet.stage),
+                  color: _stageColor(displayPet.stage),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -171,7 +183,7 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
         // 經驗條
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: _ExpProgressBar(pet: pet),
+          child: _ExpProgressBar(pet: displayPet),
         ),
       ],
     );
@@ -189,6 +201,51 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
         return Colors.orange;
       case PetStage.master:
         return Colors.amber;
+    }
+  }
+
+  /// Build a display PetModel from couple data
+  PetModel _buildDisplayPetFromCouple(CoupleInfo couple, PetModel localPet) {
+    final stage = _getStageFromExp(couple.petExp);
+    final level = couple.petExp ~/ 100 + 1;
+
+    // Map couple mood to PetMood
+    final petMood = _mapCoupleToMood(couple.petMood);
+
+    return PetModel(
+      id: localPet.id,
+      name: couple.petName,
+      exp: couple.petExp,
+      level: level,
+      mood: petMood,
+      streak: localPet.streak,
+      createdAt: localPet.createdAt,
+      totalEntries: localPet.totalEntries,
+      lastFedAt: localPet.lastFedAt,
+    );
+  }
+
+  /// Calculate PetStage from experience points
+  PetStage _getStageFromExp(int exp) {
+    if (exp >= 1000) return PetStage.master;
+    if (exp >= 500) return PetStage.adult;
+    if (exp >= 200) return PetStage.teen;
+    if (exp >= 50) return PetStage.baby;
+    return PetStage.egg;
+  }
+
+  /// Map couple mood string to PetMood enum
+  PetMood _mapCoupleToMood(String coupleMode) {
+    switch (coupleMode.toLowerCase()) {
+      case 'happy':
+        return PetMood.happy;
+      case 'hungry':
+        return PetMood.hungry;
+      case 'sleepy':
+        return PetMood.sleepy;
+      case 'neutral':
+      default:
+        return PetMood.neutral;
     }
   }
 }

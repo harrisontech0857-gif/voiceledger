@@ -185,15 +185,16 @@ class _NoPairingCard extends StatelessWidget {
 }
 
 /// 餵食狀態卡（已配對）
-class _FeedStatusCard extends StatelessWidget {
+class _FeedStatusCard extends ConsumerWidget {
   final CoupleInfo couple;
   const _FeedStatusCard({required this.couple});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     final isMyTurn =
         couple.feedTurn == Supabase.instance.client.auth.currentUser?.id;
+    final coupleService = ref.read(coupleServiceProvider);
 
     return Container(
       width: double.infinity,
@@ -207,11 +208,17 @@ class _FeedStatusCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                '🐱 ${couple.petName}',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              FutureBuilder<String?>(
+                future: coupleService?.getPartnerName(),
+                builder: (context, snapshot) {
+                  final partnerName = snapshot.data ?? '伴侶';
+                  return Text(
+                    '🐱 你和 $partnerName 的寵物',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
