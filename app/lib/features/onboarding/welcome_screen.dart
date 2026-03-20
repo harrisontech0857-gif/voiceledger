@@ -569,7 +569,7 @@ class _Page5PartnerDiary extends StatelessWidget {
                       ],
                     ),
                     child: const Icon(
-                      Icons.diary_outlined,
+                      Icons.auto_stories_rounded,
                       color: Colors.white,
                       size: 48,
                     ),
@@ -593,7 +593,7 @@ class _Page5PartnerDiary extends StatelessWidget {
                       ],
                     ),
                     child: const Icon(
-                      Icons.diary_outlined,
+                      Icons.auto_stories_rounded,
                       color: Colors.white,
                       size: 48,
                     ),
