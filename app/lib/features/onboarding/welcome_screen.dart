@@ -238,6 +238,15 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
                             child: const Text('上一步'),
                           ),
                         ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          flex: 2,
+                          child: FilledButton.icon(
+                            onPressed: _completeWelcome,
+                            icon: const Icon(Icons.favorite_rounded, size: 18),
+                            label: const Text('開始我的語記'),
+                          ),
+                        ),
                       ],
                     ),
                 ],
