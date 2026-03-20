@@ -182,6 +182,26 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
+  Future<void> _enterGuestMode() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      // Use Supabase anonymous sign-in
+      await Supabase.instance.client.auth.signInAnonymously();
+      // Set guest flag
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('is_guest', true);
+      await prefs.setBool('setup_complete', true); // Skip setup for guests
+      if (mounted) context.go('/dashboard');
+    } catch (e) {
+      setState(() => _errorMessage = '訪客模式啟動失敗: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   String _translateAuthError(String message) {
     if (message.contains('Invalid login credentials')) {
       return '郵箱或密碼錯誤';
@@ -379,6 +399,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       icon: const Icon(Icons.login_rounded),
                       label: const Text('用 Google 帳戶登入'),
                       onPressed: _isLoading ? null : _signInWithGoogle,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                // 訪客體驗
+                Center(
+                  child: TextButton(
+                    onPressed: _isLoading ? null : _enterGuestMode,
+                    child: Text(
+                      '先體驗看看，不註冊',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ),

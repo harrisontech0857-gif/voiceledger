@@ -37,6 +37,11 @@ class DashboardScreen extends ConsumerWidget {
                   _TopGreetingBar(onSettingsTap: () => context.go('/settings')),
                   const SizedBox(height: AppSpacing.md),
 
+                  // 訪客提醒
+                  if (Supabase.instance.client.auth.currentUser?.isAnonymous ==
+                      true)
+                    _GuestReminderCard(onBindTap: () => context.push('/auth')),
+
                   // 寵物主視覺
                   const PetCompanionWidget(),
                   const SizedBox(height: AppSpacing.md),
@@ -77,6 +82,40 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// 訪客提醒卡片
+class _GuestReminderCard extends StatelessWidget {
+  final VoidCallback onBindTap;
+  const _GuestReminderCard({required this.onBindTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: cs.tertiaryContainer,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline_rounded, color: cs.onTertiaryContainer),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              '你正在體驗模式，註冊後可以配對和保存日記',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: cs.onTertiaryContainer),
+            ),
+          ),
+          TextButton(onPressed: onBindTap, child: const Text('註冊')),
+        ],
       ),
     );
   }

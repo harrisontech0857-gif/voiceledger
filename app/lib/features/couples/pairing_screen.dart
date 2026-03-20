@@ -198,6 +198,41 @@ class _PairingScreenState extends ConsumerState<PairingScreen> {
   }
 
   Widget _buildUnpairedUI(ColorScheme cs) {
+    // 訪客不能配對
+    if (Supabase.instance.client.auth.currentUser?.isAnonymous == true) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text('💕', style: TextStyle(fontSize: 64)),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                '註冊後才能和伴侶配對',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                '註冊帳號後，你的體驗資料會保留',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              FilledButton(
+                onPressed: () => context.push('/auth'),
+                child: const Text('前往註冊'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
