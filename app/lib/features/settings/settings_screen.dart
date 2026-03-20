@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../main.dart' show kMockMode, kGeminiApiKey;
+import '../../main.dart' show kMockMode;
 import '../../core/theme.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -16,13 +16,11 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late bool _isDarkMode;
   late bool _notificationsEnabled;
-  late bool _locationTrackingEnabled;
 
   @override
   void initState() {
     super.initState();
     _notificationsEnabled = true;
-    _locationTrackingEnabled = true;
     _loadSettings();
   }
 
