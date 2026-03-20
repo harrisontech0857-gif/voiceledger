@@ -21,9 +21,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void initState() {
     super.initState();
-    _isDarkMode = false;
     _notificationsEnabled = true;
     _locationTrackingEnabled = true;
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = prefs.getBool('dark_mode') ?? false;
+    setState(() => _isDarkMode = isDark);
+    ref.read(themeModeProvider.notifier).state =
+        isDark ? ThemeMode.dark : ThemeMode.light;
   }
 
   void _logout() {
@@ -288,10 +296,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   title: '深色模式',
                   trailing: Switch.adaptive(
                     value: _isDarkMode,
-                    onChanged: (value) {
+                    onChanged: (value) async {
                       setState(() => _isDarkMode = value);
                       ref.read(themeModeProvider.notifier).state =
                           value ? ThemeMode.dark : ThemeMode.light;
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('dark_mode', value);
                     },
                   ),
                 ),

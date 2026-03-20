@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme.dart';
 import '../models/pet.dart';
 import '../services/pet_service.dart';
@@ -24,6 +25,7 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
   late AnimationController _floatController;
   late Animation<double> _bounceAnim;
   late Animation<double> _floatAnim;
+  String? _petPersonality;
 
   @override
   void initState() {
@@ -47,6 +49,16 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
     _floatAnim = Tween<double>(begin: 0, end: -8).animate(
       CurvedAnimation(parent: _floatController, curve: Curves.easeInOut),
     );
+
+    _loadPersonality();
+  }
+
+  Future<void> _loadPersonality() async {
+    final prefs = await SharedPreferences.getInstance();
+    final personality = prefs.getString('pet_personality');
+    if (mounted) {
+      setState(() => _petPersonality = personality);
+    }
   }
 
   @override
@@ -59,6 +71,84 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
   void _onPetTap() {
     _bounceController.forward(from: 0);
     widget.onTap?.call();
+  }
+
+  String _getPersonalityDialogue(PetModel pet) {
+    final personality = _petPersonality ?? '';
+    final moodName = pet.mood.name;
+
+    switch (personality) {
+      case 'energetic':
+        return _getEnergeticDialogue(moodName);
+      case 'gentle':
+        return _getGentleDialogue(moodName);
+      case 'funny':
+        return _getFunnyDialogue(moodName);
+      case 'clingy':
+        return _getClingingDialogue(moodName);
+      default:
+        return pet.dialogue;
+    }
+  }
+
+  String _getEnergeticDialogue(String mood) {
+    switch (mood) {
+      case 'happy':
+        return '耶耶耶！你寫日記了！我好開心～跳跳跳！🎉';
+      case 'neutral':
+        return '嘿嘿！今天要寫什麼精彩的事？快來快來！';
+      case 'hungry':
+        return '嗚嗚⋯⋯人家好餓⋯⋯快點寫日記餵我啦！！';
+      case 'sleepy':
+        return '好無聊⋯⋯都沒人理我⋯⋯我要生氣了！💢';
+      default:
+        return '嘿嘿！一起來寫日記吧！';
+    }
+  }
+
+  String _getGentleDialogue(String mood) {
+    switch (mood) {
+      case 'happy':
+        return '謝謝你今天也寫了日記，你辛苦了 ✨';
+      case 'neutral':
+        return '今天過得好嗎？不急，想說的時候再說就好';
+      case 'hungry':
+        return '你一定很忙吧⋯⋯沒關係，我會等你的';
+      case 'sleepy':
+        return '我在這裡等你⋯⋯不管多久都會等⋯⋯💤';
+      default:
+        return '慢慢來，我一直在這裡';
+    }
+  }
+
+  String _getFunnyDialogue(String mood) {
+    switch (mood) {
+      case 'happy':
+        return '哇靠！你居然寫日記了！太陽打西邊出來啦 😂';
+      case 'neutral':
+        return '欸欸欸～今天有沒有什麼八卦可以分享？🍿';
+      case 'hungry':
+        return '我的肚子在開演唱會了⋯⋯咕嚕咕嚕～🎵';
+      case 'sleepy':
+        return 'Zzz⋯⋯我夢到你寫了日記⋯⋯原來只是夢啊⋯⋯😭';
+      default:
+        return '這是什麼鬼情況啦！';
+    }
+  }
+
+  String _getClingingDialogue(String mood) {
+    switch (mood) {
+      case 'happy':
+        return '你寫日記了！！我最喜歡你了！！抱抱～🥰';
+      case 'neutral':
+        return '你在幹嘛？想你想你想你～什麼時候寫日記？';
+      case 'hungry':
+        return '你是不是不愛我了⋯⋯都不寫日記⋯⋯嗚嗚嗚 😿';
+      case 'sleepy':
+        return '我好想你⋯⋯已經好久沒看到你了⋯⋯回來好不好⋯⋯';
+      default:
+        return '我好想你⋯⋯';
+    }
   }
 
   @override
@@ -142,7 +232,11 @@ class _PetCompanionWidgetState extends ConsumerState<PetCompanionWidget>
             borderRadius: BorderRadius.circular(AppRadius.lg),
           ),
           child: Text(
-            displayPet.dialogue.replaceAll('{streak}', '${displayPet.streak}'),
+            _getPersonalityDialogue(displayPet)
+                .replaceAll('{streak}', '${displayPet.streak}')
+                .replaceAll('{name}', displayPet.name)
+                .replaceAll('{level}', '${displayPet.level}')
+                .replaceAll('{exp}', '${displayPet.exp}'),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.3),
             textAlign: TextAlign.center,
             maxLines: 2,

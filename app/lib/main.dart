@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/env.dart';
 import 'core/config.dart';
 import 'core/app_router.dart';
@@ -45,7 +46,20 @@ void main() async {
     }
   }
 
-  runApp(const ProviderScope(child: VoiceLedgerApp()));
+  // 載入深色模式設定
+  final prefs = await SharedPreferences.getInstance();
+  final isDarkMode = prefs.getBool('dark_mode') ?? false;
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        themeModeProvider.overrideWith(
+          (ref) => isDarkMode ? ThemeMode.dark : ThemeMode.light,
+        ),
+      ],
+      child: const VoiceLedgerApp(),
+    ),
+  );
 }
 
 /// Web 桌面端響應式外框 — 限制最大寬度並置中，模擬手機尺寸
