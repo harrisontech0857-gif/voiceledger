@@ -177,7 +177,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen>
             child: Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
+                color: cs.surface,
                 border: Border(top: BorderSide(color: cs.outlineVariant)),
               ),
               child: Column(
@@ -265,12 +265,9 @@ class _Page1Welcome extends StatelessWidget {
       height: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            cs.primary.withAlpha((0.3 * 255).toInt()),
-            cs.primary.withAlpha((0.1 * 255).toInt()),
-          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [const Color(0xFF1A1A2E), const Color(0xFF16213E)],
         ),
       ),
       child: SafeArea(
@@ -328,15 +325,18 @@ class _Page2CommunicationStyle extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
             Text(
               '想像一下⋯⋯',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: cs.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               '今天對方看起來心情不太好\n你會怎麼做？',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -364,9 +364,10 @@ class _Page2CommunicationStyle extends StatelessWidget {
             if (selectedStyle != null)
               Text(
                 '不管哪一種，願意在乎就是最溫柔的事 ✨',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: cs.primary,
+                ),
                 textAlign: TextAlign.center,
               ),
             const SizedBox(height: AppSpacing.xxl),
@@ -397,15 +398,18 @@ class _Page3RecordingHabit extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
             Text(
               '下班後⋯⋯',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: cs.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               '你通常怎麼記住今天發生的事？',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -433,9 +437,10 @@ class _Page3RecordingHabit extends StatelessWidget {
             if (selectedHabit != null)
               Text(
                 '語記就是你的樹洞，想說的時候說就好 🌱',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontStyle: FontStyle.italic),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  color: cs.primary,
+                ),
                 textAlign: TextAlign.center,
               ),
             const SizedBox(height: AppSpacing.xxl),
@@ -493,12 +498,15 @@ class _Page4VoiceDiary extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                border: Border.all(color: cs.outlineVariant),
+                color: cs.surfaceContainerHighest,
+                border: Border.all(color: cs.primary, width: 2),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
               child: Text(
                 '「今天加班好累，但同事請我喝奶茶，\n突然覺得好溫暖」',
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: cs.onSurface),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -513,7 +521,9 @@ class _Page4VoiceDiary extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       '記住這個瞬間',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: cs.onSurface),
                     ),
                   ],
                 ),
@@ -521,7 +531,12 @@ class _Page4VoiceDiary extends StatelessWidget {
                   children: [
                     const Text('😊', style: TextStyle(fontSize: 24)),
                     const SizedBox(height: AppSpacing.xs),
-                    Text('懂你的心情', style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      '懂你的心情',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: cs.onSurface),
+                    ),
                   ],
                 ),
                 Column(
@@ -530,7 +545,9 @@ class _Page4VoiceDiary extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       '寫成專屬你的日記',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: cs.onSurface),
                     ),
                   ],
                 ),
@@ -579,9 +596,10 @@ class _Page5SharedPet extends StatelessWidget {
             const SizedBox(height: AppSpacing.xl),
             Text(
               '牠是你們的',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: cs.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
@@ -592,19 +610,25 @@ class _Page5SharedPet extends StatelessWidget {
                 children: [
                   Text(
                     '你寫了日記，牠吃一餐 🍚',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: cs.onSurface),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
                     '對方寫了日記，牠再吃一餐',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: cs.onSurface),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
                     '兩個人都寫了，牠會開心得跳起來 🎉',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: cs.onSurface),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -613,9 +637,10 @@ class _Page5SharedPet extends StatelessWidget {
             const SizedBox(height: AppSpacing.xl),
             Text(
               '每一次記錄，都是對彼此的在乎',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontStyle: FontStyle.italic),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontStyle: FontStyle.italic,
+                color: cs.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xxl),
@@ -632,6 +657,8 @@ class _Page6Ready extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -643,15 +670,18 @@ class _Page6Ready extends StatelessWidget {
             const SizedBox(height: AppSpacing.xl),
             Text(
               '準備好了嗎？',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: cs.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
               '不用完美，不用每天\n想說的時候說就好',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: cs.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xxl),
@@ -695,10 +725,7 @@ class _OptionCard extends StatelessWidget {
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(AppRadius.lg),
-            color:
-                isSelected
-                    ? cs.primaryContainer.withAlpha((0.2 * 255).toInt())
-                    : Colors.transparent,
+            color: isSelected ? cs.primaryContainer : cs.surfaceContainerLow,
           ),
           child: Row(
             children: [
@@ -710,11 +737,16 @@ class _OptionCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.normal,
+                    color: isSelected ? cs.onPrimaryContainer : cs.onSurface,
                   ),
                 ),
               ),
               if (isSelected)
-                Icon(Icons.check_circle_rounded, color: cs.primary, size: 24),
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: cs.onPrimaryContainer,
+                  size: 24,
+                ),
             ],
           ),
         ),
