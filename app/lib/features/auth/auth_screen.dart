@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide Provider;
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
@@ -26,10 +27,19 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     _passwordController = TextEditingController();
 
     // 監聽 OAuth 回調 — 登入成功後自動導航
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
       final event = data.event;
       if (event == AuthChangeEvent.signedIn && mounted) {
-        context.go('/dashboard');
+        // Check if user has completed setup
+        final prefs = await SharedPreferences.getInstance();
+        final setupDone = prefs.getBool('setup_complete') ?? false;
+        if (mounted) {
+          if (setupDone) {
+            context.go('/dashboard');
+          } else {
+            context.go('/setup');
+          }
+        }
       }
     });
   }
@@ -89,7 +99,16 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       }
 
       if (mounted) {
-        context.go('/dashboard');
+        // Check if user has completed setup
+        final prefs = await SharedPreferences.getInstance();
+        final setupDone = prefs.getBool('setup_complete') ?? false;
+        if (mounted) {
+          if (setupDone) {
+            context.go('/dashboard');
+          } else {
+            context.go('/setup');
+          }
+        }
       }
     } on AuthException catch (e) {
       setState(() => _errorMessage = _translateAuthError(e.message));

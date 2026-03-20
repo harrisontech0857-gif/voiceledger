@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../main.dart' show kMockMode, kGeminiApiKey;
 import '../../core/theme.dart';
 
@@ -51,6 +52,151 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ],
+          ),
+    );
+  }
+
+  void _showChangeNicknameDialog() {
+    final nickController = TextEditingController(
+      text:
+          kMockMode
+              ? 'Mock User'
+              : Supabase
+                          .instance
+                          .client
+                          .auth
+                          .currentUser
+                          ?.userMetadata?['display_name']
+                      as String? ??
+                  '',
+    );
+
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('編輯暱稱'),
+            content: TextField(
+              controller: nickController,
+              maxLength: 20,
+              decoration: const InputDecoration(
+                labelText: '暱稱',
+                hintText: '輸入你的暱稱',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('取消'),
+              ),
+              FilledButton(
+                onPressed: () async {
+                  if (nickController.text.isEmpty) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(const SnackBar(content: Text('請輸入暱稱')));
+                    return;
+                  }
+                  Navigator.pop(ctx);
+                  try {
+                    if (!kMockMode) {
+                      await Supabase.instance.client.auth.updateUser(
+                        UserAttributes(
+                          data: {'display_name': nickController.text.trim()},
+                        ),
+                      );
+                    }
+                    if (mounted) {
+                      setState(() {});
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('暱稱已更新'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('更新失敗: $e')));
+                    }
+                  }
+                },
+                child: const Text('保存'),
+              ),
+            ],
+          ),
+    );
+  }
+
+  void _showChangePetPersonalityDialog() {
+    final petPersonalities = [
+      {
+        'key': 'energetic',
+        'emoji': '🐱',
+        'label': '活潑好動',
+        'description': '喜歡跳來跳去，常常催你寫日記',
+      },
+      {
+        'key': 'gentle',
+        'emoji': '😺',
+        'label': '溫柔體貼',
+        'description': '輕聲細語，會在你累的時候安慰你',
+      },
+      {
+        'key': 'funny',
+        'emoji': '😸',
+        'label': '搞笑幽默',
+        'description': '總是說些好笑的話逗你開心',
+      },
+      {
+        'key': 'clingy',
+        'emoji': '😻',
+        'label': '黏人撒嬌',
+        'description': '超級黏你，一天不寫日記就會哭哭',
+      },
+    ];
+
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: const Text('選擇寵物個性'),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                itemCount: petPersonalities.length,
+                itemBuilder: (context, index) {
+                  final p = petPersonalities[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: ListTile(
+                      leading: Text(
+                        p['emoji']!,
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                      title: Text(p['label']!),
+                      subtitle: Text(p['description']!),
+                      onTap: () async {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('pet_personality', p['key']!);
+                        if (mounted) {
+                          Navigator.pop(ctx);
+                          setState(() {});
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('寵物個性已更新'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
     );
   }
@@ -122,7 +268,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         child: Column(
           children: [
             // 用戶資料卡片
-            _ProfileCard(colorScheme: cs),
+            _ProfileCard(
+              colorScheme: cs,
+              onEditNickname: _showChangeNicknameDialog,
+            ),
             const SizedBox(height: AppSpacing.lg),
 
             // 顯示設定
@@ -158,6 +307,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     value: _notificationsEnabled,
                     onChanged: (v) => setState(() => _notificationsEnabled = v),
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+
+            // 寵物設定
+            _SettingsGroup(
+              title: '寵物',
+              children: [
+                _SettingsTile(
+                  icon: Icons.pets_rounded,
+                  iconColor: Colors.brown,
+                  title: '寵物個性',
+                  showArrow: true,
+                  onTap: _showChangePetPersonalityDialog,
                 ),
               ],
             ),
@@ -261,13 +425,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 /// 用戶資料卡片
 class _ProfileCard extends StatelessWidget {
   final ColorScheme colorScheme;
-  const _ProfileCard({required this.colorScheme});
+  final VoidCallback? onEditNickname;
+
+  const _ProfileCard({required this.colorScheme, this.onEditNickname});
 
   @override
   Widget build(BuildContext context) {
     // 從 Supabase Auth 取得真實使用者資訊
     final user = kMockMode ? null : Supabase.instance.client.auth.currentUser;
     final displayName =
+        user?.userMetadata?['display_name'] as String? ??
         user?.userMetadata?['full_name'] as String? ??
         user?.userMetadata?['name'] as String? ??
         '語記用戶';
@@ -322,6 +489,22 @@ class _ProfileCard extends StatelessWidget {
               ],
             ),
           ),
+          if (onEditNickname != null)
+            GestureDetector(
+              onTap: onEditNickname,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: Icon(
+                  Icons.edit_rounded,
+                  color: colorScheme.onPrimaryContainer,
+                  size: 20,
+                ),
+              ),
+            ),
         ],
       ),
     );

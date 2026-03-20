@@ -6,6 +6,7 @@ import '../main.dart' show kMockMode;
 import '../features/auth/auth_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/onboarding/consent_screen.dart';
+import '../features/onboarding/setup_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/voice_entry/voice_entry_screen.dart';
 import '../features/daily_journal/journal_screen.dart';
@@ -43,6 +44,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/auth', builder: (context, state) => const AuthScreen()),
+      GoRoute(path: '/setup', builder: (context, state) => const SetupScreen()),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
